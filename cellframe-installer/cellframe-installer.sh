@@ -7,7 +7,7 @@ DEPS="wget gnupg libpython3.9 libmagic1"
 ARCH=`uname -m`
 CODENAME=`lsb_release -c | cut -f2`
 
-if  $(which lsb_release > /dev/null) ; then
+if [[ $(which lsb_release > /dev/null) ]] ; then
     echo "lsb_release installed. Continuing..."
 else
     echo "lsb_release not found. You can install it with apt-get install lsb-release"
