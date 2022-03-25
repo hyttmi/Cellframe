@@ -1,12 +1,16 @@
 ## Cellframe node installer script
 
-This is as simple as it can possibly get. Tested only on Debian, might work on Ubuntu too.
+This is as simple as it can possibly get. Tested on on Ubuntu too.
+
+Supports ONLY Debian 11 and Ubuntu 20.04.x
 
 For aarch64 (Raspberry Pi 3/4/400) and x86_64.
 
-Should take care of all dependencies, please report if it doesn't.
+Should take care of all dependencies ```(wget, gnupg, libpython3.9, libmagic1)```, which are sometimes missing from default Debian/Ubuntu installation.
 
 It adds Demlabs public key/repository and then installs the latest version of Cellframe node.
+
+
 
 If you don't have wget installed, get the script with curl:
 
