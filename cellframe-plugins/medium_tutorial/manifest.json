@@ -1,0 +1,7 @@
+{ 
+    "name": "tutorial",
+    "version": "0.1",
+    "author": "Mika Hyttinen (@CELLGainz)",
+    "dependencys": [],
+    "description": "A tutorial plugin for doing some stuff with Cellframe node"
+}

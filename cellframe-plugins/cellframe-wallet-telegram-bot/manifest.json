@@ -1,0 +1,7 @@
+{ 
+    "name": "telegram-bot",
+    "version": "0.1",
+    "author": "Mika Hyttinen (@CELLGainz)",
+    "dependencys": [],
+    "description": "This plugin is a test for a Telegram bot"
+}
