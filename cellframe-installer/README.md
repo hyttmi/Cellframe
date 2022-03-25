@@ -10,9 +10,7 @@ Should take care of all dependencies ```(wget, gnupg, libpython3.9, libmagic1)``
 
 It adds Demlabs public key/repository and then installs the latest version of Cellframe node.
 
-
-
-If you don't have wget installed, get the script with curl:
+If you don't have wget installed by default, get the script with curl:
 
     curl -O https://raw.githubusercontent.com/CELLgainz/Cellframe/main/cellframe-installer/cellframe-installer.sh
 
