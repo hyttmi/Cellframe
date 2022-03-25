@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Make sure all the dependencies are installed as Debian 11 on Raspberry Pi
-# (possibly also on some VPS?) is missing some of them.
-
 DEPS="wget gnupg libpython3.9 libmagic1"
 ARCH=`uname -m`
 CODENAME=`lsb_release -c | cut -f2`
