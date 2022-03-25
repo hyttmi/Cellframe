@@ -30,4 +30,4 @@ Done!
 
 ## Some notes
 
-There are no special checks to test if everything running, the script expects that you have internet connection ready etc. If it doesn't work, please DM me on Telegram or in Twitter @CELLgainz
+There are no special checks to test if everything is working, the script expects that you have internet connection ready etc. If it doesn't work, please DM me on Telegram or in Twitter @CELLgainz
