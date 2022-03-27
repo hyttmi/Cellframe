@@ -16,7 +16,7 @@ else
     exit 1
 fi
 
-if [[ ${CODENAME} == "bullseye" ${CODENAME} == "focal" ]] ; then
+if [[ ${CODENAME} == "bullseye" || ${CODENAME} == "focal" ]] ; then
     echo "Your distro is supported. Continuing..."
 else 
     echo "Your distro is not supported, exiting..."
