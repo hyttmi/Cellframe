@@ -4,7 +4,14 @@ DEPS="wget gnupg libpython3.9 libmagic1"
 ARCH=`uname -m`
 CODENAME=`lsb_release -cs`
 
-if [[ $EUID -ne 0 ]]; then
+if  [[ ! $(which lsb_release) ]] ; then
+    echo "lsb_release not found. Install it with apt install lsb-release"
+    exit
+else
+    echo "lsb_release found. Continuing..."
+fi
+
+if [[ $EUID -ne 0 ]] ; then
    echo "This script must be run as root." 
    exit 1
 fi
