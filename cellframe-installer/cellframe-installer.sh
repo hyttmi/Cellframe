@@ -16,6 +16,13 @@ else
     echo "lsb_release found. Continuing..."
 fi
 
+if [[ ${CODENAME} != "focal" || ${CODENAME} != "bullseye" ]] ; then
+    echo "Only Ubuntu focal and Debian bullseye are supported, you're running ${CODENAME}. Exiting..."
+    exit 1
+else
+    echo "${CODENAME} is supported. Continuing..."
+fi
+
 if [[ ${ARCH} == "x86_64" || ${ARCH} == "aarch64" ]] ; then
     echo "${ARCH} is supported. Continuing... "
 else
