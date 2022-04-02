@@ -1,14 +1,5 @@
 #!/bin/bash
 
-CONFIG=/opt/cellframe-node/etc/cellframe-node.cfg
-
-if [[ ! -d $CONFIG_BACKUP ]] ; then
-    echo "Creating default config file backup..."
-    cp $CONFIG $CONFIG_BACKUP
-else
-    echo "Default config file backup already available!"
-fi
-
 if  [[ $SERVER_PORT && $SERVER_PORT < 1 || $SERVER_PORT > 65535 ]] ; then
     echo "Listen port set to ${SERVER_PORT}"
     sed -i "s/^listen_port_tcp=.*/listen_port_tcp=${SERVER_PORT}/" $CONFIG
@@ -17,10 +8,6 @@ fi
 if [[ $SERVER_ADDR && $SERVER_ADDR =~ ^(([1-9]?[0-9]|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))\.){3}([1-9]?[0-9]|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))$ ]] ; then
     echo "Server address set to ${SERVER_ADDR}"
     sed -i "s/^listen_address=.*/listen_address=${SERVER_ADDR}/" $CONFIG
-fi
-
-if [[ $DEBUG && $DEBUG == "true" || $DEBUG == "false" ]] ; then
-    echo "Debug mode set to ${DEBUG}"
 fi
 
 if [[ $AUTO_ONLINE && $AUTO_ONLINE == "true" || $AUTO_ONLINE == "false" ]] ; then
