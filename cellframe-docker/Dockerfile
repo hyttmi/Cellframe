@@ -42,7 +42,9 @@ RUN echo "cellframe-node cellframe-node/subzero_enabled select ${SUBZERO_ENABLED
     && echo "cellframe-node cellframe-node/core_t_node_type	select	${CORE_T_NODE_TYPE}" | debconf-set-selections \
     && echo "cellframe-node cellframe-node/kelvpn_minkowski_enabled	select	${MINKOWSKI_ENABLED}" | debconf-set-selections \
     && echo "cellframe-node cellframe-node/subzero_node_type	select	${SUBZERO_NODE_TYPE}" | debconf-set-selections \
-    && echo "cellframe-node cellframe-node/core_t_enabled	select	${CORE_T_ENABLED}" | debconf-set-selections
+    && echo "cellframe-node cellframe-node/core_t_enabled	select	${CORE_T_ENABLED}" | debconf-set-selections \
+    && echo "cellframe-node	cellframe-node/notify_srv_addr	string	127.0.0.1" | debconf-set-selections \
+    && echo "cellframe-node	cellframe-node/notify_srv_port	string	8080" | debconf-set-selections
 
 RUN cd /tmp \
     && wget https://pub.cellframe.net/linux/cellframe-node-${NODE_VERSION}-${ARCH}.deb \
