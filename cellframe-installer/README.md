@@ -1,6 +1,6 @@
 ## Cellframe node installer script
 
-This is as simple as it can possibly get. Tested on on Ubuntu too.
+This is as simple as it can possibly get. Tested on Ubuntu too.
 
 Supports ONLY Debian 11 and Ubuntu 20.04.x
 
