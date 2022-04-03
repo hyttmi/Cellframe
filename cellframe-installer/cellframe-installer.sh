@@ -16,11 +16,11 @@ else
     echo "lsb_release found. Continuing..."
 fi
 
-if [[ ${CODENAME} != "focal" || ${CODENAME} != "bullseye" ]] ; then
-    echo "Only Ubuntu focal and Debian bullseye are supported, you're running ${CODENAME}. Exiting..."
-    exit 1
-else
+if [[ ${CODENAME} == "focal" || ${CODENAME} == "bullseye" ]] ; then
     echo "${CODENAME} is supported. Continuing..."
+else
+    echo "${CODENAME} is not supported. Exiting..."
+    exit 1
 fi
 
 if [[ ${ARCH} == "x86_64" || ${ARCH} == "aarch64" ]] ; then
