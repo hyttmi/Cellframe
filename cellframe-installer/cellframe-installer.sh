@@ -44,12 +44,13 @@ fi
 
 echo "You have now 10 seconds before this script continues, cancel by pressing Ctrl+C"
 sleep 10
+echo "Upgrading your installation and installing dependencies, this might take a while..."
+apt-get -qq update && apt-get -yqq install ${DEPS} && apt-get -yqq dist-upgrade
 echo "Setting up Demlabs public key..."
 wget -q -O- https://debian.pub.demlabs.net/public/public-key.gpg | gpg --dearmor | tee /usr/share/keyrings/demlabs-archive-keyring.gpg > /dev/null
 echo "Adding Demlabs repository to known sources..."
 echo "deb [signed-by=/usr/share/keyrings/demlabs-archive-keyring.gpg] https://debian.pub.demlabs.net/public ${CODENAME} main" > /etc/apt/sources.list.d/demlabs.list
-echo "Upgrading your installation and installing dependencies, this might take a while..."
-apt-get -qq update && apt-get -yqq install ${DEPS} && apt-get -yqq dist-upgrade
+
 echo "Cellframe node installation starts in 10 seconds. You need to answer couple of questions during installation."
 sleep 10
 echo "Installing Cellframe node"
