@@ -30,13 +30,6 @@ else
     exit 1
 fi
 
-if [[ ${CODENAME} == "bullseye" || ${CODENAME} == "focal" ]] ; then
-    echo "Your distro is supported. Continuing..."
-else 
-    echo "Your distro is not supported, exiting..."
-    exit 1 
-fi
-
 if [[ ${ARCH} == "aarch64" && ${CODENAME} != "bullseye" ]] ; then
     echo "Detected arm64 platform but there's no package for your distro @ Demlabs repository. Exiting..."
     exit 1
@@ -50,7 +43,6 @@ echo "Setting up Demlabs public key..."
 wget -q -O- https://debian.pub.demlabs.net/public/public-key.gpg | gpg --dearmor | tee /usr/share/keyrings/demlabs-archive-keyring.gpg > /dev/null
 echo "Adding Demlabs repository to known sources..."
 echo "deb [signed-by=/usr/share/keyrings/demlabs-archive-keyring.gpg] https://debian.pub.demlabs.net/public ${CODENAME} main" > /etc/apt/sources.list.d/demlabs.list
-
 echo "Cellframe node installation starts in 10 seconds. You need to answer couple of questions during installation."
 sleep 10
 echo "Installing Cellframe node"
