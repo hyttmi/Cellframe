@@ -1,0 +1,7 @@
+{ 
+    "name": "tutorial2",
+    "version": "0.1",
+    "author": "Mika Hyttinen (@CELLgainz)",
+    "dependencys": [],
+    "description": "A wallet information plugin"
+}
