@@ -74,7 +74,7 @@ function install_node() {
 
 function recommend_reboot() {
     echo "[INFO] Now it's recommended to reboot your computer."
-    read -r -p "[INFO]If you wish to automatically do that, just press enter. Otherwise, press CTRL+C"
+    read -r -p "[INFO] If you wish to automatically do that, just press enter. Otherwise, press CTRL+C"
     reboot 
 }
 
