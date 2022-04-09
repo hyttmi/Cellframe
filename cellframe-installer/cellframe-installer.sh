@@ -29,7 +29,7 @@ function check_lsb_release() {
 
 function check_distro() {
     echo "[INFO] Checking if your Linux distro is compatible..."
-    if [[ ${CODENAME} == "focal" || ${CODENAME} == "bullseye" || ${CODENAME} == "bookworm" ]] ; then
+    if [[ ${CODENAME} == "focal" || ${CODENAME} == "bullseye" ]] ; then
         echo "[INFO] ${CODENAME} is supported. Continuing..."
     else
         echo "[ERROR] ${CODENAME} is not supported. Exiting..."
