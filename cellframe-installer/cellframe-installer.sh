@@ -29,7 +29,7 @@ function check_lsb_release() {
 
 function check_distro() {
     echo "[INFO] Checking if your Linux distro is compatible..."
-    if [[ ${CODENAME} == "focal" || ${CODENAME} == "bullseye" ]] ; then
+    if [[ ${CODENAME} == "focal" || ${CODENAME} == "bullseye" || ${CODENAME} == "bookworm" ]] ; then
         echo "[INFO] ${CODENAME} is supported. Continuing..."
     else
         echo "[ERROR] ${CODENAME} is not supported. Exiting..."
@@ -52,6 +52,15 @@ function check_arch() {
     fi
 }
 
+function check_node_installation() {
+    if [[ $(which cellframe-node) || $(which cellframe-node-cli) || -e /opt/cellframe-node/bin/cellframe-node ]] ; then
+        echo "[ERROR] Looks like you have Cellframe node already installed. Exiting..."
+        exit 6
+    else
+        echo "[INFO] Did not find installed Cellframe node. Continuing..."
+    fi
+}
+
 function install_dependencies() {
     echo "[INFO] Installing dependencies and updates..."
     apt-get -qq update && apt-get -yqq install ${DEPS} && apt-get -yqq dist-upgrade
@@ -67,9 +76,31 @@ function add_repo() {
     echo "deb [signed-by=/usr/share/keyrings/demlabs-archive-keyring.gpg] https://debian.pub.demlabs.net/public ${CODENAME} main" > /etc/apt/sources.list.d/demlabs.list
 }
 
+function prompt_plugins() {
+    read -r -p "Do you want to enable Cellframe node Python plugins? [y/N] " response
+    if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
+        enable_plugins
+    else
+        recommend_reboot
+    fi
+}
+
 function install_node() {
     echo "[INFO] Installing Cellframe node..."
     apt-get -qq update && apt-get -yqq install cellframe-node
+}
+
+function enable_plugins() {
+    if [[ -e /opt/cellframe-node/etc/cellframe-node.cfg ]] ; then
+        echo "[INFO] Enabling Python plugins..."
+        sed -i 's/#\[plugins\]/\[plugins\]/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        sed -i 's/#py_load=false/py_load=true/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        sed -i 's/#py_path=\/opt\/cellframe-node\/var\/lib\/plugins/py_path=\/opt\/cellframe-node\/var\/lib\/plugins/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        recommend_reboot
+    else
+        echo "[ERROR] Configuration file is missing. Error in installation?"
+        exit 7
+    fi
 }
 
 function recommend_reboot() {
@@ -83,8 +114,9 @@ check_root
 check_lsb_release
 check_distro
 check_arch
+check_node_installation
 install_dependencies
 setup_pubkey
 add_repo
 install_node
-recommend_reboot
+prompt_plugins
