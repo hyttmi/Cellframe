@@ -53,7 +53,7 @@ function check_arch() {
 }
 
 function install_dependencies() {
-    echo "[INFO] Installing dependencies..."
+    echo "[INFO] Installing dependencies and updates..."
     apt-get -qq update && apt-get -yqq install ${DEPS} && apt-get -yqq dist-upgrade
 }
 
