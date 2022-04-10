@@ -1,12 +1,46 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-DEPS="wget gnupg libpython3.9 libmagic1"
 ARCH=`uname -m`
 CODENAME=`lsb_release -cs`
 
 function display_information() {
     echo "This script will install the latest Cellframe node available for your distribution."
     read -r -p "Press enter now to continue or CTRL+C to abort."
+}
+
+function test_deps() {
+    echo "[INFO] Testing if you have wget installed on your operating system..."
+    if [[ ! $(which wget) ]] ; then
+        echo "[INFO] wget binary not found. Adding to dependencies..."
+        export DEPS="wget"
+    else
+        echo "[INFO] wget found..."
+    fi
+
+    echo "[INFO] Testing if you have gnupg installed on your operating system..."
+    if [[ ! $(which gpg) ]] ; then
+        echo "[INFO] gnupg binary not found. Adding to dependencies..."
+        export DEPS="${DEPS} gnupg"
+    else
+        echo "[INFO] gnupg found..."
+    fi
+    
+    echo "[INFO] Testing if you have libpython3.9 installed on your operating system..."
+    if [[ ! $(dpkg -s libpython3.9 2> /dev/null | grep "install ok installed") ]] ; then
+        echo "[INFO] libpython3.9 not found. Adding to dependencies..."
+        export DEPS="${DEPS} libpython3.9"
+    else
+        echo "[INFO] libpython3.9 found..."
+    fi
+
+    echo "[INFO] Testing if you have libmagic1 installed on your operating system..."
+    if [[ ! $(dpkg -s libmagic1 2> /dev/null | grep "install ok installed") ]] ; then
+        echo "[INFO] libmagic1 not found. Adding to dependencies..."
+        export DEPS="${DEPS} libmagic1"
+    else
+        echo "[INFO] libmagic1 found..."
+    fi
+
 }
 
 function check_root() {
@@ -62,8 +96,17 @@ function check_node_installation() {
 }
 
 function install_dependencies() {
-    echo "[INFO] Installing dependencies and updates..."
-    apt-get -qq update && apt-get -yqq install ${DEPS} && apt-get -yqq dist-upgrade
+    if [[ ! -z ${DEPS} ]] ; then
+        echo "[INFO] Installing dependencies and updates..."
+        apt-get -qq update && apt-get -yqq install ${DEPS}
+    else
+        echo "[INFO] Dependencies already installed. Continuing..."
+    fi
+}
+
+function do_upgrade() {
+    echo "[INFO] Installing system updates..."
+    apt-get -qq update && apt-get -yqq dist-upgrade
 }
 
 function setup_pubkey() {
@@ -77,7 +120,7 @@ function add_repo() {
 }
 
 function prompt_plugins() {
-    read -r -p "Do you want to enable Cellframe node Python plugins? [y/N] " response
+    read -r -p "[INFO] Do you want to enable Cellframe node Python plugins? [y/N] " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
         enable_plugins
     else
@@ -86,7 +129,7 @@ function prompt_plugins() {
 }
 
 function install_node() {
-    echo "[INFO] Installing Cellframe node..."
+    echo "[INFO] Installing Cellframe node, you need to answer the questions what installer asks during the installation..."
     apt-get -qq update && apt-get -yqq install cellframe-node
 }
 
@@ -109,13 +152,15 @@ function recommend_reboot() {
     reboot 
 }
 
-display_information
 check_root
+display_information
+test_deps
 check_lsb_release
 check_distro
 check_arch
 check_node_installation
 install_dependencies
+do_upgrade
 setup_pubkey
 add_repo
 install_node
