@@ -97,7 +97,7 @@ function check_node_installation() {
 
 function install_dependencies() {
     if [[ ! -z ${DEPS} ]] ; then
-        echo "[INFO] Installing dependencies and updates..."
+        echo "[INFO] Installing dependencies..."
         apt-get -qq update && apt-get -yqq install ${DEPS}
     else
         echo "[INFO] Dependencies already installed. Continuing..."
