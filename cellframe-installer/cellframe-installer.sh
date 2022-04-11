@@ -11,36 +11,19 @@ function display_information() {
 function test_deps() {
     echo "[INFO] Testing if you have wget installed on your operating system..."
     if [[ ! $(which wget) ]] ; then
-        echo "[INFO] wget binary not found. Adding to dependencies..."
-        export DEPS="wget"
+        echo "[INFO] wget binary not found. Installing wget..."
+        apt-get -qq update && apt-get -yqq install wget
     else
         echo "[INFO] wget found..."
     fi
 
     echo "[INFO] Testing if you have gnupg installed on your operating system..."
     if [[ ! $(which gpg) ]] ; then
-        echo "[INFO] gnupg binary not found. Adding to dependencies..."
-        export DEPS="${DEPS} gnupg"
+        echo "[INFO] gnupg binary not found. Installing gnupg..."
+        apt-get -qq update && apt-get -yqq install gnupg
     else
         echo "[INFO] gnupg found..."
     fi
-    
-    echo "[INFO] Testing if you have libpython3.9 installed on your operating system..."
-    if [[ ! $(dpkg -s libpython3.9 2> /dev/null | grep "install ok installed") ]] ; then
-        echo "[INFO] libpython3.9 not found. Adding to dependencies..."
-        export DEPS="${DEPS} libpython3.9"
-    else
-        echo "[INFO] libpython3.9 found..."
-    fi
-
-    echo "[INFO] Testing if you have libmagic1 installed on your operating system..."
-    if [[ ! $(dpkg -s libmagic1 2> /dev/null | grep "install ok installed") ]] ; then
-        echo "[INFO] libmagic1 not found. Adding to dependencies..."
-        export DEPS="${DEPS} libmagic1"
-    else
-        echo "[INFO] libmagic1 found..."
-    fi
-
 }
 
 function check_root() {
@@ -137,8 +120,8 @@ function enable_plugins() {
     if [[ -e /opt/cellframe-node/etc/cellframe-node.cfg ]] ; then
         echo "[INFO] Enabling Python plugins..."
         sed -i 's/#\[plugins\]/\[plugins\]/g' /opt/cellframe-node/etc/cellframe-node.cfg
-        sed -i 's/#py_load=false/py_load=true/g' /opt/cellframe-node/etc/cellframe-node.cfg
-        sed -i 's/#py_path=\/opt\/cellframe-node\/var\/lib\/plugins/py_path=\/opt\/cellframe-node\/var\/lib\/plugins/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        sed -i 's/#py_load=.*/py_load=true/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        sed -i 's/#py_path=.*/py_path=\/opt\/cellframe-node\/var\/lib\/plugins/g' /opt/cellframe-node/etc/cellframe-node.cfg
         recommend_reboot
     else
         echo "[ERROR] Configuration file is missing. Error in installation?"
