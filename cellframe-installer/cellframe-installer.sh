@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ARCH=`uname -m`
-CODENAME=`lsb_release -cs`
+CODENAME=`lsb_release -cs 2> /dev/null`
 
 function display_information() {
     echo "This script will install the latest Cellframe node available for your distribution."
@@ -13,14 +13,16 @@ function test_deps() {
     if [[ ! $(which wget) ]] ; then
         echo "[INFO] wget binary not found. Installing wget..."
         apt-get -qq update && apt-get -yqq install wget
+        export REMOVE_DEPS="wget"
     else
         echo "[INFO] wget found..."
     fi
 
     echo "[INFO] Testing if you have gnupg installed on your operating system..."
     if [[ ! $(which gpg) ]] ; then
-        echo "[INFO] gnupg binary not found. Installing gnupg..."
+        echo "[INFO] gnupg not found. Installing gnupg..."
         apt-get -qq update && apt-get -yqq install gnupg
+        export REMOVE_DEPS="${REMOVE_DEPS} gnupg"
     else
         echo "[INFO] gnupg found..."
     fi
@@ -74,16 +76,7 @@ function check_node_installation() {
         echo "[ERROR] Looks like you have Cellframe node already installed. Exiting..."
         exit 6
     else
-        echo "[INFO] Did not find installed Cellframe node. Continuing..."
-    fi
-}
-
-function install_dependencies() {
-    if [[ ! -z ${DEPS} ]] ; then
-        echo "[INFO] Installing dependencies..."
-        apt-get -qq update && apt-get -yqq install ${DEPS}
-    else
-        echo "[INFO] Dependencies already installed. Continuing..."
+        echo "[INFO] Didn't find installed Cellframe node. Continuing..."
     fi
 }
 
@@ -103,9 +96,25 @@ function add_repo() {
 }
 
 function prompt_plugins() {
+    echo ${REMOVE_DEPS}
     read -r -p "[INFO] Do you want to enable Cellframe node Python plugins? [y/N] " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
         enable_plugins
+        prompt_remove_deps
+    else
+        prompt_remove_deps
+    fi
+}
+
+function prompt_remove_deps() {
+    if [[ ! -z ${REMOVE_DEPS} ]] ; then
+        read -r -p "[INFO] Do you want remove the installed packages which were installed during setup ($REMOVE_DEPS)? [y/N] " response
+        if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
+            apt purge -yqq ${REMOVE_DEPS}
+            recommend_reboot
+        else
+            recommend_reboot
+        fi
     else
         recommend_reboot
     fi
@@ -122,7 +131,7 @@ function enable_plugins() {
         sed -i 's/#\[plugins\]/\[plugins\]/g' /opt/cellframe-node/etc/cellframe-node.cfg
         sed -i 's/#py_load=.*/py_load=true/g' /opt/cellframe-node/etc/cellframe-node.cfg
         sed -i 's/#py_path=.*/py_path=\/opt\/cellframe-node\/var\/lib\/plugins/g' /opt/cellframe-node/etc/cellframe-node.cfg
-        recommend_reboot
+        prompt_remove_deps
     else
         echo "[ERROR] Configuration file is missing. Error in installation?"
         exit 7
@@ -142,7 +151,6 @@ check_lsb_release
 check_distro
 check_arch
 check_node_installation
-install_dependencies
 do_upgrade
 setup_pubkey
 add_repo
