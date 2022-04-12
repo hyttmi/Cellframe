@@ -96,7 +96,6 @@ function add_repo() {
 }
 
 function prompt_plugins() {
-    echo ${REMOVE_DEPS}
     read -r -p "[INFO] Do you want to enable Cellframe node Python plugins? [y/N] " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
         enable_plugins
@@ -108,7 +107,7 @@ function prompt_plugins() {
 
 function prompt_remove_deps() {
     if [[ ! -z ${REMOVE_DEPS} ]] ; then
-        read -r -p "[INFO] Do you want remove the installed packages which were installed during setup ($REMOVE_DEPS)? [y/N] " response
+        read -r -p "[INFO] Do you want remove the installed packages which were installed during setup (${REMOVE_DEPS})? [y/N] " response
         if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
             apt purge -yqq ${REMOVE_DEPS}
             recommend_reboot
