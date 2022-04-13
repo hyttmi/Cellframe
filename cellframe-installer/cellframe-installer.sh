@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 ARCH=`uname -m`
 CODENAME=`lsb_release -cs 2> /dev/null`
@@ -50,6 +51,9 @@ function check_distro() {
     echo "[INFO] Checking if your Linux distro is compatible..."
     if [[ ${CODENAME} == "focal" || ${CODENAME} == "bullseye" ]] ; then
         echo "[INFO] ${CODENAME} is supported. Continuing..."
+    elif [[ ${CODENAME} == "elsie" ]] ; then
+        echo "[INFO] ${CODENAME} is supported. Continuing..." #Linux Mint elsie == bullseye
+        export CODENAME="bullseye"
     else
         echo "[ERROR] ${CODENAME} is not supported. Exiting..."
         exit 3
