@@ -2,7 +2,7 @@
 
 This is as simple as it can possibly get. Tested on Ubuntu too.
 
-Supports ONLY Debian 11 and Ubuntu 20.04.x
+Supports ONLY Debian 11 and Ubuntu 20.04.x (now also Linux Mint elsie, which is bullseye).
 
 For aarch64 (Raspberry Pi 3/4/400) and x86_64.
 
