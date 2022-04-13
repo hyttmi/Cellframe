@@ -24,8 +24,6 @@ After downloading:
 
 After that, run with:
 
-    ./cellframe-installer (as root/sudo)
-
 Done!
 
 ## Some notes
