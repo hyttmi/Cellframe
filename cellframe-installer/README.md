@@ -24,6 +24,8 @@ After downloading:
 
 After that, run with:
 
+    ./cellframe-installer.sh (as root)
+
 Done!
 
 ## Some notes
