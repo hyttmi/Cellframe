@@ -103,7 +103,6 @@ function prompt_plugins() {
     read -r -p "[INFO] Do you want to enable Cellframe node Python plugins? [y/N] " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
         enable_plugins
-        prompt_remove_deps
     else
         prompt_remove_deps
     fi
