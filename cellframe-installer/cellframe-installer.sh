@@ -27,6 +27,15 @@ function test_deps() {
     else
         echo "[INFO] gnupg found..."
     fi
+
+    echo "[INFO] Testing if you have curl installed on your operating system..."
+    if [[ ! $(which curl) ]] ; then
+        echo "[INFO] curl not found. Installing curl..."
+        apt-get -qq update && apt-get -yqq install curl
+        export REMOVE_DEPS="${REMOVE_DEPS} curl"
+    else
+        echo "[INFO] curl found..."
+    fi
 }
 
 function check_root() {
@@ -51,8 +60,8 @@ function check_distro() {
     echo "[INFO] Checking if your Linux distro is compatible..."
     if [[ ${CODENAME} == "focal" || ${CODENAME} == "bullseye" ]] ; then
         echo "[INFO] ${CODENAME} is supported. Continuing..."
-    elif [[ ${CODENAME} == "elsie" ]] ; then
-        echo "[INFO] ${CODENAME} is supported. Continuing..." #Linux Mint elsie == bullseye
+    elif [[ ${CODENAME} == "bookworm" || ${CODENAME} == "elsie" ]] ; then
+        echo "[INFO] ${CODENAME} is supported. Continuing..." #Linux Mint elsie == bullseye, for bookworm we can use bullseye repo
         export CODENAME="bullseye"
     else
         echo "[ERROR] ${CODENAME} is not supported. Exiting..."
@@ -68,7 +77,13 @@ function check_arch() {
         echo "[ERROR] ${ARCH} is not supported. Exiting..."
         exit 4
     fi
-    
+
+    if [[ ${ARCH} == "x86_64" ]] ; then
+        export DOWNLOAD_ARCH="amd64"
+    elif [[ ${ARCH} == "aarch64" ]] ; then
+        export DOWNLOAD_ARCH="arm64"
+    fi
+
     if [[ ${ARCH} == "aarch64" && ${CODENAME} != "bullseye" ]] ; then
         echo "[ERROR] Detected ${ARCH} platform but there's no package for your distro at Demlabs repository. Exiting..."
         exit 5
@@ -87,16 +102,44 @@ function check_node_installation() {
 function do_upgrade() {
     echo "[INFO] Installing system updates..."
     apt-get -qq update && apt-get -yqq dist-upgrade
+    prompt_bleeding_edge
+}
+
+function prompt_bleeding_edge() {
+    echo "[INFO] You can try the latest 5.1 branch version also which has support for mainnet (Backbone)."
+    read -r -p "[INFO] Do you want to install the 5.1 release version (unstable)? [y/N] " response
+    if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
+        download_and_install_latest
+    else
+        setup_pubkey
+    fi
+}
+
+function download_and_install_latest() {
+    echo "[INFO] Downloading latest 5.1-xx release from pub.cellframe.net"
+    LATEST_VERSION=$(curl 'https://pub.cellframe.net/linux/release-5.1/?C=M&O=D' | grep -oP 'href="\Kcellframe-node-\d.\d.\d*' | head -n1)
+    wget -q https://pub.cellframe.net/linux/release-5.1/${LATEST_VERSION}-${DOWNLOAD_ARCH}.deb > /dev/null
+    dpkg -i ${LATEST_VERSION}-${DOWNLOAD_ARCH}.deb
+    rm ${LATEST_VERSION}-${DOWNLOAD_ARCH}.deb
+    prompt_plugins
 }
 
 function setup_pubkey() {
     echo "[INFO] Setting up Demlabs public key..."
     wget -q -O- https://debian.pub.demlabs.net/public/public-key.gpg | gpg --dearmor | tee /usr/share/keyrings/demlabs-archive-keyring.gpg > /dev/null
+    add_repo
 }
 
 function add_repo() {
     echo "[INFO] Adding Demlabs repository to known sources..."
     echo "deb [signed-by=/usr/share/keyrings/demlabs-archive-keyring.gpg] https://debian.pub.demlabs.net/public ${CODENAME} main" > /etc/apt/sources.list.d/demlabs.list
+    install_node
+}
+
+function install_node() {
+    echo "[INFO] Installing Cellframe node, you need to answer the questions what installer asks during the installation..."
+    apt-get -qq update && apt-get -yqq install cellframe-node
+    prompt_plugins
 }
 
 function prompt_plugins() {
@@ -120,11 +163,6 @@ function prompt_remove_deps() {
     else
         recommend_reboot
     fi
-}
-
-function install_node() {
-    echo "[INFO] Installing Cellframe node, you need to answer the questions what installer asks during the installation..."
-    apt-get -qq update && apt-get -yqq install cellframe-node
 }
 
 function enable_plugins() {
@@ -154,7 +192,4 @@ check_distro
 check_arch
 check_node_installation
 do_upgrade
-setup_pubkey
-add_repo
-install_node
-prompt_plugins
+prompt_bleeding_edge
