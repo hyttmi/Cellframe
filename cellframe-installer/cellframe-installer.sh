@@ -117,11 +117,22 @@ function prompt_bleeding_edge() {
 
 function download_and_install_latest() {
     echo "[INFO] Downloading latest 5.1-xx release from pub.cellframe.net"
-    LATEST_VERSION=$(curl 'https://pub.cellframe.net/linux/release-5.1/?C=M&O=D' | grep -oP 'href="\Kcellframe-node-\d.\d.\d*' | head -n1)
-    wget -q https://pub.cellframe.net/linux/release-5.1/${LATEST_VERSION}-${DOWNLOAD_ARCH}.deb > /dev/null
-    dpkg -i ${LATEST_VERSION}-${DOWNLOAD_ARCH}.deb
-    rm ${LATEST_VERSION}-${DOWNLOAD_ARCH}.deb
-    prompt_plugins
+    LATEST_VERSION_ARM64=$(curl 'https://pub.cellframe.net/linux/release-5.1/?C=M&O=D' | grep -oP 'href="\Kcellframe-node-\d.\d.\d*-arm64' | head -n1)
+    LATEST_VERSION_AMD64=$(curl 'https://pub.cellframe.net/linux/release-5.1/?C=M&O=D' | grep -oP 'href="\Kcellframe-node-\d.\d.\d*-amd64' | head -n1)
+    if [[ ${DOWNLOAD_ARCH} == "amd64" ]] ; then
+        wget -q https://pub.cellframe.net/linux/release-5.1/${LATEST_VERSION_AMD64}.deb > /dev/null
+        dpkg -i ${LATEST_VERSION_AMD64}.deb
+        rm ${LATEST_VERSION_AMD64}.deb
+        prompt_plugins
+    elif [[ ${DOWNLOAD_ARCH} == "arm64" ]] ; then
+        wget -q https://pub.cellframe.net/linux/release-5.1/${LATEST_VERSION_ARM64}.deb > /dev/null
+        dpkg -i ${LATEST_VERSION_ARM64}.deb
+        rm ${LATEST_VERSION_ARM64}.deb
+        prompt_plugins
+    else
+        echo "[ERROR] Couldn't determine which platform you are using. Exiting."
+        exit 8
+    fi
 }
 
 function setup_pubkey() {
