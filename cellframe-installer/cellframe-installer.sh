@@ -102,37 +102,7 @@ function check_node_installation() {
 function do_upgrade() {
     echo "[INFO] Installing system updates..."
     apt-get -qq update && apt-get -yqq dist-upgrade
-    prompt_bleeding_edge
-}
-
-function prompt_bleeding_edge() {
-    echo "[INFO] You can try the latest 5.1 branch version also which has support for mainnet (Backbone)."
-    read -r -p "[INFO] Do you want to install the 5.1 release version (unstable)? [y/N] " response
-    if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
-        download_and_install_latest
-    else
-        setup_pubkey
-    fi
-}
-
-function download_and_install_latest() {
-    echo "[INFO] Downloading latest 5.1-xx release from pub.cellframe.net"
-    LATEST_VERSION_ARM64=$(curl 'https://pub.cellframe.net/linux/release-5.1/?C=M&O=D' | grep -oP 'href="\Kcellframe-node-\d.\d.\d*-arm64' | head -n1)
-    LATEST_VERSION_AMD64=$(curl 'https://pub.cellframe.net/linux/release-5.1/?C=M&O=D' | grep -oP 'href="\Kcellframe-node-\d.\d.\d*-amd64' | head -n1)
-    if [[ ${DOWNLOAD_ARCH} == "amd64" ]] ; then
-        wget -q https://pub.cellframe.net/linux/release-5.1/${LATEST_VERSION_AMD64}.deb > /dev/null
-        dpkg -i ${LATEST_VERSION_AMD64}.deb
-        rm ${LATEST_VERSION_AMD64}.deb
-        prompt_plugins
-    elif [[ ${DOWNLOAD_ARCH} == "arm64" ]] ; then
-        wget -q https://pub.cellframe.net/linux/release-5.1/${LATEST_VERSION_ARM64}.deb > /dev/null
-        dpkg -i ${LATEST_VERSION_ARM64}.deb
-        rm ${LATEST_VERSION_ARM64}.deb
-        prompt_plugins
-    else
-        echo "[ERROR] Couldn't determine which platform you are using. Exiting."
-        exit 8
-    fi
+    setup_pubkey
 }
 
 function setup_pubkey() {
@@ -162,6 +132,19 @@ function prompt_plugins() {
     fi
 }
 
+function enable_plugins() {
+    if [[ -e /opt/cellframe-node/etc/cellframe-node.cfg ]] ; then
+        echo "[INFO] Enabling Python plugins..."
+        sed -i 's/#\[plugins\]/\[plugins\]/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        sed -i 's/#py_load=.*/py_load=true/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        sed -i 's/#py_path=.*/py_path=\/opt\/cellframe-node\/var\/lib\/plugins/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        prompt_remove_deps
+    else
+        echo "[ERROR] Configuration file is missing. Error in installation?"
+        exit 7
+    fi
+}
+
 function prompt_remove_deps() {
     if [[ ! -z ${REMOVE_DEPS} ]] ; then
         read -r -p "[INFO] Do you want remove the installed packages which were installed during setup (${REMOVE_DEPS})? [y/N] " response
@@ -173,19 +156,6 @@ function prompt_remove_deps() {
         fi
     else
         recommend_reboot
-    fi
-}
-
-function enable_plugins() {
-    if [[ -e /opt/cellframe-node/etc/cellframe-node.cfg ]] ; then
-        echo "[INFO] Enabling Python plugins..."
-        sed -i 's/#\[plugins\]/\[plugins\]/g' /opt/cellframe-node/etc/cellframe-node.cfg
-        sed -i 's/#py_load=.*/py_load=true/g' /opt/cellframe-node/etc/cellframe-node.cfg
-        sed -i 's/#py_path=.*/py_path=\/opt\/cellframe-node\/var\/lib\/plugins/g' /opt/cellframe-node/etc/cellframe-node.cfg
-        prompt_remove_deps
-    else
-        echo "[ERROR] Configuration file is missing. Error in installation?"
-        exit 7
     fi
 }
 
@@ -203,4 +173,3 @@ check_distro
 check_arch
 check_node_installation
 do_upgrade
-prompt_bleeding_edge
