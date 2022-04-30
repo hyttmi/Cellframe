@@ -1,0 +1,153 @@
+diff --git a/linux/debian/essentials/config b/linux/debian/essentials/config
+index 34f6086..47ad739 100755
+--- a/linux/debian/essentials/config
++++ b/linux/debian/essentials/config
+@@ -52,6 +52,15 @@ reconfigure|configure)
+       db_input critical cellframe-node/backbone_node_type || true 
+       db_go || true
+    fi
++
++   db_input critical cellframe-node/enable_python_plugins || true 
++   db_go || true 
++
++   db_get cellframe-node/enable_python_plugins
++   if [ "$RET" = "true" ]; then
++      db_input critical cellframe-node/python_plugins_path || true 
++      db_go || true
++   fi
+ ;;
+ *)
+    echo "config called with unknown argument \`$1'" >&2
+diff --git a/linux/debian/essentials/postinst b/linux/debian/essentials/postinst
+index 769107a..b2c2a51 100755
+--- a/linux/debian/essentials/postinst
++++ b/linux/debian/essentials/postinst
+@@ -61,7 +61,6 @@ sed -i "s/{NOTIFY_SRV_ADDR}/$RET/g" $DAP_CFG  || true
+ db_get cellframe-node/notify_srv_port || true
+ sed -i "s/{NOTIFY_SRV_PORT}/$RET/g" $DAP_CFG  || true
+ 
+-
+ # Init subzero
+ NET_NAME="subzero"
+ 
+@@ -149,6 +148,15 @@ fi
+ mkdir -p $DAP_PREFIX/var/log     || true
+ mkdir -p $DAP_PREFIX/var/plugins || true
+ 
++#Set up Python plugins
++db_get cellframe-node/enable_python_plugins || true
++if [ "$RET" = "true" ]; then
++    sed -i 's/#\[plugins\]/\[plugins\]/g' $DAP_CFG || true
++    sed -i 's/#py_load=.*/py_load=true/g' $DAP_CFG || true
++    db_get cellframe-node/python_plugins_path || true
++    sed -i "s|#py_path=.*|py_path=$RET|g" $DAP_CFG || true
++    echo "[*] Enabled Python plugins"
++fi
+ 
+ cat /etc/passwd| grep cellframe-node || adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
+ 
+diff --git a/linux/debian/essentials/templates b/linux/debian/essentials/templates
+index 94a66f8..452bd1b 100755
+--- a/linux/debian/essentials/templates
++++ b/linux/debian/essentials/templates
+@@ -3,7 +3,7 @@ Default: false
+ Choices: true, false
+ Type: select
+ Description: Auto online
+- Bring up links automaticly and go to the ONLINE network state
++ Bring up links automatically and go to ONLINE network state
+ 
+ Template: cellframe-node/debug_mode
+ Default: false
+@@ -23,7 +23,7 @@ Template: cellframe-node/server_port
+ Default: 8079
+ Type: string
+ Description: Server port
+- Server port to listen on, recomended 8079 
++ Server port to listen on, recommended 8079 
+ 
+ Template: cellframe-node/server_addr
+ Default: 0.0.0.0
+@@ -56,11 +56,11 @@ Default: full
+ Choices: full, light, master, archive, root
+ Description: SubZero: Node role
+  Select node role:. 
+- Light - syncronize only local wallets 
+- full - sync all its cell
+- master - allow to store values in chains and take comission, sync all shards that will need to be synced
++ Light - Synchronize only local wallets 
++ full - Sync all its cell
++ master - Allow to store values in chains and take comission, sync all shards that will need to be synced
+  archive - Sync all the network
+- root - Special predefined root nodes, usualy produces zerochain and act like archive as well
++ root - Special predefined root nodes, usualy produces zerochain and acts like archive as well
+ 
+ Template: cellframe-node/mileena_enabled
+ Default: true
+@@ -75,11 +75,11 @@ Default: full
+ Choices: full, light, master, archive, root
+ Description: Mileena: Node role
+  Select node role:. 
+- Light - syncronize only local wallets 
+- full - sync all its cell
+- master - allow to store values in chains and take comission, sync all shards that will need to be synced
++ Light - Synchronize only local wallets 
++ full - Sync all its cell
++ master - Allow to store values in chains and take comission, sync all shards that will need to be synced
+  archive - Sync all the network
+- root - Special predefined root nodes, usualy produces zerochain and act like archive as well
++ root - Special predefined root nodes, usually produces zerochain and acts like archive as well
+ 
+ Template: cellframe-node/kelvpn_minkowski_enabled
+ Default: true
+@@ -94,18 +94,18 @@ Default: full
+ Choices: full, light, master, archive, root
+ Description: Kelvpn Minkowski: Node role
+  Select node role:. 
+- Light - syncronize only local wallets 
+- full - sync all its cell
+- master - allow to store values in chains and take comission, sync all shards that will need to be synced
++ Light - Synchronize only local wallets 
++ full - Sync all its cell
++ master - Allow to store values in chains and take comission, sync all shards that will need to be synced
+  archive - Sync all the network
+- root - Special predefined root nodes, usualy produces zerochain and act like archive as well 
++ root - Special predefined root nodes, usually produces zerochain and acts like archive as well 
+ 
+ Template: cellframe-node/backbone_enabled
+ Default: true
+ Choices: true, false
+ Type: select
+ Description: Backbone: Enable network
+- Subzero Testnet: Enable network auto load on start
++ Backbone Mainnet: Enable network auto load on start
+ 
+ Template: cellframe-node/backbone_node_type
+ Type: select
+@@ -113,8 +113,21 @@ Default: full
+ Choices: full, light, master, archive, root
+ Description: Backbone: Node role
+  Select node role:. 
+- Light - syncronize only local wallets 
+- full - sync all its cell
+- master - allow to store values in chains and take comission, sync all shards that will need to be synced
++ Light - Synchronize only local wallets 
++ full - Sync all its cell
++ master - Allow to store values in chains and take comission, sync all shards that will need to be synced
+  archive - Sync all the network
+- root - Special predefined root nodes, usualy produces zerochain and act like archive as well 
++ root - Special predefined root nodes, usually produces zerochain and acts like archive as well
++
++Template: cellframe-node/enable_python_plugins
++Default: false
++Choices: true, false
++Type: select
++Description: Python plugins: Enable Python plugins
++ Python plugins: Enable Python plugins
++
++Template: cellframe-node/python_plugins_path
++Default: /opt/cellframe-node/var/lib/plugins
++Type: string
++Description: Python plugins path
++ Path for Python plugins
+\ No newline at end of file
