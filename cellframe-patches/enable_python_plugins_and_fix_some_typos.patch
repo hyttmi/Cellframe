@@ -47,7 +47,7 @@ index 769107a..b2c2a51 100755
  cat /etc/passwd| grep cellframe-node || adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
  
 diff --git a/linux/debian/essentials/templates b/linux/debian/essentials/templates
-index 94a66f8..452bd1b 100755
+index 94a66f8..53d7dd3 100755
 --- a/linux/debian/essentials/templates
 +++ b/linux/debian/essentials/templates
 @@ -3,7 +3,7 @@ Default: false
@@ -80,7 +80,7 @@ index 94a66f8..452bd1b 100755
 + master - Allow to store values in chains and take comission, sync all shards that will need to be synced
   archive - Sync all the network
 - root - Special predefined root nodes, usualy produces zerochain and act like archive as well
-+ root - Special predefined root nodes, usualy produces zerochain and acts like archive as well
++ root - Special predefined root nodes, usually produces zerochain and acts like archive as well
  
  Template: cellframe-node/mileena_enabled
  Default: true
