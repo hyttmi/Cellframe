@@ -1,0 +1,121 @@
+diff --git a/linux/debian/essentials/postinst b/linux/debian/essentials/postinst
+index b2c2a51..479da4e 100755
+--- a/linux/debian/essentials/postinst
++++ b/linux/debian/essentials/postinst
+@@ -9,6 +9,7 @@ DAP_CFG_TPL="$DAP_PREFIX/share/configs/$DAP_APP_NAME.cfg.tpl"
+ 
+ # Store write config to new if present smth
+ DAP_CFG="$DAP_PREFIX/etc/$DAP_APP_NAME.cfg"
++DAP_CFG_BACKUP="$DAP_PREFIX/etc/$DAP_APP_NAME.cfg.bak"
+ 
+ #fixed link with python library
+ BUILD_PYTHON_VERSION=/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1.0
+@@ -31,14 +32,12 @@ fi
+ 
+ # Init node config
+ if [ -e "$DAP_CFG" ]; then
+-    DAP_CFG="$DAP_PREFIX/etc/$DAP_APP_NAME.cfg.dpkg-new"
+-else
+-    DAP_CFG="$DAP_PREFIX/etc/$DAP_APP_NAME.cfg"
++    mv $DAP_CFG $DAP_CFG_BACKUP
+ fi
+ 
+ cat $DAP_CFG_TPL > $DAP_CFG || true
+ 
+-sed -i "s/{PREFIX}/\/opt\/$DAP_APP_NAME/g" $DAP_CFG  || true
++sed -i "s|{PREFIX}|/opt/$DAP_APP_NAME|g" $DAP_CFG  || true
+ 
+ db_get cellframe-node/debug_mode || true
+ sed -i "s/{DEBUG_MODE}/$RET/g" $DAP_CFG  || true
+@@ -67,18 +66,16 @@ NET_NAME="subzero"
+ db_get cellframe-node/subzero_enabled || true
+ if [ "$RET" = "true" ]; then
+     DAP_CFG_NET="$DAP_PREFIX/etc/network/$NET_NAME.cfg"
++    DAP_CFG_NET_BACKUP="$DAP_PREFIX/etc/network/$NET_NAME.cfg.bak"
+     DAP_CFG_NET_TPL="$DAP_PREFIX/share/configs/network/$NET_NAME.cfg.tpl"
+-    DAP_NET_CFG=""
+     if [ -e "$DAP_CFG_NET" ]; then
+-	DAP_NET_CFG="$DAP_PREFIX/etc/network/$NET_NAME.cfg.dpkg-new"
+-    else
+-	DAP_NET_CFG="$DAP_PREFIX/etc/network/$NET_NAME.cfg"
++	mv $DAP_CFG_NET $DAP_CFG_NET_BACKUP
+     fi
+ 
+-    cat $DAP_CFG_NET_TPL > $DAP_NET_CFG || true
++    cat $DAP_CFG_NET_TPL > $DAP_CFG_NET || true
+     db_get cellframe-node/subzero_node_type || true
+     NODE_TYPE=$RET
+-    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_NET_CFG  || true
++    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_CFG_NET  || true
+     echo "[*] Enabled subzero"
+ fi
+ 
+@@ -88,18 +85,16 @@ NET_NAME="mileena"
+ db_get cellframe-node/mileena_enabled || true
+ if [ "$RET" = "true" ]; then
+     DAP_CFG_NET="$DAP_PREFIX/etc/network/$NET_NAME.cfg"
++    DAP_CFG_NET_BACKUP="$DAP_PREFIX/etc/network/$NET_NAME.cfg.bak"
+     DAP_CFG_NET_TPL="$DAP_PREFIX/share/configs/network/$NET_NAME.cfg.tpl"
+-    DAP_NET_CFG=""
+     if [ -e "$DAP_CFG_NET" ]; then
+-	DAP_NET_CFG="$DAP_PREFIX/etc/network/$NET_NAME.cfg.dpkg-new"
+-    else
+-	DAP_NET_CFG="$DAP_PREFIX/etc/network/$NET_NAME.cfg"
++	mv $DAP_CFG_NET $DAP_CFG_NET_BACKUP
+     fi
+ 
+-    cat $DAP_CFG_NET_TPL > $DAP_NET_CFG || true
++    cat $DAP_CFG_NET_TPL > $DAP_CFG_NET || true
+     db_get cellframe-node/mileena_node_type || true
+     NODE_TYPE=$RET
+-    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_NET_CFG  || true
++    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_CFG_NET  || true
+     echo "[*] Enabled mileena"
+ fi
+ 
+@@ -109,18 +104,16 @@ NET_NAME="kelvpn-minkowski"
+ db_get cellframe-node/kelvpn_minkowski_enabled || true
+ if [ "$RET" = "true" ]; then
+     DAP_CFG_NET="$DAP_PREFIX/etc/network/$NET_NAME.cfg"
++    DAP_CFG_NET_BACKUP="$DAP_PREFIX/etc/network/$NET_NAME.cfg.bak"
+     DAP_CFG_NET_TPL="$DAP_PREFIX/share/configs/network/$NET_NAME.cfg.tpl"
+-    DAP_NET_CFG=""
+     if [ -e "$DAP_CFG_NET" ]; then
+-	DAP_NET_CFG="$DAP_PREFIX/etc/network/$NET_NAME.cfg.dpkg-new"
+-    else
+-	DAP_NET_CFG="$DAP_PREFIX/etc/network/$NET_NAME.cfg"
++	mv $DAP_CFG_NET $DAP_CFG_NET_BACKUP
+     fi
+ 
+-    cat $DAP_CFG_NET_TPL > $DAP_NET_CFG || true
++    cat $DAP_CFG_NET_TPL > $DAP_CFG_NET || true
+     db_get cellframe-node/kelvpn_minkowski_node_type || true
+     NODE_TYPE=$RET
+-    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_NET_CFG  || true
++    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_CFG_NET  || true
+     echo "[*] Enabled subzero"
+ fi
+ 
+@@ -130,18 +123,16 @@ NET_NAME="Backbone"
+ db_get cellframe-node/backbone_enabled || true
+ if [ "$RET" = "true" ]; then
+     DAP_CFG_NET="$DAP_PREFIX/etc/network/$NET_NAME.cfg"
++    DAP_CFG_NET_BACKUP="$DAP_PREFIX/etc/network/$NET_NAME.cfg.bak"
+     DAP_CFG_NET_TPL="$DAP_PREFIX/share/configs/network/$NET_NAME.cfg.tpl"
+-    DAP_NET_CFG=""
+     if [ -e "$DAP_CFG_NET" ]; then
+-	DAP_NET_CFG="$DAP_PREFIX/etc/network/$NET_NAME.cfg.dpkg-new"
+-    else
+-	DAP_NET_CFG="$DAP_PREFIX/etc/network/$NET_NAME.cfg"
++	mv $DAP_CFG_NET $DAP_CFG_NET_BACKUP
+     fi
+ 
+-    cat $DAP_CFG_NET_TPL > $DAP_NET_CFG || true
++    cat $DAP_CFG_NET_TPL > $DAP_CFG_NET || true
+     db_get cellframe-node/backbone_node_type || true
+     NODE_TYPE=$RET
+-    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_NET_CFG  || true
++    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_CFG_NET  || true
+     echo "[*] Enabled Backbone"
+ fi
+ 
