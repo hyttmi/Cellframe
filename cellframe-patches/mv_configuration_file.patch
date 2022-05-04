@@ -1,5 +1,5 @@
 diff --git a/linux/debian/essentials/postinst b/linux/debian/essentials/postinst
-index b2c2a51..668dec3 100755
+index b2c2a51..614ce9b 100755
 --- a/linux/debian/essentials/postinst
 +++ b/linux/debian/essentials/postinst
 @@ -9,6 +9,7 @@ DAP_CFG_TPL="$DAP_PREFIX/share/configs/$DAP_APP_NAME.cfg.tpl"
@@ -94,7 +94,7 @@ index b2c2a51..668dec3 100755
 -    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_NET_CFG  || true
 -    echo "[*] Enabled subzero"
 +    sed -i "s/{NODE_TYPE}/$NODE_TYPE/g" $DAP_CFG_NET  || true
-+    echo "[*] Enabled kelvpn-minkowski"
++    echo "[*] Enabled KelVPN-Minkowski"
  fi
  
  # Init Backbone
