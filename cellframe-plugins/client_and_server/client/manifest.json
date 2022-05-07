@@ -1,0 +1,7 @@
+{ 
+    "name": "client",
+    "version": "0.1",
+    "author": "Mika Hyttinen (@CELLgainz)",
+    "dependencies": [],
+    "description": "Client plugin for Cellframe node"
+}
