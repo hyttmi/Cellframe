@@ -4,17 +4,17 @@ set -e
 ARCH=`uname -m`
 CODENAME=`lsb_release -cs 2> /dev/null`
 
-function display_information() {
-    echo "This script will install the latest Cellframe node available for your distribution."
-    read -r -p "Press enter now to continue or CTRL+C to abort."
-}
-
 function check_root() {
     echo "[INFO] Checking if you're root..."
     if [[ $EUID -ne 0 ]] ; then
         echo "[ERROR] This script must be run as root. Exiting..." 
         exit 1
     fi
+}
+
+function display_information() {
+    echo "This script will install the latest Cellframe node available for your distribution."
+    read -r -p "Press enter now to continue or CTRL+C to abort."
 }
 
 function test_deps() {
@@ -35,16 +35,16 @@ function test_deps() {
     else
         echo "[INFO] gnupg found..."
     fi
-}
 
-function check_lsb_release() {
-    echo "[INFO] Checking lsb_release availability..."
-    if  [[ ! $(which lsb_release) ]] ; then
-        echo "[ERROR] lsb_release not found. Install it with apt install lsb-release"
-        exit 2
+    echo "[INFO] Testing if you have lsb_release installed on your operating system..."
+    if [[ ! $(which lsb_release) ]] ; then
+        echo "[INFO] lsb_release not found. Installing lsb_release..."
+        apt-get -qq update && apt-get -yqq install lsb-release
+        export REMOVE_DEPS="${REMOVE_DEPS} lsb-release"
     else
-        echo "[INFO] lsb_release found. Continuing..."
+        echo "[INFO] lsb_release found..."
     fi
+    
 }
 
 function check_distro() {
@@ -153,7 +153,6 @@ function recommend_reboot() {
 check_root
 display_information
 test_deps
-check_lsb_release
 check_distro
 check_arch
 check_node_installation
