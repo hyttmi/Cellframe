@@ -9,6 +9,14 @@ function display_information() {
     read -r -p "Press enter now to continue or CTRL+C to abort."
 }
 
+function check_root() {
+    echo "[INFO] Checking if you're root..."
+    if [[ $EUID -ne 0 ]] ; then
+        echo "[ERROR] This script must be run as root. Exiting..." 
+        exit 1
+    fi
+}
+
 function test_deps() {
     echo "[INFO] Testing if you have wget installed on your operating system..."
     if [[ ! $(which wget) ]] ; then
@@ -26,23 +34,6 @@ function test_deps() {
         export REMOVE_DEPS="${REMOVE_DEPS} gnupg"
     else
         echo "[INFO] gnupg found..."
-    fi
-
-    echo "[INFO] Testing if you have curl installed on your operating system..."
-    if [[ ! $(which curl) ]] ; then
-        echo "[INFO] curl not found. Installing curl..."
-        apt-get -qq update && apt-get -yqq install curl
-        export REMOVE_DEPS="${REMOVE_DEPS} curl"
-    else
-        echo "[INFO] curl found..."
-    fi
-}
-
-function check_root() {
-    echo "[INFO] Checking if you're root..."
-    if [[ $EUID -ne 0 ]] ; then
-        echo "[ERROR] This script must be run as root. Exiting..." 
-        exit 1
     fi
 }
 
@@ -76,12 +67,6 @@ function check_arch() {
     else
         echo "[ERROR] ${ARCH} is not supported. Exiting..."
         exit 4
-    fi
-
-    if [[ ${ARCH} == "x86_64" ]] ; then
-        export DOWNLOAD_ARCH="amd64"
-    elif [[ ${ARCH} == "aarch64" ]] ; then
-        export DOWNLOAD_ARCH="arm64"
     fi
 
     if [[ ${ARCH} == "aarch64" && ${CODENAME} != "bullseye" ]] ; then
@@ -137,7 +122,7 @@ function enable_plugins() {
         echo "[INFO] Enabling Python plugins..."
         sed -i 's/#\[plugins\]/\[plugins\]/g' /opt/cellframe-node/etc/cellframe-node.cfg
         sed -i 's/#py_load=.*/py_load=true/g' /opt/cellframe-node/etc/cellframe-node.cfg
-        sed -i 's/#py_path=.*/py_path=\/opt\/cellframe-node\/var\/lib\/plugins/g' /opt/cellframe-node/etc/cellframe-node.cfg
+        sed -i 's|#py_path=.*|py_path=/opt/cellframe-node/var/lib/plugins|g' /opt/cellframe-node/etc/cellframe-node.cfg
         prompt_remove_deps
     else
         echo "[ERROR] Configuration file is missing. Error in installation?"
