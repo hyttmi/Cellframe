@@ -1,0 +1,7 @@
+{ 
+    "name": "logremove",
+    "version": "0.1",
+    "author": "Mika Hyttinen (@CELLgainz)",
+    "dependencies": [],
+    "description": "Remove log file when it reaches a defined size"
+}
