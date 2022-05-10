@@ -2,14 +2,12 @@
 
 This is as simple as it can possibly get. Tested on Ubuntu too.
 
-Supports ONLY Debian 11 and Ubuntu 20.04.x (now also Linux Mint elsie, which is, under the hood, Debian bullseye).
-* NOW SUPPORTS ALSO UPCOMING DEBIAN 12 *
+For aarch64 and x86_64.
 
-For aarch64 (Raspberry Pi 3/4/400) and x86_64.
+Should support every Debian based linux distro there is.
 
-Should take care of all dependencies, which are sometimes missing from default Debian/Ubuntu installation.
-
-It adds Demlabs public key/repository and then installs the latest version of Cellframe node.
+It adds Demlabs public key/repository if your platform is supported and then installs the latest version of Cellframe node.
+Otherwise it downloads it straight from repository without adding it to sources.
 
 If you don't have wget installed by default, get the script with curl:
 
