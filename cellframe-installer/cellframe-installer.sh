@@ -179,7 +179,7 @@ function prompt_remove_deps() {
     if [[ ! -z ${REMOVE_DEPS} ]] ; then
         read -r -p "[INFO] Do you want remove the installed packages which were installed during setup (${REMOVE_DEPS})? [y/N] " response
         if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]] ; then
-            apt purge -yqq ${REMOVE_DEPS}
+            apt-get remove --purge -yqq ${REMOVE_DEPS}
             recommend_reboot
         else
             recommend_reboot
