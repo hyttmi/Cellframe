@@ -13,7 +13,7 @@ Docker file has a few ARGs which can be changed:
     ARG NOTIFY_SRV_PORT="8080"
     ARG ENABLE_PYTHON_PLUGINS="false"
     ARG PYTHON_PLUGINS_PATH="/opt/cellframe-node/var/lib/plugins"
-    
+
     # Network settings
     ARG BACKBONE_ENABLED="true"
     ARG BACKBONE_NODE_TYPE="full"
@@ -62,7 +62,7 @@ I added support for changing few settings via environment variables before launc
 
 So for example, before launching the node you can set the variable for SERVER_PORT:
     ```
-    docker run -e SERVER_PORT=6666 -v cellframe:/opt/cellframe-node --name=cellframe-node --net=host -it cellgainz/cellframe-node-ce:latest
+    docker run -e SERVER_PORT=6666 -v cellframe:/opt/cellframe-node --name=cellframe-node  --privileged--net=host -it cellgainz/cellframe-node-ce:latest
     ```
 
 Beware though, there is no proper check for IP address for example.
