@@ -31,35 +31,15 @@ These args are passed to debconf-set-selections before node installation.
 
 3. And start the node by running:
     ```
-    docker run -v cellframe:/opt/cellframe-node --name=cellframe-node --net=host -it <name>
+    docker run -v cellframe:/opt/cellframe-node --name=cellframe-node --privileged --net=host -it <name>
     ```
 
 4. Or as daemon:
     ```
-    docker run -v cellframe:/opt/cellframe-node --name=cellframe-node --net=host -it -d <name>
+    docker run -v cellframe:/opt/cellframe-node --name=cellframe-node --privileged --net=host -it -d <name>
     ```
 
 5. If running as daemon, check the logs with
-   ```
-   docker logs -f cellframe-node
-   ```
-
-## Downloading straight from Dockerhub
-Latest build is uploaded to Dockerhub, you can run it simply with the following commands:
-
-1. First create a volume for cellframe-node
-    ```
-    docker volume create cellframe
-    ```
-2. Run it:
-    ```
-    docker run -v cellframe:/opt/cellframe-node --name=cellframe-node --net=host -it cellgainz/cellframe-node-ce:latest
-    ```
-3. Or if you want to daemonize it:
-    ```
-    docker run -v cellframe:/opt/cellframe-node --name=cellframe-node --net=host -it -d cellgainz/cellframe-node-ce:latest
-    ```
-4. If running as daemon, check the logs with
    ```
    docker logs -f cellframe-node
    ```
