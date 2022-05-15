@@ -3,19 +3,25 @@ With this Dockerfile you can build your own Cellframe node docker image.
 
 Docker file has a few ARGs which can be changed:
 
-    ARG SERVER_PORT=8079
-    ARG SERVER_ADDR=0.0.0.0
-    ARG DEBUG=false
-    ARG AUTO_ONLINE=true
-    ARG SERVER_ENABLED=true
-    ARG SUBZERO_ENABLED=true
-    ARG SUBZERO_NODE_TYPE=full
-    ARG CORE_T_ENABLED=false
-    ARG CORE_T_NODE_TYPE=full
-    ARG MINKOWSKI_ENABLED=true
-    ARG MINKOWSKI_NODE_TYPE=full
-    ARG KELVIN_ENABLED=true
-    ARG KELVIN_NODE_TYPE=full
+    ARG SERVER_PORT="8079"
+    ARG SERVER_ADDR="0.0.0.0"
+    ARG DEBUG="false"
+    ARG AUTO_ONLINE="true"
+    ARG SERVER_ENABLED="true"
+    ARG NOTIFY_SRV_ADDR="127.0.0.1"
+    ARG NOTIFY_SRV_PORT="8080"
+    ARG ENABLE_PYTHON_PLUGINS="false"
+    ARG PYTHON_PLUGIN_PATH="/opt/cellframe-node/var/lib/plugins"
+    
+    # Network settings
+    ARG BACKBONE_ENABLED="true"
+    ARG BACKBONE_NODE_TYPE="full"
+    ARG MILEENA_ENABLED="true"
+    ARG MILEENA_NODE_TYPE="full"
+    ARG MINKOWSKI_ENABLED="true"
+    ARG MINKOWSKI_NODE_TYPE="full"
+    ARG SUBZERO_ENABLED="true"
+    ARG SUBZERO_NODE_TYPE="full"
 
 These args are passed to debconf-set-selections before node installation.
 
