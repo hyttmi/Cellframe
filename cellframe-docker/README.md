@@ -3,6 +3,7 @@ With this Dockerfile you can build your own Cellframe node docker image.
 
 Docker file has a few ARGs which can be changed:
 
+    # Basic settings for node
     ARG SERVER_PORT="8079"
     ARG SERVER_ADDR="0.0.0.0"
     ARG DEBUG="false"
@@ -11,7 +12,7 @@ Docker file has a few ARGs which can be changed:
     ARG NOTIFY_SRV_ADDR="127.0.0.1"
     ARG NOTIFY_SRV_PORT="8080"
     ARG ENABLE_PYTHON_PLUGINS="false"
-    ARG PYTHON_PLUGIN_PATH="/opt/cellframe-node/var/lib/plugins"
+    ARG PYTHON_PLUGINS_PATH="/opt/cellframe-node/var/lib/plugins"
     
     # Network settings
     ARG BACKBONE_ENABLED="true"
