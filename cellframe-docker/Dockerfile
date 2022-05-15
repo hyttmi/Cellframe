@@ -9,7 +9,7 @@ ARG SERVER_ENABLED="true"
 ARG NOTIFY_SRV_ADDR="127.0.0.1"
 ARG NOTIFY_SRV_PORT="8080"
 ARG ENABLE_PYTHON_PLUGINS="false"
-ARG PYTHON_PLUGIN_PATH="/opt/cellframe-node/var/lib/plugins"
+ARG PYTHON_PLUGINS_PATH="/opt/cellframe-node/var/lib/plugins"
 
 # Network settings
 ARG BACKBONE_ENABLED="true"
@@ -44,6 +44,8 @@ RUN echo "cellframe-node cellframe-node/mileena_enabled	select ${MILEENA_ENABLED
     && echo "cellframe-node cellframe-node/auto_online select ${AUTO_ONLINE}" | debconf-set-selections \
     && echo "cellframe-node cellframe-node/server_enabled select ${SERVER_ENABLED}" | debconf-set-selections \
     && echo "cellframe-node cellframe-node/debug_mode select ${DEBUG}" | debconf-set-selections \
+    && echo "cellframe-node cellframe-node/python_plugins_path string ${PYTHON_PLUGINS_PATH}" | debconf-set-selections \
+    && echo "cellframe-node cellframe-node/enable_python_plugins select ${ENABLE_PYTHON_PLUGINS}" | debconf-set-selections \
     && echo "cellframe-node cellframe-node/server_port string ${SERVER_PORT}" | debconf-set-selections \
     && echo "cellframe-node cellframe-node/server_addr string ${SERVER_ADDR}" | debconf-set-selections
 
