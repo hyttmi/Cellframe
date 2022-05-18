@@ -1,29 +1,26 @@
-## Cellframe node installer script
+## Cellframe node tool
 
-This is as simple as it can possibly get. Tested on Ubuntu too.
+With this tool, you can install latest Cellframe node, completely uninstall installed Cellframe node (script automatically does a backup of your wallet) or do some basic troubleshooting if your node is not working for some reason.
 
-For aarch64 and x86_64.
+For installation aarch64 and x86_64 are supported.
 
 Should support every Debian based linux distro there is.
 
-It adds Demlabs public key/repository if your platform is supported and then installs the latest version of Cellframe node.
-Otherwise it downloads it straight from repository without adding it to sources.
-
 If you don't have wget installed by default, get the script with curl:
 
-    curl -O https://raw.githubusercontent.com/CELLgainz/Cellframe/main/cellframe-installer/cellframe-installer.sh
+    curl -O https://raw.githubusercontent.com/CELLgainz/Cellframe/main/cellframe-installer/cellframe-node-tool.sh
 
 Or if you have wget installed, use:
 
-    wget https://raw.githubusercontent.com/CELLgainz/Cellframe/main/cellframe-installer/cellframe-installer.sh
+    wget https://raw.githubusercontent.com/CELLgainz/Cellframe/main/cellframe-installer/cellframe-node-tool.sh
 
 After downloading:
 
-    chmod +x cellframe-installer.sh
+    chmod +x cellframe-node-tool.sh
 
 After that, run with:
 
-    ./cellframe-installer.sh (as root)
+    ./cellframe-node-tool.sh (as root)
 
 Done!
 
