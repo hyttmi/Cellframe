@@ -3,6 +3,10 @@ set -e
 
 ARCH=`uname -m`
 CODENAME=`lsb_release -cs 2> /dev/null`
+INSTALL_PATH="/opt/cellframe-node"
+BACKUP="/opt/cellframe_backup/"
+WALLET_FILES="/opt/cellframe-node/var/lib/wallet/*"
+REMOVE_DB="/opt/cellframe-node/var/lib/global_db"
 
 function check_root() {
     echo "[INFO] Checking if you're root..."
@@ -10,8 +14,72 @@ function check_root() {
         echo "[ERROR] This script must be run as root. Exiting..." 
         exit 1
     else
-        display_information
+        ask_job
     fi
+}
+
+function ask_job {
+    echo "[INFO] CELLFRAME NODE HELPER"
+    echo "[INFO] 1: Install Cellframe node"
+    echo "[INFO] 2: Remove Cellframe node (and do a backup of your wallet if available)"
+    echo "[INFO] 3: Try to fix if Cellframe node is not starting"
+    read -r -p "[INFO] Which option would you like to use? [1,2,3] " response
+    
+    case $response in
+
+        1)
+            display_information
+        ;;
+        2)
+            create_backup
+        ;;
+        3)
+            remove_gdb
+        ;;
+        *)
+            echo "Unknown method! Exiting..."
+        ;;
+        esac
+}
+
+function create_backup() {
+    if [[ $(ls ${WALLET_FILES} 2> /dev/null) ]] ; then
+        echo "[INFO] Detected .dwallet file(s), doing a backup..."
+        mkdir -p ${BACKUP}
+        cp ${WALLET_FILES} ${BACKUP}
+        echo "[INFO] Wallet backup is now available at ${BACKUP}"
+        wipe
+    else
+        wipe
+    fi
+}
+
+function wipe() {
+    if [[ $(dpkg -l | grep -i cellframe-node) ]] ; then
+        echo "[INFO] Cellframe node is installed, removing it..."
+        apt-get -yqq remove --purge cellframe-node
+    fi
+
+    if [[ -e ${INSTALL_PATH} ]] ; then
+        echo "[INFO] Found ${INSTALL_PATH}, removing it..."
+        rm -rf ${INSTALL_PATH}
+        echo "[INFO] ${INSTALL_PATH} removed."
+        echo "[INFO] You may now start from the beginning and do a fresh install of Cellframe node"
+    fi
+}
+
+function remove_gdb {
+    if [[ ! $(systemctl status cellframe-node.service | grep -i inactive) || $(ps -aux | grep -i cellframe-node) ]] ; then
+        echo "[INFO] Cellframe node is running, stopping it..."
+        systemctl stop cellframe-node > /dev/null
+        killall -9 cellframe-node > /dev/null
+    if [[ -e ${REMOVE_DB} ]] ; then
+        echo "[INFO] global_db folder found, removing it."
+        rm -rf ${REMOVE_DB}
+    else
+        echo "[INFO] global_db folder not found. Nothing to do, exiting..."
+        exit
+
 }
 
 function display_information() {
