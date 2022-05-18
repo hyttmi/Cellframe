@@ -19,7 +19,7 @@ function check_root() {
 }
 
 function ask_job {
-    echo "[INFO] CELLFRAME NODE HELPER"
+    echo "[INFO] CELLFRAME NODE TOOL"
     echo "[INFO] 1: Install Cellframe node"
     echo "[INFO] 2: Remove Cellframe node (and do a backup of your wallet if available)"
     echo "[INFO] 3: Try to fix if Cellframe node is not starting"
@@ -69,7 +69,7 @@ function wipe() {
 }
 
 function remove_gdb {
-    if [[ ! $(systemctl status cellframe-node.service | grep -i inactive) || $(ps -aux | grep -i cellframe-node) ]] ; then
+    if [[ $(pgrep -x cellframe-node) ]] ; then
         echo "[INFO] Cellframe node is running, stopping it..."
         systemctl stop cellframe-node > /dev/null
         killall -9 cellframe-node > /dev/null
