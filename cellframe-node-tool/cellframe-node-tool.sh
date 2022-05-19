@@ -78,6 +78,7 @@ function remove_gdb {
     if [[ -e ${REMOVE_DB} ]] ; then
         echo "[INFO] global_db folder found, removing it."
         rm -rf ${REMOVE_DB}
+        systemctl start cellframe-node
     else
         echo "[INFO] global_db folder not found. Nothing to do, exiting..."
         exit
