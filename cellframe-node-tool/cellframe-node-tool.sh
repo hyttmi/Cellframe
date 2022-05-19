@@ -5,8 +5,8 @@ ARCH=`uname -m`
 CODENAME=`lsb_release -cs 2> /dev/null`
 INSTALL_PATH="/opt/cellframe-node"
 BACKUP="/opt/cellframe_backup/"
-WALLET_FILES="/opt/cellframe-node/var/lib/wallet/*"
-REMOVE_DB="/opt/cellframe-node/var/lib/global_db"
+WALLET_FILES="${INSTALL_PATH}/var/lib/wallet/*"
+GDB_PATH="${INSTALL_PATH}/var/lib/global_db"
 
 function check_root() {
     echo "[INFO] Checking if you're root..."
@@ -75,9 +75,9 @@ function remove_gdb {
         killall -9 cellframe-node > /dev/null
     fi
     
-    if [[ -e ${REMOVE_DB} ]] ; then
+    if [[ -e ${GDB_PATH} ]] ; then
         echo "[INFO] global_db folder found, removing it."
-        rm -rf ${REMOVE_DB}
+        rm -rf ${GDB_PATH}
         systemctl start cellframe-node
     else
         echo "[INFO] global_db folder not found. Nothing to do, exiting..."
