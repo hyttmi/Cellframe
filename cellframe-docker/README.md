@@ -38,12 +38,12 @@ These args are passed to debconf-set-selections before node installation.
 
 3. And start the node by running:
     ```
-    docker run -v cellframe:/opt/cellframe-node --name=cellframe-node --privileged --net=host -it <name>
+    docker run -v cellframe:/home/cellframe --name=cellframe-node --privileged --net=host -it <name>
     ```
 
 4. Or as daemon:
     ```
-    docker run -v cellframe:/opt/cellframe-node --name=cellframe-node --privileged --net=host -it -d <name>
+    docker run -v cellframe:/home/cellframe --name=cellframe-node --privileged --net=host -it -d <name>
     ```
 
 5. If running as daemon, check the logs with
@@ -62,7 +62,7 @@ I added support for changing few settings via environment variables before launc
 
 So for example, before launching the node you can set the variable for SERVER_PORT:
     ```
-    docker run -e SERVER_PORT=6666 -v cellframe:/opt/cellframe-node --name=cellframe-node  --privileged--net=host -it cellgainz/cellframe-node-ce:latest
+    docker run -e SERVER_PORT=6666 -v cellframe:/home/cellframe --name=cellframe-node  --privileged--net=host <name>
     ```
 
 Beware though, there is no proper check for IP address for example.

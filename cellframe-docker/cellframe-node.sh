@@ -2,6 +2,9 @@
 
 CONFIG="/opt/cellframe-node/etc/cellframe-node.cfg"
 
+WALLET_PATH="/home/cellframe/wallet"
+GDB_PATH="/home/cellframe/gdb"
+
 if  [[ ! -z ${SERVER_PORT} && ${SERVER_PORT} < 1 || ${SERVER_PORT} > 65535 ]] ; then
     echo "Listen port set to ${SERVER_PORT}"
     sed -i "s/^listen_port_tcp=.*/listen_port_tcp=${SERVER_PORT}/" ${CONFIG}
@@ -22,4 +25,9 @@ if [[ ! -z ${SERVER_ENABLED} && ${SERVER_ENABLED} == "true" || ${SERVER_ENABLED}
     sed -i "0,/enabled=.*/s//enabled=${SERVER_ENABLED}/" ${CONFIG}
 fi
 
-/usr/bin/cellframe-node
+# Modify the gdb and wallet lines in config
+
+sed -i "s|^wallets_path=.*|wallets_path=${WALLET_PATH}|" ${CONFIG}
+sed -i "s|^dap_global_db_path=.*|dap_global_db_path=${GDB_PATH}|" ${CONFIG}
+
+/opt/cellframe-node/bin/cellframe-node

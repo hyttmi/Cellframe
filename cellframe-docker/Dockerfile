@@ -8,8 +8,8 @@ ARG AUTO_ONLINE="true"
 ARG SERVER_ENABLED="true"
 ARG NOTIFY_SRV_ADDR="127.0.0.1"
 ARG NOTIFY_SRV_PORT="8080"
-ARG ENABLE_PYTHON_PLUGINS="false"
-ARG PYTHON_PLUGINS_PATH="/opt/cellframe-node/var/lib/plugins"
+ARG ENABLE_PYTHON_PLUGINS="true"
+ARG PYTHON_PLUGINS_PATH="/home/cellframe/plugins"
 
 # Network settings
 ARG BACKBONE_ENABLED="true"
@@ -55,13 +55,15 @@ RUN cd /tmp \
 
 RUN apt-get -y autoremove --purge && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN mkdir -p /home/cellframe/gdb
+RUN mkdir -p /home/cellframe/wallet
+RUN mkdir -p /home/cellframe/plugins
+
 # We need to create a volume, otherwise the downloaded databases would be lost. 
-VOLUME [ "/opt/cellframe-node" ]
+VOLUME [ "/home/cellframe" ]
 
 COPY cellframe-node.sh /usr/bin/
 
 RUN chmod 777 /usr/bin/cellframe-node.sh
-
-RUN ln -sv /opt/cellframe-node/bin/cellframe* /usr/bin/
 
 CMD [ "/usr/bin/cellframe-node.sh" ]
