@@ -1,0 +1,131 @@
+Submodule prod_build 63d6d73..0dce14d:
+diff --git a/prod_build/linux/debian/essentials/postinst b/prod_build/linux/debian/essentials/postinst
+index b2c2a51..e477f19 100755
+--- a/prod_build/linux/debian/essentials/postinst
++++ b/prod_build/linux/debian/essentials/postinst
+@@ -145,9 +145,6 @@ if [ "$RET" = "true" ]; then
+     echo "[*] Enabled Backbone"
+ fi
+ 
+-mkdir -p $DAP_PREFIX/var/log     || true
+-mkdir -p $DAP_PREFIX/var/plugins || true
+-
+ #Set up Python plugins
+ db_get cellframe-node/enable_python_plugins || true
+ if [ "$RET" = "true" ]; then
+@@ -158,35 +155,23 @@ if [ "$RET" = "true" ]; then
+     echo "[*] Enabled Python plugins"
+ fi
+ 
+-cat /etc/passwd| grep cellframe-node || adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
+-
+ echo "[*] Check /etc/systemd/system/$DAP_APP_NAME.service file..."
+ if [ -e /etc/systemd/system/$DAP_APP_NAME.service ]; then
+     echo "[*] Restarting $DAP_APP_NAME to implement changes"
+-    systemctl --system stop $DAP_APP_NAME  >> /dev/null|| true
++    systemctl stop $DAP_APP_NAME  >> /dev/null|| true
+     echo "[*] Stopped $DAP_APP_NAME"
+     systemctl daemon-reload || true
+-    systemctl --system start $DAP_APP_NAME || true
++    systemctl start $DAP_APP_NAME || true
+     echo "[*] Started $DAP_APP_NAME"
+ else
+-    echo "[!] Installing $DAP_APP_NAME as systemd service (haven't found /etc/systemd/system/$DAP_APP_NAME.service)"
+-    ln -sf $DAP_PREFIX/share/$DAP_APP_NAME.service /etc/systemd/system/$DAP_APP_NAME.service || true
++    echo "[!] Installing $DAP_APP_NAME as systemd service (/etc/systemd/system/$DAP_APP_NAME.service file not found)"
++    #ln -sf $DAP_PREFIX/share/$DAP_APP_NAME.service /etc/systemd/system/$DAP_APP_NAME.service || true
++    echo "[*] Execute 'systemctl start $DAP_APP_NAME' to start $DAP_APP_NAME service"
+     systemctl --system enable $DAP_PREFIX/share/$DAP_APP_NAME.service || true
+-#    systemctl --system start $DAP_APP_NAME
+-    echo "[ ] Execute 'systemctl start $DAP_APP_NAME' to start $DAP_APP_NAME service"
+-
+-    #USERMAN=`users | awk '{print $1}'`
+-    echo "[ ] Enabling logrotate"
++    echo "[*] Enabling logrotate"
+     ln -sf $DAP_PREFIX/share/logrotate/$DAP_APP_NAME /etc/logrotate.d/$DAP_APP_NAME || true
+-    adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
+-    #usermod -aG $DAP_CHAINS_NAME `users | awk '{print $1}'`
+-    for username in $(cat /etc/passwd | grep "/home" | cut -d ':' -f1); do
+-        usermod -aG cellframe-node $username || true
+-    done
+-    mkdir -p $DAP_PREFIX/var/{run,lib/wallet,lib/global_db,var/plugins} || true
+-    #mkdir -p $DAP_PREFIX/var/{run,lib/ca,lib/wallet,lib/global_db,var/plugins} || true
++    mkdir -p $DAP_PREFIX/var/{run,lib/wallet,lib/global_db,log,plugins} || true
+     touch $DAP_PREFIX/var/run/cellframe-node.pid || true
+-    #chown -R $USERMAN:$USERMAN $DAP_PREFIX
+     for filename in $(find $DAP_PREFIX | grep -v bugreport); do
+         if [ -d $filename ]; then
+             chmod 0775 $filename 2>/dev/null || true
+@@ -196,9 +181,8 @@ else
+     done
+     chmod 0666 $DAP_CFG
+     chmod 0666 $DAP_CFG_TPL
+-    chmod 0774 $DAP_PREFIX/bin/* || true
+-    chmod 0777 $DAP_PREFIX/bin/$DAP_APP_NAME-cli $DAP_PREFIX/bin/pip3* $DAP_PREFIX/bin/python3* || true
+-    service cellframe-node start || true
+-    systemctl restart cellframe-node || true
++    chmod 0774 $DAP_PREFIX/bin/*
++    chmod 0777 $DAP_PREFIX/bin/$DAP_APP_NAME-cli $DAP_PREFIX/bin/pip3* $DAP_PREFIX/bin/python3* 2> /dev/null || true
++    systemctl start cellframe-node || true
+     echo "[!] Done"
+ fi
+diff --git a/prod_build/linux/debian/essentials/postrm b/prod_build/linux/debian/essentials/postrm
+index b6cd2eb..59c9b1b 100755
+--- a/prod_build/linux/debian/essentials/postrm
++++ b/prod_build/linux/debian/essentials/postrm
+@@ -1,17 +1,7 @@
+-#! /bin/bash -e
++#!/bin/bash -e
+ if [ "$1" == "purge" ] && [ -e /usr/share/debconf/confmodule ] ; then
+-. /usr/share/debconf/confmodule
+-db_purge
++    . /usr/share/debconf/confmodule
++    db_purge
+ fi
+-GROUP_RM="cellframe-node"
+-
+-systemctl stop cellframe-node || true
+-systemctl disable cellframe-node || true
+-
+-#for username in `cat /etc/passwd | grep "/home" | cut -d ':' -f1`; do
+-#  gpasswd -d $username $GROUP_RM || true
+-#done
+-#rm -r /opt/cellframe-node || true
+-#groupdel cellframe-node || true
+-#userdel cellframe-node || true
+ 
++exit 0
+diff --git a/prod_build/linux/debian/essentials/prerm b/prod_build/linux/debian/essentials/prerm
+new file mode 100755
+index 0000000..99da364
+--- /dev/null
++++ b/prod_build/linux/debian/essentials/prerm
+@@ -0,0 +1,10 @@
++#!/bin/bash -e
++
++case "$1" in
++	remove|purge|abort-install|abort-upgrade)
++		systemctl stop cellframe-node
++        systemctl disable cellframe-node
++		;;
++esac
++
++exit 0
+\ No newline at end of file
+diff --git a/prod_build/linux/debian/essentials/templates b/prod_build/linux/debian/essentials/templates
+index 53d7dd3..fd3a6b8 100755
+--- a/prod_build/linux/debian/essentials/templates
++++ b/prod_build/linux/debian/essentials/templates
+@@ -127,7 +127,8 @@ Description: Python plugins: Enable Python plugins
+  Python plugins: Enable Python plugins
+ 
+ Template: cellframe-node/python_plugins_path
+-Default: /opt/cellframe-node/var/lib/plugins
++Default: /opt/cellframe-node/var/plugins
+ Type: string
+ Description: Python plugins path
+- Path for Python plugins
+\ No newline at end of file
++ Path for Python plugins
++ 
+\ No newline at end of file
