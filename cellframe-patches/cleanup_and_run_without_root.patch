@@ -28,7 +28,7 @@ index 2003ba0..51f096d 100644
 Submodule prod_build contains modified content
 Submodule prod_build ba8db76..d8414df:
 diff --git a/prod_build/linux/debian/essentials/postinst b/prod_build/linux/debian/essentials/postinst
-index 409c47d..a24e384 100755
+index 409c47d..02bfcee 100755
 --- a/prod_build/linux/debian/essentials/postinst
 +++ b/prod_build/linux/debian/essentials/postinst
 @@ -10,23 +10,6 @@ DAP_CFG_TPL="${DAP_PREFIX}/share/configs/${DAP_APP_NAME}.cfg.tpl"
@@ -106,17 +106,16 @@ index 409c47d..a24e384 100755
  #Set up Python plugins
  db_get cellframe-node/enable_python_plugins || true
  if [ "${RET}" = "true" ]; then
-@@ -158,33 +142,33 @@ if [ "${RET}" = "true" ]; then
+@@ -158,34 +142,31 @@ if [ "${RET}" = "true" ]; then
      echo "[*] Enabled Python plugins"
  fi
  
 -cat /etc/passwd| grep cellframe-node || adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
-+if [ $(cat /etc/passwd | grep cellframe-node) ] ; then
-+    echo "[*] Modifying user default shell"
-+    usermod cellframe-node -s /bin/false || true # Let's change the default shell just in case
++if [ $(cat /etc/passwd | grep ${DAP_APP_NAME}) ] ; then
++    usermod ${DAP_APP_NAME} -s /bin/false > /dev/null || true # Let's change the default shell just in case
 +else
-+    echo "[*] Add user cellframe-node"
-+    adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node --shell /bin/false || true
++    echo "[*] Add user ${DAP_APP_NAME}"
++    adduser --system --no-create-home --group --home /opt/${DAP_APP_NAME} ${DAP_APP_NAME} --shell /bin/false > /dev/null || true
 +fi
  
  echo "[*] Check /etc/systemd/system/${DAP_APP_NAME}.service file..."
@@ -130,16 +129,16 @@ index 409c47d..a24e384 100755
 +    systemctl start ${DAP_APP_NAME} || true
      echo "[*] Started ${DAP_APP_NAME}"
  else
-     echo "[!] Installing ${DAP_APP_NAME} as systemd service (haven't found /etc/systemd/system/${DAP_APP_NAME}.service)"
+-    echo "[!] Installing ${DAP_APP_NAME} as systemd service (haven't found /etc/systemd/system/${DAP_APP_NAME}.service)"
++    echo "[!] Installing ${DAP_APP_NAME} as systemd service"
      ln -sf $DAP_PREFIX/share/${DAP_APP_NAME}.service /etc/systemd/system/${DAP_APP_NAME}.service || true
 -    systemctl --system enable ${DAP_PREFIX}/share/${DAP_APP_NAME}.service || true
-+    systemctl enable ${DAP_PREFIX}/share/${DAP_APP_NAME}.service || true
- 
+-
 -    echo "[ ] Execute 'systemctl start ${DAP_APP_NAME}' to start ${DAP_APP_NAME} service"
-+    echo "[*] Execute 'systemctl start ${DAP_APP_NAME}' to start ${DAP_APP_NAME} service"
- 
+-
 -    #USERMAN=`users | awk '{print $1}'`
 -    echo "[ ] Enabling logrotate"
++    systemctl enable ${DAP_PREFIX}/share/${DAP_APP_NAME}.service || true
 +    echo "[*] Enabling logrotate"
      ln -sf ${DAP_PREFIX}/share/logrotate/${DAP_APP_NAME} /etc/logrotate.d/${DAP_APP_NAME} || true
 -    adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
@@ -147,23 +146,26 @@ index 409c47d..a24e384 100755
 -    for username in $(cat /etc/passwd | grep "/home" | cut -d ':' -f1); do
 -        usermod -aG cellframe-node ${username} || true
 -    done
--    
--    mkdir -p ${DAP_PREFIX}/var/{run,lib/wallet,lib/global_db,var/lib/plugins} || true
 +
 +    mkdir -p ${DAP_PREFIX}/var/{run,lib/wallet,lib/global_db,lib/plugins} || true
-     touch ${DAP_PREFIX}/var/run/cellframe-node.pid || true
+     
+-    mkdir -p ${DAP_PREFIX}/var/{run,lib/wallet,lib/global_db,var/lib/plugins} || true
+-    touch ${DAP_PREFIX}/var/run/cellframe-node.pid || true
++    touch ${DAP_PREFIX}/var/run/${DAP_APP_NAME}.pid || true
      
      for filename in $(find ${DAP_PREFIX} | grep -v bugreport); do
-@@ -202,9 +186,8 @@ else
+         if [ -d ${filename} ]; then
+@@ -202,9 +183,8 @@ else
      #set python permissions    
      find ${DAP_PREFIX}/bin/python -type d -exec chmod 755 {} +
      chmod 774 ${DAP_PREFIX}/bin/python/bin/*
 -    
-+    chown -R cellframe-node: /opt/cellframe-node
- 
+-
 -    service cellframe-node start || true
 -    systemctl restart cellframe-node || true
-+    systemctl start cellframe-node || true
++    chown -R ${DAP_APP_NAME}: /opt/${DAP_APP_NAME}
++    echo "[*] Starting ${DAP_APP_NAME} service"
++    systemctl start ${DAP_APP_NAME} || true
      echo "[!] Done"
 -fi
 +fi
