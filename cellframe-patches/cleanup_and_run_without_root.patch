@@ -25,9 +25,10 @@ index 2003ba0..51f096d 100644
  
  [Install]
  WantedBy=multi-user.target
+Submodule prod_build contains modified content
 Submodule prod_build ba8db76..d8414df:
 diff --git a/prod_build/linux/debian/essentials/postinst b/prod_build/linux/debian/essentials/postinst
-index 409c47d..92e5ebb 100755
+index 409c47d..a24e384 100755
 --- a/prod_build/linux/debian/essentials/postinst
 +++ b/prod_build/linux/debian/essentials/postinst
 @@ -10,23 +10,6 @@ DAP_CFG_TPL="${DAP_PREFIX}/share/configs/${DAP_APP_NAME}.cfg.tpl"
@@ -54,48 +55,31 @@ index 409c47d..92e5ebb 100755
  [ -e "/etc/profile.d/${DAP_APP_NAME}.sh" ] || ln -sf ${DAP_PREFIX}/share/profile.d/${DAP_APP_NAME}.sh /etc/profile.d/${DAP_APP_NAME}.sh
  
  # Init node config
-@@ -69,10 +52,11 @@ if [ "${RET}" = "true" ]; then
+@@ -69,6 +52,7 @@ if [ "${RET}" = "true" ]; then
      DAP_CFG_NET="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
      DAP_CFG_NET_TPL="${DAP_PREFIX}/share/configs/network/${NET_NAME}.cfg.tpl"
      DAP_NET_CFG=""
 +    
      if [ -e "$DAP_CFG_NET" ]; then
--	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
-+	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
+ 	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
      else
--	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
-+	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
-     fi
- 
-     cat ${DAP_CFG_NET_TPL} > ${DAP_NET_CFG} || true
-@@ -90,10 +74,11 @@ if [ "$RET" = "true" ]; then
+@@ -90,6 +74,7 @@ if [ "$RET" = "true" ]; then
      DAP_CFG_NET="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
      DAP_CFG_NET_TPL="${DAP_PREFIX}/share/configs/network/${NET_NAME}.cfg.tpl"
      DAP_NET_CFG=""
 +    
      if [ -e "${DAP_CFG_NET}" ]; then
--	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
-+	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
+ 	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
      else
--	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
-+	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
-     fi
- 
-     cat ${DAP_CFG_NET_TPL} > ${DAP_NET_CFG} || true
-@@ -111,17 +96,18 @@ if [ "${RET}" = "true" ]; then
+@@ -111,6 +96,7 @@ if [ "${RET}" = "true" ]; then
      DAP_CFG_NET="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
      DAP_CFG_NET_TPL="${DAP_PREFIX}/share/configs/network/${NET_NAME}.cfg.tpl"
      DAP_NET_CFG=""
 +    
      if [ -e "$DAP_CFG_NET" ]; then
--	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
-+	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
+ 	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
      else
--	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
-+	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
-     fi
- 
-     cat ${DAP_CFG_NET_TPL} > ${DAP_NET_CFG} || true
+@@ -121,7 +107,7 @@ if [ "${RET}" = "true" ]; then
      db_get cellframe-node/kelvpn_minkowski_node_type || true
      NODE_TYPE=${RET}
      sed -i "s/{NODE_TYPE}/${NODE_TYPE}/g" ${DAP_NET_CFG}  || true
@@ -104,20 +88,14 @@ index 409c47d..92e5ebb 100755
  fi
  
  # Init Backbone
-@@ -132,10 +118,11 @@ if [ "${RET}" = "true" ]; then
+@@ -132,6 +118,7 @@ if [ "${RET}" = "true" ]; then
      DAP_CFG_NET="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
      DAP_CFG_NET_TPL="${DAP_PREFIX}/share/configs/network/${NET_NAME}.cfg.tpl"
      DAP_NET_CFG=""
 +    
      if [ -e "${DAP_CFG_NET}" ]; then
--	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
-+	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
+ 	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
      else
--	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
-+	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
-     fi
- 
-     cat ${DAP_CFG_NET_TPL} > ${DAP_NET_CFG} || true
 @@ -145,9 +132,6 @@ if [ "${RET}" = "true" ]; then
      echo "[*] Enabled Backbone"
  fi
