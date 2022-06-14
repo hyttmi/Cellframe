@@ -1,0 +1,192 @@
+diff --git a/dist.linux/share/cellframe-node.service b/dist.linux/share/cellframe-node.service
+index 2003ba0..51f096d 100644
+--- a/dist.linux/share/cellframe-node.service
++++ b/dist.linux/share/cellframe-node.service
+@@ -3,20 +3,13 @@ Description=Cellframe Node
+ After=network.target
+ 
+ [Service]
+-#Type=forking
+-#OOMScoreAdjust=-1000
+-#PIDFile=/opt/cellframe-node/var/run/cellframe-node.pid
+ WorkingDirectory=/opt/cellframe-node
+ ExecStart=/opt/cellframe-node/bin/cellframe-node &
+-#ExecStop=/opt/cellframe-node/bin/cellframe-node --stop
+ ExecStop=/bin/kill -SIGTERM $MAINPID
+ Restart=always
+-#User=cellframe-node
+-#Group=cellframe-node
+-User=root
+-Group=root
++User=cellframe-node
++Group=cellframe-node
+ RestartSec=10
+-CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_IPC_LOCK CAP_KILL CAP_LEASE CAP_MKNOD CAP_NET_ADMIN CAP_NET_BROADCAST CAP_NET_RAW CAP_SYS_NICE CAP_SYS_RAWIO CAP_SYSLOG CAP_WAKE_ALARM CAP_SYS_RESOURCE CAP_DAC_READ_SEARCH
+ 
+ [Install]
+ WantedBy=multi-user.target
+Submodule prod_build ba8db76..d8414df:
+diff --git a/prod_build/linux/debian/essentials/postinst b/prod_build/linux/debian/essentials/postinst
+index 409c47d..92e5ebb 100755
+--- a/prod_build/linux/debian/essentials/postinst
++++ b/prod_build/linux/debian/essentials/postinst
+@@ -10,23 +10,6 @@ DAP_CFG_TPL="${DAP_PREFIX}/share/configs/${DAP_APP_NAME}.cfg.tpl"
+ # Store write config to new if present smth
+ DAP_CFG="${DAP_PREFIX}/etc/${DAP_APP_NAME}.cfg"
+ 
+-#fixed link with python library
+-#BUILD_PYTHON_VERSION=/usr/lib/x86_64-linux-gnu/libpython3.5m.so.1.0
+-
+-#[ -h $BUILD_PYTHON_VERSION ] && rm $BUILD_PYTHON_VERSION
+-#STANDART_PYTHON_LIB=$(ls /usr/lib/x86_64-linux-gnu | grep "libpython3.*.so.1.0" | cut -d" " -f1 | head -n1)
+-#[ -e $BUILD_PYTHON_VERSION ] || ln -sf /usr/lib/x86_64-linux-gnu/$STANDART_PYTHON_LIB /usr/lib/x86_64-linux-gnu/libpython3.5m.so.1.0
+-
+-
+-#unpack PYTHON_ENV
+-#if [[ -e /opt/cellframe-node/share/cpython.tar.xz ]]; then 
+-#    rm -rf /opt/cellframe-node/etc/lib /opt/cellframe-node/etc/bin /opt/cellframe-node/var/python || true
+-#    mkdir -p /opt/cellframe-node/var || true
+-#    tar -C /opt/cellframe-node -xf /opt/cellframe-node/share/cpython.tar.xz || true
+-#    rm /opt/cellframe-node/share/cpython.tar.xz || true
+-#fi
+-# Check profile.d symlink
+-
+ [ -e "/etc/profile.d/${DAP_APP_NAME}.sh" ] || ln -sf ${DAP_PREFIX}/share/profile.d/${DAP_APP_NAME}.sh /etc/profile.d/${DAP_APP_NAME}.sh
+ 
+ # Init node config
+@@ -69,10 +52,11 @@ if [ "${RET}" = "true" ]; then
+     DAP_CFG_NET="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
+     DAP_CFG_NET_TPL="${DAP_PREFIX}/share/configs/network/${NET_NAME}.cfg.tpl"
+     DAP_NET_CFG=""
++    
+     if [ -e "$DAP_CFG_NET" ]; then
+-	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
++	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
+     else
+-	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
++	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
+     fi
+ 
+     cat ${DAP_CFG_NET_TPL} > ${DAP_NET_CFG} || true
+@@ -90,10 +74,11 @@ if [ "$RET" = "true" ]; then
+     DAP_CFG_NET="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
+     DAP_CFG_NET_TPL="${DAP_PREFIX}/share/configs/network/${NET_NAME}.cfg.tpl"
+     DAP_NET_CFG=""
++    
+     if [ -e "${DAP_CFG_NET}" ]; then
+-	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
++	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
+     else
+-	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
++	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
+     fi
+ 
+     cat ${DAP_CFG_NET_TPL} > ${DAP_NET_CFG} || true
+@@ -111,17 +96,18 @@ if [ "${RET}" = "true" ]; then
+     DAP_CFG_NET="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
+     DAP_CFG_NET_TPL="${DAP_PREFIX}/share/configs/network/${NET_NAME}.cfg.tpl"
+     DAP_NET_CFG=""
++    
+     if [ -e "$DAP_CFG_NET" ]; then
+-	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
++	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
+     else
+-	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
++	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
+     fi
+ 
+     cat ${DAP_CFG_NET_TPL} > ${DAP_NET_CFG} || true
+     db_get cellframe-node/kelvpn_minkowski_node_type || true
+     NODE_TYPE=${RET}
+     sed -i "s/{NODE_TYPE}/${NODE_TYPE}/g" ${DAP_NET_CFG}  || true
+-    echo "[*] Enabled subzero"
++    echo "[*] Enabled kelvpn-minkowski"
+ fi
+ 
+ # Init Backbone
+@@ -132,10 +118,11 @@ if [ "${RET}" = "true" ]; then
+     DAP_CFG_NET="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
+     DAP_CFG_NET_TPL="${DAP_PREFIX}/share/configs/network/${NET_NAME}.cfg.tpl"
+     DAP_NET_CFG=""
++    
+     if [ -e "${DAP_CFG_NET}" ]; then
+-	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
++	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg.dpkg-new"
+     else
+-	DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
++	    DAP_NET_CFG="${DAP_PREFIX}/etc/network/${NET_NAME}.cfg"
+     fi
+ 
+     cat ${DAP_CFG_NET_TPL} > ${DAP_NET_CFG} || true
+@@ -145,9 +132,6 @@ if [ "${RET}" = "true" ]; then
+     echo "[*] Enabled Backbone"
+ fi
+ 
+-mkdir -p ${DAP_PREFIX}/var/log     || true
+-mkdir -p ${DAP_PREFIX}/var/plugins || true
+-
+ #Set up Python plugins
+ db_get cellframe-node/enable_python_plugins || true
+ if [ "${RET}" = "true" ]; then
+@@ -158,33 +142,33 @@ if [ "${RET}" = "true" ]; then
+     echo "[*] Enabled Python plugins"
+ fi
+ 
+-cat /etc/passwd| grep cellframe-node || adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
++if [ $(cat /etc/passwd | grep cellframe-node) ] ; then
++    echo "[*] Modifying user default shell"
++    usermod cellframe-node -s /bin/false || true # Let's change the default shell just in case
++else
++    echo "[*] Add user cellframe-node"
++    adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node --shell /bin/false || true
++fi
+ 
+ echo "[*] Check /etc/systemd/system/${DAP_APP_NAME}.service file..."
+ if [ -e /etc/systemd/system/${DAP_APP_NAME}.service ]; then
+     echo "[*] Restarting ${DAP_APP_NAME} to implement changes"
+-    systemctl --system stop ${DAP_APP_NAME}  >> /dev/null|| true
++    systemctl stop ${DAP_APP_NAME}  >> /dev/null || true
+     echo "[*] Stopped ${DAP_APP_NAME}"
+     systemctl daemon-reload || true
+-    systemctl --system start ${DAP_APP_NAME} || true
++    systemctl start ${DAP_APP_NAME} || true
+     echo "[*] Started ${DAP_APP_NAME}"
+ else
+     echo "[!] Installing ${DAP_APP_NAME} as systemd service (haven't found /etc/systemd/system/${DAP_APP_NAME}.service)"
+     ln -sf $DAP_PREFIX/share/${DAP_APP_NAME}.service /etc/systemd/system/${DAP_APP_NAME}.service || true
+-    systemctl --system enable ${DAP_PREFIX}/share/${DAP_APP_NAME}.service || true
++    systemctl enable ${DAP_PREFIX}/share/${DAP_APP_NAME}.service || true
+ 
+-    echo "[ ] Execute 'systemctl start ${DAP_APP_NAME}' to start ${DAP_APP_NAME} service"
++    echo "[*] Execute 'systemctl start ${DAP_APP_NAME}' to start ${DAP_APP_NAME} service"
+ 
+-    #USERMAN=`users | awk '{print $1}'`
+-    echo "[ ] Enabling logrotate"
++    echo "[*] Enabling logrotate"
+     ln -sf ${DAP_PREFIX}/share/logrotate/${DAP_APP_NAME} /etc/logrotate.d/${DAP_APP_NAME} || true
+-    adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
+-    
+-    for username in $(cat /etc/passwd | grep "/home" | cut -d ':' -f1); do
+-        usermod -aG cellframe-node ${username} || true
+-    done
+-    
+-    mkdir -p ${DAP_PREFIX}/var/{run,lib/wallet,lib/global_db,var/lib/plugins} || true
++
++    mkdir -p ${DAP_PREFIX}/var/{run,lib/wallet,lib/global_db,lib/plugins} || true
+     touch ${DAP_PREFIX}/var/run/cellframe-node.pid || true
+     
+     for filename in $(find ${DAP_PREFIX} | grep -v bugreport); do
+@@ -202,9 +186,8 @@ else
+     #set python permissions    
+     find ${DAP_PREFIX}/bin/python -type d -exec chmod 755 {} +
+     chmod 774 ${DAP_PREFIX}/bin/python/bin/*
+-    
++    chown -R cellframe-node: /opt/cellframe-node
+ 
+-    service cellframe-node start || true
+-    systemctl restart cellframe-node || true
++    systemctl start cellframe-node || true
+     echo "[!] Done"
+-fi
++fi
+\ No newline at end of file
