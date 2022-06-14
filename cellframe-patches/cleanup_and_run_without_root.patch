@@ -28,7 +28,7 @@ index 2003ba0..51f096d 100644
 Submodule prod_build contains modified content
 Submodule prod_build ba8db76..d8414df:
 diff --git a/prod_build/linux/debian/essentials/postinst b/prod_build/linux/debian/essentials/postinst
-index 409c47d..02bfcee 100755
+index 409c47d..c67b882 100755
 --- a/prod_build/linux/debian/essentials/postinst
 +++ b/prod_build/linux/debian/essentials/postinst
 @@ -10,23 +10,6 @@ DAP_CFG_TPL="${DAP_PREFIX}/share/configs/${DAP_APP_NAME}.cfg.tpl"
@@ -163,7 +163,7 @@ index 409c47d..02bfcee 100755
 -
 -    service cellframe-node start || true
 -    systemctl restart cellframe-node || true
-+    chown -R ${DAP_APP_NAME}: /opt/${DAP_APP_NAME}
++    chown -R ${DAP_APP_NAME}: ${DAP_PREFIX}
 +    echo "[*] Starting ${DAP_APP_NAME} service"
 +    systemctl start ${DAP_APP_NAME} || true
      echo "[!] Done"
