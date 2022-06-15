@@ -28,7 +28,7 @@ index 2003ba0..51f096d 100644
 Submodule prod_build contains modified content
 Submodule prod_build ba8db76..d8414df:
 diff --git a/prod_build/linux/debian/essentials/postinst b/prod_build/linux/debian/essentials/postinst
-index 409c47d..c67b882 100755
+index 409c47d..98456ce 100755
 --- a/prod_build/linux/debian/essentials/postinst
 +++ b/prod_build/linux/debian/essentials/postinst
 @@ -10,23 +10,6 @@ DAP_CFG_TPL="${DAP_PREFIX}/share/configs/${DAP_APP_NAME}.cfg.tpl"
@@ -147,7 +147,7 @@ index 409c47d..c67b882 100755
 -        usermod -aG cellframe-node ${username} || true
 -    done
 +
-+    mkdir -p ${DAP_PREFIX}/var/{run,lib/wallet,lib/global_db,lib/plugins} || true
++    mkdir -p ${DAP_PREFIX}/var/{run,lib/wallet,lib/global_db,lib/plugins,log} || true
      
 -    mkdir -p ${DAP_PREFIX}/var/{run,lib/wallet,lib/global_db,var/lib/plugins} || true
 -    touch ${DAP_PREFIX}/var/run/cellframe-node.pid || true
