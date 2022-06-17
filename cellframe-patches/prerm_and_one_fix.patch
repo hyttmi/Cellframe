@@ -13,10 +13,10 @@ index 6a22109..d9fd7e6 100644
      elseif(DARWIN)
 Submodule prod_build contains modified content
 diff --git a/prod_build/packaging/deb/postinst b/prod_build/packaging/deb/postinst
-index 0eb6292..3fbe621 100755
+index 0eb6292..e8a0617 100755
 --- a/prod_build/packaging/deb/postinst
 +++ b/prod_build/packaging/deb/postinst
-@@ -182,7 +182,7 @@ else
+@@ -182,9 +182,11 @@ else
  
      #set python permissions    
      find ${DAP_PREFIX}/bin/python -type d -exec chmod 755 {} +
@@ -25,6 +25,11 @@ index 0eb6292..3fbe621 100755
      chown -R ${DAP_APP_NAME}: ${DAP_PREFIX}
      echo "[*] Starting ${DAP_APP_NAME} service"
      systemctl start ${DAP_APP_NAME} || true
+     echo "[!] Done"
+ fi
++
++exit 0
+\ No newline at end of file
 diff --git a/prod_build/packaging/deb/postrm b/prod_build/packaging/deb/postrm
 index b6cd2eb..0b9bfd6 100755
 --- a/prod_build/packaging/deb/postrm
