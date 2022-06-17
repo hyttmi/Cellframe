@@ -48,15 +48,17 @@ index b6cd2eb..0b9bfd6 100755
  #  gpasswd -d $username $GROUP_RM || true
 diff --git a/prod_build/packaging/deb/prerm b/prod_build/packaging/deb/prerm
 new file mode 100755
-index 0000000..f3fbfa2
+index 0000000..09fd3c5
 --- /dev/null
 +++ b/prod_build/packaging/deb/prerm
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,29 @@
 +#!/bin/bash -e
 +
 +case "$1" in
 +	remove|purge|abort-install|abort-upgrade)
++		echo "[*] Stopping cellframe-node.service"
 +		systemctl stop cellframe-node
++		echo "[*] Disabling cellframe-node.service"
 +        systemctl disable cellframe-node
 +		;;
 +    
@@ -64,10 +66,12 @@ index 0000000..f3fbfa2
 +		;;
 +
 +	upgrade)
++		echo "[*] Stopping cellframe-node.service"
 +        systemctl stop cellframe-node
 +		;;
 +
 +	failed-upgrade)
++		echo "[*] Stopping cellframe-node.service"
 +        systemctl stop cellframe-node
 +        ;;
 +
