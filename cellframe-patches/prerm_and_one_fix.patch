@@ -1,0 +1,74 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6a22109..d9fd7e6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -137,7 +137,7 @@ if(UNIX)
+     message("[*] Debian package setup pkgarch=${CPACK_DEBIAN_PACKAGE_ARCHITECTURE} version=${CPACK_PACKAGE_VERSION}")
+ 
+     SET( CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+-    "${CMAKE_CURRENT_SOURCE_DIR}/debian/postinst;${CMAKE_CURRENT_SOURCE_DIR}/debian/postrm;${CMAKE_CURRENT_SOURCE_DIR}/debian/templates;${CMAKE_CURRENT_SOURCE_DIR}/debian/config;")
++    "${CMAKE_CURRENT_SOURCE_DIR}/debian/postinst;${CMAKE_CURRENT_SOURCE_DIR}/debian/prerm;${CMAKE_CURRENT_SOURCE_DIR}/debian/postrm;${CMAKE_CURRENT_SOURCE_DIR}/debian/templates;${CMAKE_CURRENT_SOURCE_DIR}/debian/config;")
+     elseif(BSD)
+         message("[*] BSD family system ${CMAKE_SYSTEM} ")
+     elseif(DARWIN)
+Submodule prod_build contains modified content
+diff --git a/prod_build/packaging/deb/postinst b/prod_build/packaging/deb/postinst
+index 0eb6292..3fbe621 100755
+--- a/prod_build/packaging/deb/postinst
++++ b/prod_build/packaging/deb/postinst
+@@ -182,7 +182,7 @@ else
+ 
+     #set python permissions    
+     find ${DAP_PREFIX}/bin/python -type d -exec chmod 755 {} +
+-    chmod 774 ${DAP_PREFIX}/bin/python/bin/*
++    chmod 774 ${DAP_PREFIX}/bin/python/bin/* || true
+     chown -R ${DAP_APP_NAME}: ${DAP_PREFIX}
+     echo "[*] Starting ${DAP_APP_NAME} service"
+     systemctl start ${DAP_APP_NAME} || true
+diff --git a/prod_build/packaging/deb/postrm b/prod_build/packaging/deb/postrm
+index b6cd2eb..0b9bfd6 100755
+--- a/prod_build/packaging/deb/postrm
++++ b/prod_build/packaging/deb/postrm
+@@ -3,10 +3,8 @@ if [ "$1" == "purge" ] && [ -e /usr/share/debconf/confmodule ] ; then
+ . /usr/share/debconf/confmodule
+ db_purge
+ fi
+-GROUP_RM="cellframe-node"
+ 
+-systemctl stop cellframe-node || true
+-systemctl disable cellframe-node || true
++#GROUP_RM="cellframe-node"
+ 
+ #for username in `cat /etc/passwd | grep "/home" | cut -d ':' -f1`; do
+ #  gpasswd -d $username $GROUP_RM || true
+diff --git a/prod_build/packaging/deb/prerm b/prod_build/packaging/deb/prerm
+new file mode 100755
+index 0000000..f3fbfa2
+--- /dev/null
++++ b/prod_build/packaging/deb/prerm
+@@ -0,0 +1,25 @@
++#!/bin/bash -e
++
++case "$1" in
++	remove|purge|abort-install|abort-upgrade)
++		systemctl stop cellframe-node
++        systemctl disable cellframe-node
++		;;
++    
++	disappear)
++		;;
++
++	upgrade)
++        systemctl stop cellframe-node
++		;;
++
++	failed-upgrade)
++        systemctl stop cellframe-node
++        ;;
++
++	*) 
++        echo "$0: didn't understand being called with \`$1'" 1>&2
++	    exit 1;;
++esac
++
++exit 0
