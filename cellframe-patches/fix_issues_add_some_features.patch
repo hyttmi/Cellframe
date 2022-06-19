@@ -1,0 +1,148 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6a22109..751e9c0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -137,7 +137,7 @@ if(UNIX)
+     message("[*] Debian package setup pkgarch=${CPACK_DEBIAN_PACKAGE_ARCHITECTURE} version=${CPACK_PACKAGE_VERSION}")
+ 
+     SET( CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+-    "${CMAKE_CURRENT_SOURCE_DIR}/debian/postinst;${CMAKE_CURRENT_SOURCE_DIR}/debian/postrm;${CMAKE_CURRENT_SOURCE_DIR}/debian/templates;${CMAKE_CURRENT_SOURCE_DIR}/debian/config;")
++    "${CMAKE_CURRENT_SOURCE_DIR}/debian/postinst;${CMAKE_CURRENT_SOURCE_DIR}/debian/prerm;${CMAKE_CURRENT_SOURCE_DIR}/debian/postrm;${CMAKE_CURRENT_SOURCE_DIR}/debian/templates;${CMAKE_CURRENT_SOURCE_DIR}/debian/config;")
+     elseif(BSD)
+         message("[*] BSD family system ${CMAKE_SYSTEM} ")
+     elseif(DARWIN)
+@@ -477,7 +477,7 @@ else()
+ 	    INSTALL(TARGETS ${NODE_TOOL_TARGET} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
+ 
+         if (SUPPORT_PYTHON_PLUGINS AND NOT BUILD_WITH_SYSTEM_PYTHON) #install python environment if not system python in use
+-            INSTALL(DIRECTORY ${PYTHON_PREFIX} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/python USE_SOURCE_PERMISSIONS)
++            INSTALL(DIRECTORY ${PYTHON_PREFIX} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin USE_SOURCE_PERMISSIONS)
+         endif()
+     endif()
+ 
+diff --git a/dist.linux/share/cellframe-node.service b/dist.linux/share/cellframe-node.service
+index 51f096d..9b44ebb 100644
+--- a/dist.linux/share/cellframe-node.service
++++ b/dist.linux/share/cellframe-node.service
+@@ -1,6 +1,7 @@
+ [Unit]
+ Description=Cellframe Node
+ After=network.target
++Wants=network-online.target
+ 
+ [Service]
+ WorkingDirectory=/opt/cellframe-node
+Submodule prod_build contains modified content
+diff --git a/prod_build/packaging/deb/postinst b/prod_build/packaging/deb/postinst
+index 0eb6292..e8a0617 100755
+--- a/prod_build/packaging/deb/postinst
++++ b/prod_build/packaging/deb/postinst
+@@ -182,9 +182,11 @@ else
+ 
+     #set python permissions    
+     find ${DAP_PREFIX}/bin/python -type d -exec chmod 755 {} +
+-    chmod 774 ${DAP_PREFIX}/bin/python/bin/*
++    chmod 774 ${DAP_PREFIX}/bin/python/bin/* || true
+     chown -R ${DAP_APP_NAME}: ${DAP_PREFIX}
+     echo "[*] Starting ${DAP_APP_NAME} service"
+     systemctl start ${DAP_APP_NAME} || true
+     echo "[!] Done"
+ fi
++
++exit 0
+\ No newline at end of file
+diff --git a/prod_build/packaging/deb/postrm b/prod_build/packaging/deb/postrm
+index b6cd2eb..bb103d1 100755
+--- a/prod_build/packaging/deb/postrm
++++ b/prod_build/packaging/deb/postrm
+@@ -1,17 +1,40 @@
+-#! /bin/bash -e
+-if [ "$1" == "purge" ] && [ -e /usr/share/debconf/confmodule ] ; then
+-. /usr/share/debconf/confmodule
+-db_purge
+-fi
+-GROUP_RM="cellframe-node"
++#!/bin/bash -e
+ 
+-systemctl stop cellframe-node || true
+-systemctl disable cellframe-node || true
++PRODUCT_NAME="cellframe-node"
++PRODUCT_PATH="/opt/${PRODUCT_NAME}"
++GDB_PATH=`cat ${PRODUCT_PATH}/etc/${PRODUCT_NAME}.cfg | grep -oP "^dap_global_db_path=\K.*"`
++CONFFILES="${PRODUCT_PATH}/etc/"
+ 
+-#for username in `cat /etc/passwd | grep "/home" | cut -d ':' -f1`; do
+-#  gpasswd -d $username $GROUP_RM || true
+-#done
+-#rm -r /opt/cellframe-node || true
+-#groupdel cellframe-node || true
+-#userdel cellframe-node || true
+ 
++case "$1" in
++    purge)
++    # Purge database
++    if [ -e /usr/share/debconf/confmodule ] ; then
++        . /usr/share/debconf/confmodule
++        db_purge
++    fi
++    # Remove user and group
++    echo "[*] Removing user cellframe-node"
++    userdel ${PRODUCT_NAME} > /dev/null || true
++    echo "[*] Removing group cellframe-node"
++    groupdel ${PRODUCT_NAME} > /dev/null || true
++
++    # Remove configuration file, logs and at least gdb path for now on purge
++    echo "[*] Removing configuration files for ${PRODUCT_NAME}"
++    rm -rf ${CONFFILES} || true
++    echo "[*] Removing log files for ${PRODUCT_NAME}"
++    rm -rf ${PRODUCT_PATH}/var/log || true
++    echo "[*] Removing databases for ${PRODUCT_NAME}"
++    rm -rf ${GDB_PATH} || true
++    ;;
++
++    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
++    ;;
++
++    *)
++        echo "postrm called with unknown argument \`$1'" >&2
++        exit 1
++    ;;
++esac
++
++exit 0
+\ No newline at end of file
+diff --git a/prod_build/packaging/deb/prerm b/prod_build/packaging/deb/prerm
+new file mode 100755
+index 0000000..de856f8
+--- /dev/null
++++ b/prod_build/packaging/deb/prerm
+@@ -0,0 +1,29 @@
++#!/bin/bash -e
++
++case "$1" in
++	remove|purge|abort-install|abort-upgrade)
++		echo "[*] Stopping cellframe-node.service"
++		systemctl stop cellframe-node
++		echo "[*] Disabling cellframe-node.service"
++		systemctl disable cellframe-node
++		;;
++
++	disappear)
++		;;
++
++	upgrade)
++		echo "[*] Stopping cellframe-node.service"
++        systemctl stop cellframe-node
++		;;
++
++	failed-upgrade)
++		echo "[*] Stopping cellframe-node.service"
++        systemctl stop cellframe-node
++        ;;
++
++	*)
++	    echo "prerm called with unknown argument \`$1'" >&2
++		exit 1;;
++esac
++
++exit 0
