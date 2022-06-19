@@ -20,18 +20,6 @@ index 6a22109..751e9c0 100644
          endif()
      endif()
  
-diff --git a/dist.linux/share/cellframe-node.service b/dist.linux/share/cellframe-node.service
-index 51f096d..9b44ebb 100644
---- a/dist.linux/share/cellframe-node.service
-+++ b/dist.linux/share/cellframe-node.service
-@@ -1,6 +1,7 @@
- [Unit]
- Description=Cellframe Node
- After=network.target
-+Wants=network-online.target
- 
- [Service]
- WorkingDirectory=/opt/cellframe-node
 Submodule prod_build contains modified content
 diff --git a/prod_build/packaging/deb/postinst b/prod_build/packaging/deb/postinst
 index 0eb6292..e8a0617 100755
