@@ -23,8 +23,6 @@ ARG SUBZERO_NODE_TYPE="full"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG ARCH=amd64
-
 ARG RUN_DEPS="libsqlite3-0 libjson-c5 libmagic1 inetutils-traceroute libpython3.9 wget debconf-utils curl dconf-cli less pv psmisc logrotate irqbalance xz-utils ca-certificates"
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y install ${RUN_DEPS}
@@ -49,6 +47,13 @@ RUN echo "cellframe-node cellframe-node/mileena_enabled	select ${MILEENA_ENABLED
 
 RUN cd /tmp \
     && NODE_VERSION=`curl -v --silent https://pub.cellframe.net/linux/ 2>&1 | grep -oP ">cellframe-node-\K5.1.[0-9]{3}" | sort | tail -n1` \
+    && ARCH=`dpkg --print-architecture` \
+    && case "${ARCH}" in \
+      amd64) ARCH='amd64';; \
+      arm64) ARCH='arm64';; \
+      armhf) ARCH='armhf';; \
+      *) echo "Unsupported architecture, exiting..."; exit 1 ;; \
+    esac \
     && wget https://pub.cellframe.net/linux/cellframe-node-${NODE_VERSION}-${ARCH}.deb \
     && dpkg -i cellframe-node-${NODE_VERSION}-${ARCH}.deb
 

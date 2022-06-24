@@ -26,8 +26,6 @@ ARG MINKOWSKI_NODE_TYPE="full"
 ARG SUBZERO_ENABLED="true"
 ARG SUBZERO_NODE_TYPE="full"
 
-# Architecture
-ARG ARCH="amd64"
 ```
 
 These args are passed to debconf-set-selections before node installation.
@@ -38,12 +36,6 @@ These args are passed to debconf-set-selections before node installation.
 
     ```sh
     docker build -t <name> .
-    ```
-
-    ❗️ If you are on a **Mac with Apple Silicon**, execute the following command instead:
-
-     ```sh
-    docker build -t <name> --build-arg ARCH=arm64 .
     ```
 
 2. Then create a volume with:
