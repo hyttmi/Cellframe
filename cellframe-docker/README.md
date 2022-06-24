@@ -1,6 +1,6 @@
 # Dockerfile for building your own Docker image
 
-With this Dockerfile you can build your own Cellframe node docker image.
+With this Dockerfile you can build your own Cellframe node docker image from the latest node version available.
 
 Docker file has a few ARGs which can be changed:
 
@@ -25,9 +25,6 @@ ARG MINKOWSKI_ENABLED="true"
 ARG MINKOWSKI_NODE_TYPE="full"
 ARG SUBZERO_ENABLED="true"
 ARG SUBZERO_NODE_TYPE="full"
-
-# Node version
-ARG NODE_VERSION="5.1-153"
 
 # Architecture
 ARG ARCH="amd64"
