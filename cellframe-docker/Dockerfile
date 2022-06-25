@@ -23,7 +23,7 @@ ARG SUBZERO_NODE_TYPE="full"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG RUN_DEPS="libsqlite3-0 libjson-c5 libmagic1 inetutils-traceroute libpython3.9 wget debconf-utils curl dconf-cli less pv psmisc logrotate irqbalance xz-utils ca-certificates"
+ARG RUN_DEPS="libsqlite3-0 libjson-c5 libmagic1 inetutils-traceroute libpython3.9 debconf-utils curl dconf-cli less pv psmisc logrotate irqbalance xz-utils ca-certificates"
 
 RUN apt-get update && apt-get -y dist-upgrade && apt-get -y install ${RUN_DEPS}
 
@@ -54,14 +54,14 @@ RUN cd /tmp \
       armhf) ARCH='armhf';; \
       *) echo "Unsupported architecture, exiting..."; exit 1 ;; \
     esac \
-    && wget https://pub.cellframe.net/linux/cellframe-node-${NODE_VERSION}-${ARCH}.deb \
+    && curl -O https://pub.cellframe.net/linux/cellframe-node-${NODE_VERSION}-${ARCH}.deb \
     && dpkg -i cellframe-node-${NODE_VERSION}-${ARCH}.deb
 
 RUN apt-get -y autoremove --purge && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir -p /home/cellframe/gdb
-RUN mkdir -p /home/cellframe/wallet
-RUN mkdir -p /home/cellframe/plugins
+RUN mkdir -p /home/cellframe/gdb \
+&& mkdir -p /home/cellframe/wallet \
+&& mkdir -p /home/cellframe/plugins
 
 # We need to create a volume, otherwise the downloaded databases would be lost. 
 VOLUME [ "/home/cellframe" ]
