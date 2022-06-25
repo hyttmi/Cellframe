@@ -1,0 +1,57 @@
+Submodule prod_build contains modified content
+diff --git a/prod_build/packaging/deb/postinst b/prod_build/packaging/deb/postinst
+index 23bbc98..aa9f7a0 100755
+--- a/prod_build/packaging/deb/postinst
++++ b/prod_build/packaging/deb/postinst
+@@ -176,7 +176,7 @@ else
+ 
+     chmod 0666 ${DAP_CFG}
+     chmod 0666 ${DAP_CFG_TPL}
+-    chmod 0774 ${DAP_PREFIX}/bin/* || true
++    chmod 0775 ${DAP_PREFIX}/bin/* || true
+ 
+     #set python permissions    
+     find ${DAP_PREFIX}/bin/python -type d -exec chmod 755 {} +
+diff --git a/prod_build/packaging/deb/postrm b/prod_build/packaging/deb/postrm
+index bb103d1..dba6179 100755
+--- a/prod_build/packaging/deb/postrm
++++ b/prod_build/packaging/deb/postrm
+@@ -1,9 +1,11 @@
+ #!/bin/bash -e
+ 
+-PRODUCT_NAME="cellframe-node"
+-PRODUCT_PATH="/opt/${PRODUCT_NAME}"
+-GDB_PATH=`cat ${PRODUCT_PATH}/etc/${PRODUCT_NAME}.cfg | grep -oP "^dap_global_db_path=\K.*"`
+-CONFFILES="${PRODUCT_PATH}/etc/"
++DAP_CHAINS_NAME="cellframe"
++DAP_APP_NAME="${DAP_CHAINS_NAME}-node"
++DAP_PREFIX="/opt/${DAP_APP_NAME}"
++
++GDB_PATH=`cat ${DAP_PREFIX}/etc/${DAP_APP_NAME}.cfg | grep -oP "^dap_global_db_path=\K.*"`
++CONFFILES="${DAP_PREFIX}/etc/"
+ 
+ 
+ case "$1" in
+@@ -15,16 +17,16 @@ case "$1" in
+     fi
+     # Remove user and group
+     echo "[*] Removing user cellframe-node"
+-    userdel ${PRODUCT_NAME} > /dev/null || true
++    userdel ${DAP_APP_NAME} > /dev/null || true
+     echo "[*] Removing group cellframe-node"
+-    groupdel ${PRODUCT_NAME} > /dev/null || true
++    groupdel ${DAP_APP_NAME} > /dev/null || true
+ 
+     # Remove configuration file, logs and at least gdb path for now on purge
+-    echo "[*] Removing configuration files for ${PRODUCT_NAME}"
++    echo "[*] Removing configuration files for ${DAP_APP_NAME}"
+     rm -rf ${CONFFILES} || true
+-    echo "[*] Removing log files for ${PRODUCT_NAME}"
+-    rm -rf ${PRODUCT_PATH}/var/log || true
+-    echo "[*] Removing databases for ${PRODUCT_NAME}"
++    echo "[*] Removing log files for ${DAP_APP_NAME}"
++    rm -rf ${DAP_PREFIX}/var/log || true
++    echo "[*] Removing databases for ${DAP_APP_NAME}"
+     rm -rf ${GDB_PATH} || true
+     ;;
+ 
