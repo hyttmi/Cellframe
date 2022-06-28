@@ -1,9 +1,6 @@
 #!/usr/bin/python3
-
-from calendar import c
 import socket
 import sys
-import time 
 
 socket_path = "/opt/cellframe-node/var/run/node_cli"
 
