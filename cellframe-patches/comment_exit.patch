@@ -1,0 +1,19 @@
+Submodule cellframe-sdk contains modified content
+diff --git a/cellframe-sdk/modules/net/dap_chain_node_cli_cmd.c b/cellframe-sdk/modules/net/dap_chain_node_cli_cmd.c
+index bb667d1d..0e134861 100644
+--- a/cellframe-sdk/modules/net/dap_chain_node_cli_cmd.c
++++ b/cellframe-sdk/modules/net/dap_chain_node_cli_cmd.c
+@@ -4418,11 +4418,12 @@ int com_stats(int argc, char ** argv, char **str_reply)
+  */
+ int com_exit(int argc, char ** argv, char **str_reply)
+ {
++    dap_chain_node_cli_set_reply_text(str_reply, "Exiting...");
+     UNUSED(argc);
+     UNUSED(argv);
+     UNUSED(str_reply);
+     //dap_events_stop_all();
+-    exit(0);
++    //exit(0);
+     return 0;
+ }
+ 
