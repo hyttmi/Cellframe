@@ -29,3 +29,4 @@ while command != "exit":
     reply = reply[4:]
     for replies in reply:
         print(replies)
+s.close()
