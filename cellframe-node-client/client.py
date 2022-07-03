@@ -29,6 +29,6 @@ if command != "exit":
     reply = reply[4:]
     for replies in reply:
         print(replies)
-    s.shutdown(1)
+    s.shutdown(socket.SHUT_RDWR)
     s.close()
     sys.exit() # Exit this client because Node has a bug somewhere in socket connection and sending multiple commands won't work.
