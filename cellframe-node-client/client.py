@@ -24,4 +24,3 @@ while True:
         print(replies)
     s.shutdown(socket.SHUT_RDWR)
     s.close()
-    # Exit this client because Node has a bug somewhere in socket connection and sending multiple commands won't work.
