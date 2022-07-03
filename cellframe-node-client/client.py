@@ -17,6 +17,7 @@ s.connect(socket_path)
 command = input("> ")
 if command != "exit":    
     length = str(len(command))
+    command = command.replace(" ", "\r\n")
     post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
     post = bytes(post,"utf-8")
 
