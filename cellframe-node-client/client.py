@@ -14,9 +14,8 @@ except socket.error:
 print("Connecting to server, " + socket_path)
 s.connect(socket_path)
 
-command = ""
-while command != "exit":
-    command = input("> ")
+command = input("> ")
+if command != "exit":    
     length = str(len(command))
     post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
     post = bytes(post,"utf-8")
