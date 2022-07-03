@@ -29,4 +29,6 @@ while command != "exit":
     reply = reply[4:]
     for replies in reply:
         print(replies)
-s.close()
+    s.shutdown(1)
+    s.close()
+    sys.exit() # Exit this client because Node has a bug somewhere in socket connection and sending multiple commands won't work.
