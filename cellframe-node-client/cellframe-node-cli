@@ -14,14 +14,18 @@ while True:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     else:   
         s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    try:
-        if args.ip and args.port:
+    if args.ip and args.port:
+        try:
             s.connect((args.ip, args.port))
-        else:
+        except:
+            print("Couldn't connect to socket, is it forwarded?")
+            sys.exit()
+    else:
+        try:
             s.connect(socket_path)
-    except:
-        print("Couldn't connect to socket!")
-        sys.exit()
+        except:
+            print("Couldn't connect to socket! Node is running?")
+            sys.exit()
     command = input("> ")
     if command == "exit":
         break
