@@ -1,0 +1,34 @@
+diff --git a/sources/main_node_cli.c b/sources/main_node_cli.c
+index 102a426..81905c0 100644
+--- a/sources/main_node_cli.c
++++ b/sources/main_node_cli.c
+@@ -176,6 +176,11 @@ int shell_reader_loop()
+          and execute it. */
+         s = rl_stripwhite(line);
+ 
++        if (strcmp(s, "exit") == 0) {
++            fprintf(stdout, "Exiting...\r\n"); // Exit client on exit command
++            exit(0);
++        }
++
+         if(*s)
+         {
+             add_history(s);
+@@ -227,7 +232,7 @@ int main(int argc, const char *argv[])
+     dap_log_level_set(L_CRITICAL);
+ 
+     if((g_config = dap_config_open(dap_get_appname())) == NULL) {
+-        printf("Can't init general configurations %s.cfg\n", dap_get_appname());
++        printf("Can't init general configuration %s.cfg\n", dap_get_appname());
+         exit(-1);
+     }
+ 
+@@ -284,7 +289,7 @@ int main(int argc, const char *argv[])
+                 printf("Socket read error!\n");
+                 break;
+             case DAP_CLI_ERROR_TIMEOUT:
+-                printf("No response recieved.\n");
++                printf("No response received.\n");
+                 break;
+             case DAP_CLI_ERROR_INCOMPLETE:
+                 printf("Connection closed by peer");
