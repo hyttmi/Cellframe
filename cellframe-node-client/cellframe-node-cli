@@ -2,6 +2,7 @@
 import socket
 import sys
 import argparse
+import re
 
 socket_path = "/opt/cellframe-node/var/run/node_cli" # Local socket for connections
 parser = argparse.ArgumentParser()
@@ -12,15 +13,13 @@ args = parser.parse_args()
 while True:
     if args.ip and args.port:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    else:   
-        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    if args.ip and args.port:
         try:
             s.connect((args.ip, args.port))
         except:
             print("Couldn't connect to socket, is it forwarded?")
             sys.exit()
     else:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             s.connect(socket_path)
         except:
@@ -30,6 +29,7 @@ while True:
     if command == "exit":
         break
     length = str(len(command))
+    command = re.sub('\\s+', " ", command) # Multiple spaces are one space, yes?
     command = command.replace(" ", "\r\n")
     post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
     post = bytes(post,"utf-8")
