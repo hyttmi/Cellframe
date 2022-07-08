@@ -16,7 +16,7 @@ while True:
         try:
             s.connect((args.ip, args.port))
         except:
-            print("Couldn't connect to socket, is it forwarded?")
+            print("Couldn't connect to socket, is it forwarded with socat?")
             sys.exit()
     else:
         s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -26,8 +26,11 @@ while True:
             print("Couldn't connect to socket! Node is running?")
             sys.exit()
     command = input("> ")
-    if command == "exit":
-        break
+    if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
+        print("Exiting...")
+        s.shutdown(socket.SHUT_RDWR)
+        s.close()
+        sys.exit()
     length = str(len(command))
     command = re.sub('\\s+', " ", command) # Multiple spaces are one space, yes?
     command = command.replace(" ", "\r\n")
