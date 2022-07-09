@@ -31,7 +31,7 @@ For local socket connection, just execute:
 And for remote connections:
 
 
-./cellframe-node-cli --ip <ip_address> --port <port>
+    ./cellframe-node-cli --ip <ip_address> --port <port>
 
 
 Where IP address is the hosts external IP address and port is the socat forwarded port.
