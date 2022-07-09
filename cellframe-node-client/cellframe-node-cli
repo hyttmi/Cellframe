@@ -10,6 +10,13 @@ parser.add_argument("--ip", type=str, required=False, help="Socat forwarded IP")
 parser.add_argument("--port", type=int, required=False, help="Socat forwarded port")
 args = parser.parse_args()
 
+info =  '''
+******************************** CELLFRAME NODE CLI ********************************
+****       THIS CLIENT CAN BE USED AS A SUBSTITUTE FOR CELLFRAME-NODE-CLI       ****
+****                      TYPE QUIT TO EXIT THIS CLIENT                         ****
+************************************************************************************'''
+print(info)
+
 while True:
     if args.ip and args.port:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,6 +49,7 @@ while True:
     reply = reply.split("\n")
     reply = list(filter(None, reply))
     reply = reply[4:]
+    reply.sort() # Sort the reply, easier to navigate
     for replies in reply:
         print(replies)
     s.shutdown(socket.SHUT_RDWR)
