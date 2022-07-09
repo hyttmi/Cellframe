@@ -49,7 +49,7 @@ while True:
     reply = reply.split("\n")
     reply = list(filter(None, reply))
     reply = reply[4:]
-    reply.sort() # Sort the reply, easier to navigate
+    reply.sort() # Sort the reply, easier to navigate at least when using "help"
     for replies in reply:
         print(replies)
     s.shutdown(socket.SHUT_RDWR)
