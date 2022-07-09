@@ -7,14 +7,14 @@ or you can connect to your node from everywhere if you have forwarded UNIX socke
 
 Make sure you have `socat` utility installed to your distribution. For Debian and it's derivatives:
 
-    ```sh
+    ```
     sudo apt install socat
     ```
 For other distros, please search `socat` from repositories.
 
 After installation, execute it with:
 
-    ```sh
+    ```
     socat TCP-LISTEN:12345,reuseaddr,fork UNIX-CLIENT:/opt/cellframe-node/var/run/node_cli &
     ```
 
@@ -27,13 +27,13 @@ as explained above.
 
 For local socket connection, just execute:
 
-    ```sh
+    ```
     ./cellframe-node-cli
     ```
 
 And for remote connections:
 
-    ```sh
+    ```
     ./cellframe-node-cli --ip <ip_address> --port <port>
     ```
 
