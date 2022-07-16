@@ -19,7 +19,7 @@ info =  '''
 
 print(info)
 
-while True:
+def doConnection():
     connected = False
     if args.ip and args.port:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,27 +39,34 @@ while True:
             except:
                 print("Couldn't connect to socket! Node is running? Trying again... (Exit with CTRL+C)")
                 sleep(5)
+    return s
 
-    command = input("> ")
-    if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
-        print("Exiting...")
+def main():
+    while True:
+        s = doConnection()
+        command = input("> ")
+        if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
+            print("Exiting...")
+            s.shutdown(socket.SHUT_RDWR)
+            s.close()
+            sys.exit()
+        length = str(len(command))
+        command = re.sub('\\s+', " ", command) # Multiple spaces are one space, yes?
+        command = command.replace(" ", "\r\n")
+        post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
+        post = bytes(post,"utf-8")
+        s.sendall(post)
+        reply = s.recv(4096)
+        reply = reply.decode("utf-8")
+        reply = reply.split("\n")
+        reply = list(filter(None, reply))
+        reply = reply[4:]
+        reply = [x for x in reply if not 'Available commands:' in x]
+        reply.sort() # Sort the reply, easier to navigate at least when using "help"
+        for replies in reply:
+            print(replies)
         s.shutdown(socket.SHUT_RDWR)
         s.close()
-        sys.exit()
-    length = str(len(command))
-    command = re.sub('\\s+', " ", command) # Multiple spaces are one space, yes?
-    command = command.replace(" ", "\r\n")
-    post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
-    post = bytes(post,"utf-8")
-    s.sendall(post)
-    reply = s.recv(4096)
-    reply = reply.decode("utf-8")
-    reply = reply.split("\n")
-    reply = list(filter(None, reply))
-    reply = reply[4:]
-    reply = [x for x in reply if not 'Available commands:' in x]
-    reply.sort() # Sort the reply, easier to navigate at least when using "help"
-    for replies in reply:
-        print(replies)
-    s.shutdown(socket.SHUT_RDWR)
-    s.close()
+
+if __name__ == "__main__":
+    main()
