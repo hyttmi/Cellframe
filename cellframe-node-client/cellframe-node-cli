@@ -45,6 +45,7 @@ def main():
     while True:
         s = doConnection()
         command = input("> ")
+        command = command.lower()
         if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
             print("Exiting...")
             s.shutdown(socket.SHUT_RDWR)
