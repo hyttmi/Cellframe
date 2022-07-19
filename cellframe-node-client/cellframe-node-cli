@@ -15,9 +15,13 @@ info =  '''
 ******************************** CELLFRAME NODE CLI ********************************
 ****       THIS CLIENT CAN BE USED AS A SUBSTITUTE FOR CELLFRAME-NODE-CLI       ****
 ************************************************************************************
+'''
+
+help = '''
 Available commands:
-quit\t\t\tExit this client
-history\t\t\tShow history of commands
+cli-help\t\t\tPrint this help
+quit\t\t\t\tExit this client
+history\t\t\t\tShow history of commands
 '''
 
 def doConnection():
@@ -44,8 +48,12 @@ def doConnection():
 
 def main():
     commands = []
-    print(info)
+    info_printed = False
     while True:
+        if info_printed == False:
+            print(info)
+            print(help)
+            info_printed = True
         s = doConnection()
         command = input("> ")
         command = command.lower()
@@ -55,10 +63,13 @@ def main():
             s.close()
             sys.exit()
         elif command == "history":
+            print("\nCommands history:\r\n")
             commands.append(command)
             for cmd in commands:
                 cmd = cmd.replace("\r\n", " ")
                 print(cmd)
+        elif command == "cli-help":
+            print(help)
         else:
             length = str(len(command))
             command = re.sub('\\s+', " ", command) # Multiple spaces are one space, yes?
