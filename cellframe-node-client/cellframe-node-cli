@@ -14,10 +14,11 @@ args = parser.parse_args()
 info =  '''
 ******************************** CELLFRAME NODE CLI ********************************
 ****       THIS CLIENT CAN BE USED AS A SUBSTITUTE FOR CELLFRAME-NODE-CLI       ****
-****                      TYPE QUIT TO EXIT THIS CLIENT                         ****
-************************************************************************************'''
-
-print(info)
+************************************************************************************
+Available commands:
+quit\t\t\tExit this client
+history\t\t\tShow history of commands
+'''
 
 def doConnection():
     connected = False
@@ -42,6 +43,8 @@ def doConnection():
     return s
 
 def main():
+    commands = []
+    print(info)
     while True:
         s = doConnection()
         command = input("> ")
@@ -51,23 +54,30 @@ def main():
             s.shutdown(socket.SHUT_RDWR)
             s.close()
             sys.exit()
-        length = str(len(command))
-        command = re.sub('\\s+', " ", command) # Multiple spaces are one space, yes?
-        command = command.replace(" ", "\r\n")
-        post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
-        post = bytes(post,"utf-8")
-        s.sendall(post)
-        reply = s.recv(4096)
-        reply = reply.decode("utf-8")
-        reply = reply.split("\n")
-        reply = list(filter(None, reply))
-        reply = reply[4:]
-        reply = [x for x in reply if not 'Available commands:' in x]
-        reply.sort() # Sort the reply, easier to navigate at least when using "help"
-        for replies in reply:
-            print(replies)
-        s.shutdown(socket.SHUT_RDWR)
-        s.close()
+        elif command == "history":
+            commands.append(command)
+            for cmd in commands:
+                cmd = cmd.replace("\r\n", " ")
+                print(cmd)
+        else:
+            length = str(len(command))
+            command = re.sub('\\s+', " ", command) # Multiple spaces are one space, yes?
+            command = command.replace(" ", "\r\n")
+            commands.append(command)
+            post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
+            post = bytes(post,"utf-8")
+            s.sendall(post)
+            reply = s.recv(4096)
+            reply = reply.decode("utf-8")
+            reply = reply.split("\n")
+            reply = list(filter(None, reply))
+            reply = reply[4:]
+            reply = [x for x in reply if not 'Available commands:' in x]
+            reply.sort() # Sort the reply, easier to navigate at least when using "help"
+            for replies in reply:
+                print(replies)
+            s.shutdown(socket.SHUT_RDWR)
+            s.close()
 
 if __name__ == "__main__":
     main()
