@@ -1,0 +1,7 @@
+{ 
+    "name": "redirectoooooor",
+    "version": "0.1",
+    "author": "Mika Hyttinen (@CELLgainz)",
+    "dependencies": [],
+    "description": "Redirect socket data to Unix socket provided by Cellframe node"
+}
