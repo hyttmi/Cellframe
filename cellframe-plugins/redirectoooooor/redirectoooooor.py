@@ -17,7 +17,7 @@ def redirectData():
     try:
         ext_socket.bind(("0.0.0.0", port))
     except:
-        logIt.error("Failed to bind external socket! Port in use?")
+        logIt.error(f"{plugin_name}: Failed to bind external socket! Port in use?")
 
     while True:
         local_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
