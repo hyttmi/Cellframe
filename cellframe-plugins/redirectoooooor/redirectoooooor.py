@@ -7,6 +7,7 @@ import threading
 plugin_name="redirectoooooor"
 version="0.1"
 port = 12345
+allowed = ["127.0.0.1", "localhost"]
 
 def redirectData():
     node_socket_path = configGetItem("conserver", "listen_unix_socket_path")
@@ -24,6 +25,10 @@ def redirectData():
         logIt.notice(f"{plugin_name}: External socket listening...")
         ext_conn, addr = ext_socket.accept()
         logIt.notice(f"{plugin_name}: Client connected from {addr}!")
+        if addr[0] not in allowed:
+            logIt.error("IP address is not allowed!")
+            ext_conn.close()
+            continue
         fwd = ext_conn.recv(1024)
         try:
             local_socket.connect(node_socket_path)

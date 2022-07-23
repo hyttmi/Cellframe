@@ -8,7 +8,8 @@ from time import sleep
 socket_path = "/opt/cellframe-node/var/run/node_cli" # Local socket for connections
 parser = argparse.ArgumentParser()
 parser.add_argument("--ip", type=str, required=False, help="Host IP (ext. address)")
-parser.add_argument("--port", type=int, required=False, help="Socat forwarded port")
+parser.add_argument("--port", type=int, required=False, help="Host port")
+parser.add_argument("--ssl", type=str, required=False, help="Use SSL")
 args = parser.parse_args()
 
 info =  '''
