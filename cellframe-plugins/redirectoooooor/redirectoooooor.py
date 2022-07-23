@@ -12,8 +12,11 @@ def redirectData():
     node_socket_path = configGetItem("conserver", "listen_unix_socket_path")
 
     ext_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    ext_socket.bind(("localhost", port))
+    
+    try:
+        ext_socket.bind(("localhost", port))
+    except:
+        logIt.error("Failed to bind external socket! Port in use?")
 
     while True:
         local_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -28,6 +31,7 @@ def redirectData():
         except:
             logIt.error(f"{plugin_name}: Connection to local socket failed!")
         fwd_str = fwd.decode("utf-8")
+        fwd_str = fwd_str.replace("\r\n", " ")
         logIt.notice(f"{plugin_name}: Received data: {fwd_str}")
         local_socket.sendall(fwd)
         data = local_socket.recv(1024)
