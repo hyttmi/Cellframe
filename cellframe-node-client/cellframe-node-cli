@@ -57,7 +57,6 @@ def main():
         command = input("> ")
         if len(command) == 0:
             continue
-        command = command.lower()
         if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
             print("Exiting...")
             break
@@ -78,13 +77,12 @@ def main():
             post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
             post = bytes(post,"utf-8")
             s.sendall(post)
-            reply = s.recv(4096)
+            reply = s.recv()
             reply = reply.decode("utf-8")
             reply = reply.split("\n")
             reply = list(filter(None, reply))
             reply = reply[4:]
             reply = [x for x in reply if not 'Available commands:' in x]
-            reply.sort() # Sort the reply, easier to navigate at least when using "help"
             for replies in reply:
                 print(replies)
             s.shutdown(socket.SHUT_RDWR)
