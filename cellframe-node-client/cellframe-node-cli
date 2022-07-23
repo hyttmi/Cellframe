@@ -77,7 +77,7 @@ def main():
             post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
             post = bytes(post,"utf-8")
             s.sendall(post)
-            reply = s.recv()
+            reply = s.recv(16384)
             reply = reply.decode("utf-8")
             reply = reply.split("\n")
             reply = list(filter(None, reply))
