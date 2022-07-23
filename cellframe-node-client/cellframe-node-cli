@@ -54,14 +54,11 @@ def main():
             print(info)
             print(help)
             info_printed = True
-        s = doConnection()
         command = input("> ")
         command = command.lower()
         if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
             print("Exiting...")
-            s.shutdown(socket.SHUT_RDWR)
-            s.close()
-            sys.exit()
+            break
         elif command == "history":
             print("\nCommands history:\r\n")
             commands.append(command)
@@ -71,11 +68,13 @@ def main():
         elif command == "cli-help":
             print(help)
         else:
+            s = doConnection()
             length = str(len(command))
             command = re.sub('\\s+', " ", command) # Multiple spaces are one space, yes?
             command = command.replace(" ", "\r\n")
             commands.append(command)
             post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
+            #post = post.strip()
             post = bytes(post,"utf-8")
             s.sendall(post)
             reply = s.recv(4096)
