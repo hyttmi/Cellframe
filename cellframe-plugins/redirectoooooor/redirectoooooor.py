@@ -1,13 +1,26 @@
+from datetime import datetime
 from DAP.Core import logIt
 from DAP import configGetItem
 
 import socket
 import threading
+import os
+import datetime
 
 plugin_name="redirectoooooor"
 version="0.1"
 port = 12345
-allowed = ["127.0.0.1", "localhost"] # use external IP address if connecting remotely!
+allowed = ["127.0.0.1", "localhost", "192.168.1.10"] # use external IP address if connecting remotely!
+
+def writeLog(address, command):
+    filepath = os.path.abspath(os.path.dirname(__file__))
+    logfile = filepath + "/" + plugin_name + ".log"
+    timestamp = datetime.datetime.now()
+    timestamp = timestamp.strftime("%d-%m-%Y %H:%M:%S")
+
+    f = open(logfile, "a", encoding="utf-8")
+    f.write(f"{timestamp} {address} {command}\n")
+    f.close()
 
 def redirectData():
     node_socket_path = configGetItem("conserver", "listen_unix_socket_path")
@@ -17,7 +30,7 @@ def redirectData():
     try:
         ext_socket.bind(("0.0.0.0", port))
     except:
-        logIt.error(f"{plugin_name}: Failed to bind external socket! Port in use?")
+        logIt.error("Failed to bind external socket! Port in use?")
 
     while True:
         local_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -30,14 +43,15 @@ def redirectData():
             ext_conn.close()
             continue
         fwd = ext_conn.recv(1024)
+        fwd_str = fwd.decode("utf-8")
+        fwd_str = fwd_str.replace("\r\n", " ")
+        logIt.notice(f"{plugin_name}: Received data: {fwd_str}")
+        writeLog(addr, fwd_str)
         try:
             local_socket.connect(node_socket_path)
             logIt.notice(f"{plugin_name}: Connected to local socket!")
         except:
             logIt.error(f"{plugin_name}: Connection to local socket failed!")
-        fwd_str = fwd.decode("utf-8")
-        fwd_str = fwd_str.replace("\r\n", " ")
-        logIt.notice(f"{plugin_name}: Received data: {fwd_str}")
         local_socket.sendall(fwd)
         data = local_socket.recv(1024)
         ext_conn.sendto(data, addr)
