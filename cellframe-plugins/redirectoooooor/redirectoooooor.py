@@ -7,7 +7,7 @@ import threading
 plugin_name="redirectoooooor"
 version="0.1"
 port = 12345
-allowed = ["127.0.0.1", "localhost"]
+allowed = ["127.0.0.1", "localhost"] # use external IP address if connecting remotely!
 
 def redirectData():
     node_socket_path = configGetItem("conserver", "listen_unix_socket_path")
