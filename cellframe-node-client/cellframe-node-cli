@@ -55,6 +55,8 @@ def main():
             print(help)
             info_printed = True
         command = input("> ")
+        if len(command) == 0:
+            continue
         command = command.lower()
         if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
             print("Exiting...")
