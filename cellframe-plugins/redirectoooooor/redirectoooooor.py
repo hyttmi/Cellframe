@@ -41,7 +41,7 @@ def redirectData():
             logIt.error("IP address is not allowed!")
             ext_conn.close()
             continue
-        fwd = ext_conn.recv(16384)
+        fwd = ext_conn.recv(65536)
         fwd_str = fwd.decode("utf-8")
         fwd_str = fwd_str.replace("\r\n", " ")
         logIt.notice(f"{plugin_name}: Received data: {fwd_str}")
@@ -52,7 +52,7 @@ def redirectData():
         except:
             logIt.error(f"{plugin_name}: Connection to local socket failed!")
         local_socket.sendall(fwd)
-        data = local_socket.recv(16384)
+        data = local_socket.recv(65536)
         ext_conn.sendto(data, addr)
         ext_conn.close()
         local_socket.close()
