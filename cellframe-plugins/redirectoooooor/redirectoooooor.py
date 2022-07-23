@@ -1,4 +1,3 @@
-from datetime import datetime
 from DAP.Core import logIt
 from DAP import configGetItem
 
