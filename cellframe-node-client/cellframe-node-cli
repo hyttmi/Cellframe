@@ -1,14 +1,18 @@
 #!/usr/bin/python3
+import os
 import socket
 import sys
 import argparse
 import re
+import configparser
 from time import sleep
 
 socket_path = "/opt/cellframe-node/var/run/node_cli" # Local socket for connections
 parser = argparse.ArgumentParser()
 parser.add_argument("--ip", type=str, required=False, help="Host IP (ext. address)")
 parser.add_argument("--port", type=int, required=False, help="Host port")
+parser.add_argument("--save", type=str, required=False, help="Save connection details for later use")
+parser.add_argument("--load", type=str, required=False, help="Load saved connection details")
 args = parser.parse_args()
 
 info =  '''
@@ -23,6 +27,24 @@ cli-help\t\t\tPrint this help
 quit\t\t\t\tExit this client
 history\t\t\t\tShow history of commands
 '''
+
+def saveConnection(name, ip, port):
+    port = str(port)
+    filepath = os.path.abspath(os.path.dirname(__file__))
+    session_file = filepath + "/session.ini"
+
+    config = configparser.ConfigParser()
+    
+    config[name] = {
+        "IP": ip,
+        "Port": port
+    }
+    
+    with open(session_file, "a") as sessionfile:
+        config.write(sessionfile)
+        print("Configuration saved!")
+        sessionfile.close()
+
 
 def doConnection():
     connected = False
@@ -47,6 +69,8 @@ def doConnection():
     return s
 
 def main():
+    if args.save and args.ip and args.port:
+        saveConnection(args.save, args.ip, args.port)
     commands = []
     info_printed = False
     while True:
@@ -59,7 +83,7 @@ def main():
             continue
         if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
             print("Exiting...")
-            break
+            sys.exit()
         elif command == "history":
             print("\nCommands history:\r\n")
             commands.append(command)
