@@ -82,7 +82,6 @@ def main():
             reply = reply.split("\n")
             reply = list(filter(None, reply))
             reply = reply[4:]
-            reply = [x for x in reply if not 'Available commands:' in x]
             for replies in reply:
                 print(replies)
             s.shutdown(socket.SHUT_RDWR)
