@@ -5,6 +5,7 @@ import sys
 import argparse
 import re
 import configparser
+import logging
 from time import sleep
 
 socket_path = "/opt/cellframe-node/var/run/node_cli" # Local socket for connections
@@ -28,6 +29,30 @@ quit\t\t\t\tExit this client
 history\t\t\t\tShow history of commands
 '''
 
+def checkValidArgs():
+    if args.ip or args.port or args.save:
+        if args.load:
+            logging.error("You need to use --load independently!\n\neg. ./cellframe-node-cli --load my_configuration")
+            sys.exit()
+
+def loadConnection(name):
+    filepath = os.path.abspath(os.path.dirname(__file__))
+    session_file = filepath + "/session.cfg"
+
+    config = configparser.ConfigParser()
+    try:
+        with open(session_file) as rfile:
+            config.read_file(rfile)
+            if config.has_section(name):
+                ip = config.get(name, "ip")
+                port = config.get(name, "port")
+                print(f"Opened saved session:\nName: {name}\nIP: {ip}\nPort: {port}")
+    except:
+        logging.error("Saved session not found!")
+        sys.exit()
+    
+    return ip, port
+
 def saveConnection(name, ip, port):
     port = str(args.port) # Int is not accepted
     filepath = os.path.abspath(os.path.dirname(__file__))
@@ -38,7 +63,7 @@ def saveConnection(name, ip, port):
         with open(session_file) as rfile:
             config.read_file(rfile)
     except:
-        print("File not found, creating new one...")
+        logging.info("File not found, creating new one...")
 
     try:
         config.add_section(name)
@@ -47,7 +72,7 @@ def saveConnection(name, ip, port):
         config.write(open(session_file, "w"))
         print(f"\r\nSettings saved:\nName: {name}\nIP: {ip}\nPort: {port}\n")
     except:
-        print("Configuration with this name already exists!")
+        logging.error("Configuration with this name already exists!")
         sys.exit()
 
 
@@ -60,7 +85,18 @@ def doConnection():
                 s.connect((args.ip, args.port))
                 connected = True
             except:
-                print("Couldn't connect to socket, is it forwarded with socat? Trying again... (Exit with CTRL+C)")
+                logging.error("Couldn't connect to socket, is it forwarded with socat? Trying again... (Exit with CTRL+C)")
+                sleep(5)
+    elif args.load:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ip, port = loadConnection(args.load)
+        port = int(port)
+        while not connected:
+            try:
+                s.connect((ip, port))
+                connected = True
+            except:
+                logging.error("Couldn't connect to socket, is it forwarded with socat? Trying again... (Exit with CTRL+C)")
                 sleep(5)
     else:
         s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -69,11 +105,14 @@ def doConnection():
                 s.connect(socket_path)
                 connected = True
             except:
-                print("Couldn't connect to socket! Node is running? Trying again... (Exit with CTRL+C)")
+                logging.error("Couldn't connect to socket! Node is running? Trying again... (Exit with CTRL+C)")
                 sleep(5)
     return s
 
 def main():
+    checkValidArgs()
+    if args.load:
+        loadConnection(args.load)
     if args.ip and args.port and args.save:
         saveConnection(args.save, args.ip, args.port)
     commands = []
