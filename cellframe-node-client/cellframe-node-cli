@@ -29,21 +29,26 @@ history\t\t\t\tShow history of commands
 '''
 
 def saveConnection(name, ip, port):
-    port = str(port)
+    port = str(args.port) # Int is not accepted
     filepath = os.path.abspath(os.path.dirname(__file__))
-    session_file = filepath + "/session.ini"
+    session_file = filepath + "/session.cfg"
 
     config = configparser.ConfigParser()
-    
-    config[name] = {
-        "IP": ip,
-        "Port": port
-    }
-    
-    with open(session_file, "a") as sessionfile:
-        config.write(sessionfile)
-        print("Configuration saved!")
-        sessionfile.close()
+    try:
+        with open(session_file) as rfile:
+            config.read_file(rfile)
+    except:
+        print("File not found, creating new one...")
+
+    try:
+        config.add_section(name)
+        config.set(name, "ip", ip)
+        config.set(name, "port", port)
+        config.write(open(session_file, "w"))
+        print(f"\r\nSettings saved:\nName: {name}\nIP: {ip}\nPort: {port}\n")
+    except:
+        print("Configuration with this name already exists!")
+        sys.exit()
 
 
 def doConnection():
@@ -52,7 +57,11 @@ def doConnection():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         while not connected:
             try:
-                s.connect((args.ip, args.port))
+                if not args.load:
+                    s.connect((args.ip, args.port))
+                else:
+                    s.connect
+
                 connected = True
             except:
                 print("Couldn't connect to socket, is it forwarded with socat? Trying again... (Exit with CTRL+C)")
@@ -69,7 +78,7 @@ def doConnection():
     return s
 
 def main():
-    if args.save and args.ip and args.port:
+    if args.ip and args.port and args.save:
         saveConnection(args.save, args.ip, args.port)
     commands = []
     info_printed = False
