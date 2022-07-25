@@ -57,11 +57,7 @@ def doConnection():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         while not connected:
             try:
-                if not args.load:
-                    s.connect((args.ip, args.port))
-                else:
-                    s.connect
-
+                s.connect((args.ip, args.port))
                 connected = True
             except:
                 print("Couldn't connect to socket, is it forwarded with socat? Trying again... (Exit with CTRL+C)")
