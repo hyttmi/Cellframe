@@ -1,0 +1,7 @@
+{ 
+    "name": "webui",
+    "version": "0.1",
+    "author": "Mika Hyttinen (@CELLgainz)",
+    "dependencies": [],
+    "description": "WebUI for Cellframe Node"
+}
