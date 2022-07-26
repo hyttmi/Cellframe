@@ -28,7 +28,7 @@ def redirectData():
         ext_conn, addr = ext_socket.accept()
         logIt.notice(f"{plugin_name}: Client connected from {addr}!")
         if addr[0] not in allowed:
-            logIt.error("IP address is not allowed!")
+            logIt.error(f"{plugin_name}: IP address is not allowed!")
             ext_conn.close()
             continue
         fwd = ext_conn.recv(65536)
