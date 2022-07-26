@@ -28,16 +28,26 @@ You can find the plugin here: https://github.com/CELLgainz/Cellframe/tree/main/c
 By default, the client uses local socket connection to your node. If you want to remotely connect to your node, you have to first forward your UNIX socket with socat
 or with my plugin as explained above.
 
-For local socket connection, just execute:
+ ### Local socket connections:
 
 
     ./cellframe-node-cli
 
 
-And for remote connections:
+### Remote connections:
 
 
     ./cellframe-node-cli --ip <ip_address> --port <port>
 
-
 Where IP address is the hosts external IP address and port is the forwarded port.
+
+### Saving connection details:
+
+
+    ./cellframe-node-cli --ip <ip_address> --port <port> --save <name_you_want>
+
+### Loading connection details:
+
+
+    ./cellframe-node-cli --load <saved_name>
+
