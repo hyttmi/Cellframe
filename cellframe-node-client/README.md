@@ -5,7 +5,7 @@ or you can connect to your node from everywhere if you have forwarded UNIX socke
 
 ## Forwarding the UNIX socket
 
-Make sure you have `socat` utility installed to your distribution. For Debian and it's derivatives:
+Make sure you have `socat` utility installed on your distribution. For Debian and it's derivatives:
 
     sudo apt install socat
 
