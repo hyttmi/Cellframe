@@ -32,7 +32,7 @@ history\t\t\t\tShow history of commands
 def checkValidArgs():
     if args.ip or args.port or args.save:
         if args.load:
-            logging.error("You need to use --load independently!\n\neg. ./cellframe-node-cli --load my_configuration")
+            logging.error("You need to use --load independently!\n\neg. ./cellframe-node-cli --load my_configuration\n")
             sys.exit()
 
 def loadConnection(name):
@@ -46,7 +46,7 @@ def loadConnection(name):
             if config.has_section(name):
                 ip = config.get(name, "ip")
                 port = config.get(name, "port")
-                print(f"Opened saved session:\nName: {name}\nIP: {ip}\nPort: {port}")
+                printed = False
     except:
         logging.error("Saved session not found!")
         sys.exit()
@@ -78,41 +78,30 @@ def saveConnection(name, ip, port):
 
 def doConnection():
     connected = False
-    if args.ip and args.port:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        while not connected:
-            try:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    while not connected:
+        try:
+            if args.ip and args.port:
                 s.connect((args.ip, args.port))
                 connected = True
-            except:
-                logging.error("Couldn't connect to socket, is it forwarded with socat? Trying again... (Exit with CTRL+C)")
-                sleep(5)
-    elif args.load:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ip, port = loadConnection(args.load)
-        port = int(port)
-        while not connected:
-            try:
-                s.connect((ip, port))
+            elif args.load:
+                ip_addr, port = loadConnection(args.load)
+                port = int(port)
+                s.connect((ip_addr, port))
                 connected = True
-            except:
-                logging.error("Couldn't connect to socket, is it forwarded with socat? Trying again... (Exit with CTRL+C)")
-                sleep(5)
-    else:
-        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        while not connected:
-            try:
+            else:
                 s.connect(socket_path)
                 connected = True
-            except:
-                logging.error("Couldn't connect to socket! Node is running? Trying again... (Exit with CTRL+C)")
-                sleep(5)
+        except:
+            logging.error("Couldn't connect to socket! Trying again... (Exit with CTRL+C)")
+            sleep(5)
     return s
 
 def main():
     checkValidArgs()
     if args.load:
         loadConnection(args.load)
+        print("Settings loaded!")
     if args.ip and args.port and args.save:
         saveConnection(args.save, args.ip, args.port)
     commands = []
