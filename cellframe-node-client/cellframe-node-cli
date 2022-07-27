@@ -12,13 +12,12 @@ info =  '''
 ******************************** CELLFRAME NODE CLI ********************************
 ****       THIS CLIENT CAN BE USED AS A SUBSTITUTE FOR CELLFRAME-NODE-CLI       ****
 ************************************************************************************
-'''
 
-help = '''
 Available commands:
 cli-help\t\t\tPrint this help
 quit\t\t\t\tExit this client
 history\t\t\t\tShow history of commands
+
 '''
 
 def checkValidArgs():
@@ -96,7 +95,6 @@ def handleCommands():
     while True:
         if info_printed == False:
             print(info)
-            print(help)
             info_printed = True
         command = input("> ")
         if len(command) == 0:
@@ -111,7 +109,7 @@ def handleCommands():
                 cmd = cmd.replace("\r\n", " ")
                 print(cmd)
         elif command == "cli-help":
-            print(help)
+            print(info)
         else:
             s = doConnection()
             length = str(len(command))
