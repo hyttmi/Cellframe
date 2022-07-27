@@ -9,12 +9,6 @@ import logging
 from time import sleep
 
 socket_path = "/opt/cellframe-node/var/run/node_cli" # Local socket for connections
-parser = argparse.ArgumentParser()
-parser.add_argument("--ip", type=str, required=False, help="Host IP (ext. address)")
-parser.add_argument("--port", type=int, required=False, help="Host port")
-parser.add_argument("--save", type=str, required=False, help="Save connection details for later use")
-parser.add_argument("--load", type=str, required=False, help="Load saved connection details")
-args = parser.parse_args()
 
 info =  '''
 ******************************** CELLFRAME NODE CLI ********************************
@@ -97,13 +91,7 @@ def doConnection():
             sleep(5)
     return s
 
-def main():
-    checkValidArgs()
-    if args.load:
-        loadConnection(args.load)
-        print("Settings loaded!")
-    if args.ip and args.port and args.save:
-        saveConnection(args.save, args.ip, args.port)
+def handleCommands():
     commands = []
     info_printed = False
     while True:
@@ -144,5 +132,20 @@ def main():
             s.shutdown(socket.SHUT_RDWR)
             s.close()
 
+def main():
+    checkValidArgs()
+    if args.load:
+        loadConnection(args.load)
+        print("Settings loaded!")
+    if args.ip and args.port and args.save:
+        saveConnection(args.save, args.ip, args.port)
+    handleCommands()
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--ip", type=str, required=False, help="Host IP (ext. address)")
+    parser.add_argument("--port", type=int, required=False, help="Host port")
+    parser.add_argument("--save", type=str, required=False, help="Save connection details for later use")
+    parser.add_argument("--load", type=str, required=False, help="Load saved connection details")
+    args = parser.parse_args()
     main()
