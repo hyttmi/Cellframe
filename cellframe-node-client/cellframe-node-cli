@@ -8,8 +8,6 @@ import configparser
 import logging
 from time import sleep
 
-socket_path = "/opt/cellframe-node/var/run/node_cli" # Local socket for connections
-
 info =  '''
 ******************************** CELLFRAME NODE CLI ********************************
 ****       THIS CLIENT CAN BE USED AS A SUBSTITUTE FOR CELLFRAME-NODE-CLI       ****
@@ -83,6 +81,7 @@ def doConnection():
                 s.connect((ip_addr, port))
                 connected = True
             else:
+                socket_path = "/opt/cellframe-node/var/run/node_cli" # Local socket for connections
                 s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                 s.connect(socket_path)
                 connected = True
