@@ -38,7 +38,6 @@ def checkValidArgs():
 def loadConnection(name):
     filepath = os.path.abspath(os.path.dirname(__file__))
     session_file = filepath + "/session.cfg"
-
     config = configparser.ConfigParser()
     try:
         with open(session_file) as rfile:
@@ -46,7 +45,6 @@ def loadConnection(name):
             if config.has_section(name):
                 ip = config.get(name, "ip")
                 port = config.get(name, "port")
-                printed = False
     except:
         logging.error("Saved session not found!")
         sys.exit()
