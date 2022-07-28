@@ -23,7 +23,7 @@ def init():
     server_address = ("", port)
     server = http.server.ThreadingHTTPServer(server_address, WebUIHandler)
     server.serve_forever()
-    logIt.error("WebUI serving at port " + str(port))
+    logIt.info("WebUI serving at port " + str(port))
     return 0
 
 def deinit(): 
