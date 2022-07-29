@@ -14,7 +14,7 @@ class WebUIHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
+        self.send_header("Content-type", "application/json")
         self.end_headers()
         self.wfile.write("...".encode("utf-8"))
 
