@@ -1,5 +1,5 @@
 diff --git a/README.md b/README.md
-index c1a18eb..cfa6256 100644
+index c1a18eb..1e5b519 100644
 --- a/README.md
 +++ b/README.md
 @@ -1,369 +1,166 @@
@@ -142,7 +142,7 @@ index c1a18eb..cfa6256 100644
 +  echo "deb [signed-by=/usr/share/keyrings/demlabs-archive-keyring.gpg] https://debian.pub.demlabs.net/public $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/demlabs.list
    ```
 -* Then update your apt cache and install the package (apt-transport-https should be installed):
-+3. Update your apt-cache and install the Cellframe node
++3. Update your package index files and install the Cellframe node
    ```
 -  sudo apt-get update
 -  sudo apt-get install cellframe-node
