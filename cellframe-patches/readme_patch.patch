@@ -1,8 +1,8 @@
 diff --git a/README.md b/README.md
-index c1a18eb..1e5b519 100644
+index c1a18eb..3b98e2c 100644
 --- a/README.md
 +++ b/README.md
-@@ -1,369 +1,166 @@
+@@ -1,369 +1,163 @@
 -# cellframe-node
 +# How to install Cellframe node
  
@@ -179,35 +179,50 @@ index c1a18eb..1e5b519 100644
  
  * Server address
 -Network address used for listentning. Set ```0.0.0.0``` if you want to listen all network interfaces on your computer
--
--* Server port (optional, usually don't ask)
--Server port, 8079 by default but sometimes better to set it to ```80``` or ```443``` to masquarade service as web service. 
--
--* Core-testnet: Enable network
--Set ```true``` if you want to connect your node with ```Core-T testnet```
 +  * Network address used for listening. Set to `0.0.0.0` if you want to listen on all network interfaces on your computer
  
--* Core-testnet: Node type (role)
--Select node type (or node role) from suggested list with short descriptions. By default suggested to select ```full```
+-* Server port (optional, usually don't ask)
+-Server port, 8079 by default but sometimes better to set it to ```80``` or ```443``` to masquarade service as web service. 
 +* Server port
 +  * Server port to listen on: Default is 8079, recommended 8079. Use 80 or 443 if you want to masquerade node for example as a web service
  
--* Kelvin-testnet: Enable network
--Set ```true``` if you want to connect your node with ```kelvin-testnet```
+-* Core-testnet: Enable network
+-Set ```true``` if you want to connect your node with ```Core-T testnet```
 +* Notify server address
 +  * Default is 127.0.0.1, recommended 127.0.0.1
  
+-* Core-testnet: Node type (role)
+-Select node type (or node role) from suggested list with short descriptions. By default suggested to select ```full```
++* Notify server port
++  * Default is 8080, recommended 8080
+ 
+-* Kelvin-testnet: Enable network
+-Set ```true``` if you want to connect your node with ```kelvin-testnet```
++* Enable Subzero testnet (true / false)
++  * True: Connect your node to Subzero testnet
++  * False: Don't connect your node to Subzero testnet
+ 
 -* SubZero: Enable network
 -Set ```true``` if you want to connect your node with ```subzero```
--
++* Subzero node role (full / light / master / archive / root)
++  * Different role types for node. Default `full`, recommended `full`
+ 
 -* SubZero: Node role
 -Select node type (or node role) from suggested list with short descriptions. By default suggested to select ```full```
--
++* Enable KelVPN Minkowski testnet (true / false)
++  * True: Connect your node to KelVPN Minkowski testnet
++  * False: Don't connect your node to KelVPN Minkowski testnet
+ 
 -### How to configure VPN service share
--
++* KelVPN Minkowski node role (full / light / master / archive / root)
++  * Different role types for node. Default `full`, recommended `full`
+ 
 -#### Node base configuration
 -Open ```/opt/cellframe-node/etc/cellframe-node.cfg``` with command ```sudo nano /opt/cellframe-node/etc/cellframe-node.cfg``` and find next section:
--
++* Enable Backbone mainnet (true / false)
++  * True: Connect your node to Backbone mainnet
++  * False: Don't connect your node to Backbone mainnet
+ 
 -```
 -# VPN stream channel processing module
 -[srv_vpn]
@@ -218,41 +233,44 @@ index c1a18eb..1e5b519 100644
 -network_mask=255.255.255.0
 -#pricelist=[kelvin-testnet:0.00001:KELT:3600:SEC:mywallet0,kelvin-testnet:0.00001:cETH:3600:SEC:mywallet1,private:1:WOOD:10:SEC:mywallet0]
 -```
--
++* Backbone node role (full / light / master / archive / root)
++  * Different role types for node. Default `full`, recommended `full`
+ 
 -Turn ```enabled``` parameter to ```true``` thats enable VPN service on your node. Then, the next lines ```network_address``` and ```network_mask``` usually you don't need to touch. Default configuration reserves network addresses for 254 connections at one time, if you have more - change network mask to smth like ```255.255.0.0``` and network address to ```10.11.0.0``` thats gives you 4095 local addresses. 
 -Thats important - all the addresses are local and used only inside virtual private network (VPN). For this address and mask also should be configured OS - should be present DNS server, switched on IP4 forwarding and configured NAT. Example of such configurations are below:
 -Next line ```pricelist``` if commented out it shares service for free.
--
++* Enable Mileena testnet (true / false)
++  * True: Connect your node to Mileena testnet
++  * False: Don't connect your node to Mileena testnet
+ 
 -#### Pricelist config
 -Pricelist line has list of values, splitted with ```:``` symbol. What it means lets see in example ```kelvin-testnet:0.00001:KELT:3600:SEC:mywallet0```:
--
++* Mileena testnet node role (full / light / master / archive / root)
++  * Different role types for node. Default `full`, recommended `full`
+ 
 -1. ```kelvin-testnet``` thats the chain network name where the price token issued
 -2. ```0.00001``` price per units. Important: not for one unit but for all the units, in our example - for 1 hour.
 -3. ```KELT``` token ticker thats will be used for payments
 -4. ```3600``` units number thats costs price `0.00001`
 -5. ```SEC``` unit type, could be ```SEC``` for seconds, ```DAY``` for days, ```MB``` for megabyte. IMPORTANT: if selected ```MB``` accounting would be not by time but by used traffic amount
 -6.```mywallet``` wallet name for payments accommodation, should be created before with ```cellframe-node-cli```. Used for signing conditioned transactions with receipts therefore they pass values to the selected wallet.
--
++* Enable Python plugins (true / false)
++  * True: Enable loading of Python plugins
++  * False: Disable loading of Python plugins
+ 
 -You could enter any number of such prices
--
++* Python plugins path
++  * Set path where you want to store your plugins
+ 
 -#### DNS server install
-+* Notify server port
-+  * Default is 8080, recommended 8080
++## Running and troubleshooting your Cellframe node after installation 
  
 -Install DNS server, it could be any other than Bind9 but for example we will use exactly thats one - did we test this with any other? at a least a couple of others?
-+* Enable Subzero testnet (true / false)
-+  * True: Connect your node to Subzero testnet
-+  * False: Don't connect your node to Subzero testnet
- 
+-
 -```sudo apt-get install bind9```
-+* Subzero node role (full / light / master / archive / root)
-+  * Different role types for node. Default `full`, recommended `full`
- 
+-
 -#### Switch on IPv4 forwarding 
-+* Enable KelVPN Minkowski testnet (true / false)
-+  * True: Connect your node to KelVPN Minkowski testnet
-+  * False: Don't connect your node to KelVPN Minkowski testnet
- 
+-
 -Open ```/etc/sysctl.conf``` with command ```sudo nano /etc/sysctl.conf``` and find line 
 -```
 -# Uncomment the next line to enable packet forwarding for IPv4
@@ -264,26 +282,16 @@ index c1a18eb..1e5b519 100644
 -sudo sysctl -p
 -```
 -Then after reboot they will be implemented automatically - do we need to specify a reboot command?
-+* KelVPN Minkowski node role (full / light / master / archive / root)
-+  * Different role types for node. Default `full`, recommended `full`
- 
-+* Enable Backbone mainnet (true / false)
-+  * True: Connect your node to Backbone mainnet
-+  * False: Don't connect your node to Backbone mainnet
- 
+-
+-
 -#### Configuring firewall with NAT
-+* Backbone node role (full / light / master / archive / root)
-+  * Different role types for node. Default `full`, recommended `full`
- 
+-
 -Easiest way is to install ```arno-iptables-firewall``` with the next command:
 -```
 -sudo apt-get install arno-iptables-firewall
 -```
 -It would ask next questions:
-+* Enable Mileena testnet (true / false)
-+  * True: Connect your node to Mileena testnet
-+  * False: Don't connect your node to Mileena testnet
- 
+-
 -*  `Do you want to manage the firewall setup with debconf` answer `Yes`
 -*  `External network interfaces` answer with you network interface thats used for internet access. Usually its `eth0` or `wifi0` but could be different, examine you network configuration first.
 -*  `Open external TCP-ports` answer `8079` or what the port do you configured for cellframe node when it was installed
@@ -291,32 +299,22 @@ index c1a18eb..1e5b519 100644
 -*  `Internal network interfaces` answer `tun0` if you haven't configured any other VPN servers. If they are - find what the tunnel number is biggest and list all of them here with your tunnel name (`tun<max number plus 1>` )
 -*  `Internal subnets ` here should be network_adddres/network_mask from VPN service configuration, ```10.11.12.0/255.255.255.0``` in our example
 -*  `Should be restarted` answer `No` becase we need some more configs
-+* Mileena testnet node role (full / light / master / archive / root)
-+  * Different role types for node. Default `full`, recommended `full`
- 
+-
 -Now lets increase config ask level and reconfigure the package with the next command:
 -```
 -sudo dpkg-reconfigure -plow arno-iptables-firewall
 -``` 
-+* SubZero: Enable network
-+  * Set ```true``` if you want to connect your node with ```subzero```
- 
+-
 -For answers where you'll see right answers just press enter to skip them. Then the next questions should appears:
 -* `Is DHCP used on external interfaces? ` usually answer `Yes`, answer `No` only if you have static network configuration for external connections
 -* `Should the machine be pingable from the outside world?` answer `Yes` because we use pings for network speed measurements
 -* `Do you want to enable NAT? ` answer `Yes`
 -* `Internal networks with access to external networks:` here you list internal networks again, ```10.11.12.0/255.255.255.0``` in our example
 -* `Should the firewall be (re)started now?` now answer `Yes` and have everything ready for routing
-+* Enable Python plugins (true / false)
-+  * True: Enable loading of Python plugins
-+  * False: Disable loading of Python plugins
- 
-+* Python plugins path
-+  * Set path where you want to store your plugins
- 
+-
+-
 -### How to run 
-+## Running and troubleshooting your Cellframe node after installation 
- 
+-
 -If the node is installed in your system you need only to check it if its runned on your system
 +### Check the status of Cellframe node
  ```
@@ -335,19 +333,15 @@ index c1a18eb..1e5b519 100644
  ```
  
 -### How to publish service in network 
-+Log files can be found at /opt/cellframe-node/var/log/cellframe-node.log
- 
-+## Useful links
- 
+-
+-
 -#### Obtain node address
 -First you need to publish you public IPv4 and/or IPv6 addresses (for current moment we support only IPv4)
-+[Cellframe Wiki pages](https://wiki.cellframe.net/en/home)
- 
+-
 -```
 -sudo /opt/cellframe-node/bin/cellframe-node-cli net -net kelvin-testnet get status
 -```
-+[Cellframe node CLI manual](https://wiki.cellframe.net/en/soft/node_commands)
- 
+-
 -It should print smth like this
 -```
 -Network "kelvin-testnet" has state NET_STATE_SYNC_CHAINS (target state NET_STATE_ONLINE), active links 3 from 4, cur node address 374C::CEB5::6740::D93B
@@ -383,14 +377,18 @@ index c1a18eb..1e5b519 100644
 -* ```-price_unit``` Set 2 for Seconds, 1 for Megabytes
 -* ```-price_token``` Token ticker
 -* ```-price``` Price for one unit, price for one second in our example
--
++Log files can be found at /opt/cellframe-node/var/log/cellframe-node.log
+ 
 -Important: if you set price in configs for units set, 3600 in our example - here you set price for your single one unit, for one second in example.
--
++## Useful links
+ 
 -More details about order operations you could find with call ```sudo /opt/cellframe-node/bin/cellframe-node-cli help net_srv```
 -More details about cellframe node commands in call ```sudo /opt/cellframe-node/bin/cellframe-node-cli help```
--
++[Cellframe Wiki pages](https://wiki.cellframe.net/en/home)
+ 
 -# SubZero testnet
--
++[Cellframe node CLI manual](https://wiki.cellframe.net/en/soft/node_commands)
+ 
 -## Create wallet and token request
 -
 -1. Install node according instructions above.
