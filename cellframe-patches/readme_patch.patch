@@ -1,25 +1,44 @@
-diff --cc README.md
-index e7db0d7,079abe2..0000000
+diff --git a/README.md b/README.md
+index e7db0d7..ef1375c 100644
 --- a/README.md
 +++ b/README.md
-@@@ -20,6 -20,6 +20,7 @@@ brew install cmake sqlite
-  
-  ### Download the sources with Git
-  
-++
-  With the following command, you can download the latest source code from master branch:
-    ```
-    git clone https://gitlab.demlabs.net/cellframe/cellframe-node.git --recurse-submodules
-@@@ -366,8 -366,8 +367,8 @@@ Removing Cellframe node is simple, you 
-  ```
-  apt remove cellframe-node
-  ```
-- Or if you want to purge the databases also, use:
- -Or if you want to also purge the debconf database for Cellframe node, use:
-++Or if you want to purge the debconf databases also for Cellframe node, use:
-  ```
-  apt purge cellframe-node
-  ```
-- ***NOTE: All the installed files and folders are not removed by default. If you want to remove everything, you may remove the files and directories from `/opt/cellframe-node`. But beware, if you have created wallets, make sure you backup them before proceeding.***
- -***NOTE: All the installed files and directories are not removed by default. If you want to remove everything, you may remove the files and directories from `/opt/cellframe-node`. But beware, if you have created wallets make sure you backup them before proceeding.***
-++***NOTE: All the installed files and folders are not removed by default. If you want to remove everything, you may remove the files and directories from `/opt/cellframe-node`. But beware, if you have created wallets make sure you backup them before proceeding.***
+@@ -6,7 +6,7 @@
+ 
+ To successfully build the Cellframe node, you need to have all the necessary dependencies installed. To install them, use the following command:
+ ```
+-sudo apt install build-essential cmake dpkg-dev libpython3-dev libjson-c-dev libsqlite3-dev libmemcached-dev libev-dev libmagic-dev libcurl4-gnutls-dev libldb-dev libtalloc-dev libtevent-dev traceroute debconf-utils pv build-essential cmake dpkg-dev libpython3-dev libjson-c-dev libsqlite3-dev libmemcached-dev libev-dev libmagic-dev libcurl4-gnutls-dev libldb-dev libtalloc-dev libtevent-dev traceroute debconf-utils pv git
++sudo apt install build-essential cmake dpkg-dev libpython3-dev libjson-c-dev libsqlite3-dev libmemcached-dev libev-dev libmagic-dev libcurl4-gnutls-dev libldb-dev libtalloc-dev libtevent-dev traceroute debconf-utils pv build-essential cmake dpkg-dev libpython3-dev libjson-c-dev libsqlite3-dev libmemcached-dev libev-dev libmagic-dev libcurl4-gnutls-dev libldb-dev libtalloc-dev libtevent-dev traceroute debconf-utils pv git wget
+ ```
+ 
+ ### MacOS prerequisites 
+@@ -73,7 +73,7 @@ Building installation package for MacOS is not possible yet. However, you can us
+   ```
+   echo "deb [signed-by=/usr/share/keyrings/demlabs-archive-keyring.gpg] https://debian.pub.demlabs.net/public $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/demlabs.list
+   ```
+-3. Update your package index files and install the Cellframe node
++3. Update your package index files and install Cellframe node
+   ```
+   sudo apt update && sudo apt install cellframe-node
+   ```
+@@ -136,7 +136,7 @@ Building installation package for MacOS is not possible yet. However, you can us
+   * False: Disable loading of Python plugins.
+ 
+ * Python plugins path
+-  * Set path where you want to store your plugins.
++  * Set path where you store your plugins.
+ 
+ ## Running and troubleshooting your Cellframe node after installation 
+ 
+@@ -366,8 +366,8 @@ Removing Cellframe node is simple, you can use `apt` to remove the package:
+ ```
+ apt remove cellframe-node
+ ```
+-Or if you want to purge the databases also, use:
++Or if you want to purge the Cellframe node debconf databases also, use:
+ ```
+ apt purge cellframe-node
+ ```
+-***NOTE: All the installed files and folders are not removed by default. If you want to remove everything, you may remove the files and directories from `/opt/cellframe-node`. But beware, if you have created wallets, make sure you backup them before proceeding.***
+\ No newline at end of file
++***NOTE: All the installed files and folders are not removed by default. If you want to remove everything, you may remove the files and directories from `/opt/cellframe-node`. But beware, if you have created wallets make sure you backup them before proceeding.***
+\ No newline at end of file
