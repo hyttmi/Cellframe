@@ -1,5 +1,5 @@
 diff --git a/README.md b/README.md
-index e7db0d7..ef1375c 100644
+index e7db0d7..ae08488 100644
 --- a/README.md
 +++ b/README.md
 @@ -6,7 +6,7 @@
@@ -11,7 +11,12 @@ index e7db0d7..ef1375c 100644
  ```
  
  ### MacOS prerequisites 
-@@ -73,7 +73,7 @@ Building installation package for MacOS is not possible yet. However, you can us
+@@ -69,11 +69,11 @@ Building installation package for MacOS is not possible yet. However, you can us
+   wget -O- https://debian.pub.demlabs.net/public/public-key.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/demlabs-archive-keyring.gpg
+   ```
+ 
+-2. Add Demlabs repository to your sources with the following command:
++2. Add Demlabs repository to your software sources with the following command:
    ```
    echo "deb [signed-by=/usr/share/keyrings/demlabs-archive-keyring.gpg] https://debian.pub.demlabs.net/public $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/demlabs.list
    ```
