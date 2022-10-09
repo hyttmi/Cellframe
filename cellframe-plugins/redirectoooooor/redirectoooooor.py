@@ -19,20 +19,25 @@ def redirectData():
     try:
         ext_socket.bind(("0.0.0.0", port))
         ext_socket.listen()
-        logIt.notice(f"{plugin_name}: External socket listening...")
+        logIt.notice(f"{plugin_name}: External socket listening on port {port}...")
     except:
         logIt.error("Failed to bind external socket! Port in use?")
 
     while True:
         local_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         ext_conn, addr = ext_socket.accept()
-        logIt.notice(f"{plugin_name}: Client connected from {addr}!")
         if addr[0] not in allowed:
             logIt.error(f"{plugin_name}: IP address is not allowed!")
             ext_conn.close()
             continue
-        fwd = ext_conn.recv(65536)
-        fwd_str = fwd.decode("utf-8")
+        logIt.notice(f"{plugin_name}: Client connected from {addr}!")
+        fwd_data = b''
+        while True:
+            fwd = ext_conn.recv(4096)
+            fwd_data += fwd
+            if len(fwd) < 4096:
+                break
+        fwd_str = fwd_data.decode("utf-8")
         fwd_str = fwd_str.replace("\r\n", " ")
         logIt.notice(f"{plugin_name}: Received data: {fwd_str}")
         try:
@@ -40,9 +45,14 @@ def redirectData():
             logIt.notice(f"{plugin_name}: Connected to local socket!")
         except:
             logIt.error(f"{plugin_name}: Connection to local socket failed!")
-        local_socket.sendall(fwd)
-        data = local_socket.recv(65536)
-        ext_conn.sendto(data, addr)
+        local_socket.sendall(fwd_data)
+        rcv_data = b''
+        while True:
+            data = local_socket.recv(4096)
+            rcv_data += data
+            if len(data) < 4096:
+                break
+        ext_conn.sendto(rcv_data, addr)
         ext_conn.close()
         local_socket.close()
 
