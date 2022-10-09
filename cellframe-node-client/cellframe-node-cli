@@ -99,7 +99,7 @@ def handleCommands():
         command = input("> ")
         if len(command) == 0:
             continue
-        if command == "quit": # We need to use quit for exiting the client because exit is actually sent to node...
+        if command == "quit": # We need to use quit for exiting the client because command 'exit' is actually sent to node...
             print("Exiting...")
             sys.exit()
         elif command == "history":
@@ -109,6 +109,7 @@ def handleCommands():
                 cmd = cmd.replace("\r\n", " ")
                 print(cmd)
         elif command == "cli-help":
+            commands.append(command)
             print(info)
         else:
             s = doConnection()
@@ -119,13 +120,18 @@ def handleCommands():
             post = "POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/text\r\nContent-Length: " + length + "\r\n\r\n" + command + "\r\n\r\n"
             post = bytes(post,"utf-8")
             s.sendall(post)
-            reply = s.recv(65536)
-            reply = reply.decode("utf-8")
-            reply = reply.split("\n")
-            reply = list(filter(None, reply))
-            reply = reply[4:]
-            for replies in reply:
-                print(replies)
+            data = b''
+            while True:
+                part = s.recv(4096)
+                data += part
+                if len(part) < 4096:
+                    break
+            data = data.decode("utf-8")
+            data = data.split("\n")
+            data = list(filter(None, data))
+            data = data[4:]
+            for x in data:
+                print(x)
             s.shutdown(socket.SHUT_RDWR)
             s.close()
 
