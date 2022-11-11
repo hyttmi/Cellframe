@@ -1,0 +1,25 @@
+diff --git a/sources/main.c b/sources/main.c
+index 9715c02..f786fc1 100755
+--- a/sources/main.c
++++ b/sources/main.c
+@@ -493,9 +493,17 @@ int main( int argc, const char **argv )
+ 
+ //Init python plugins
+ #ifdef DAP_SUPPORT_PYTHON_PLUGINS
+-    log_it(L_NOTICE, "Loading python plugins");
+-    dap_plugins_python_app_content_init(l_server);
+-    dap_chain_plugins_init(g_config);
++    log_it(L_NOTICE, "Checking if Python plugins are enabled...");
++    if (dap_config_get_item_bool_default(g_config, "plugins", "py_load", false))
++    {
++        log_it(L_NOTICE, "Python plugins enabled, initializing Python plugins...");
++        dap_plugins_python_app_content_init(l_server);
++        dap_chain_plugins_init(g_config);
++    }
++    else
++    {
++        log_it(L_NOTICE, "Python plugins aren't enabled, skipping initialization of Python plugins...");
++    }
+ #endif
+ 
+     rc = dap_events_wait(l_events);
