@@ -58,13 +58,16 @@ function wipe() {
     if [[ $(dpkg -l | grep -i cellframe-node) ]] ; then
         echo "[INFO] Cellframe node is installed, removing it..."
         apt-get -yqq remove --purge cellframe-node
-    fi
-
-    if [[ -e ${INSTALL_PATH} ]] ; then
-        echo "[INFO] Found ${INSTALL_PATH}, removing it..."
-        rm -rf ${INSTALL_PATH}
-        echo "[INFO] ${INSTALL_PATH} removed."
-        echo "[INFO] You may now start from the beginning and do a fresh install of Cellframe node"
+    else
+        echo "[INFO] No installation of Cellframe node detected. Checking for leftovers..."
+        if [[ -e ${INSTALL_PATH} ]] ; then
+            echo "[INFO] Found ${INSTALL_PATH}, removing it..."
+            rm -rf ${INSTALL_PATH}
+            echo "[INFO] ${INSTALL_PATH} removed."
+            echo "[INFO] You may now start from the beginning and do a fresh install of Cellframe node."
+        else
+            echo "[INFO] ${INSTALL_PATH} not found. You may reinstall Cellframe node."
+        fi
     fi
 }
 
