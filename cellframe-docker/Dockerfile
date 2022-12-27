@@ -46,7 +46,7 @@ RUN echo "cellframe-node cellframe-node/mileena_enabled	select ${MILEENA_ENABLED
     && echo "cellframe-node cellframe-node/server_addr string ${SERVER_ADDR}" | debconf-set-selections
 
 RUN cd /tmp \
-    && NODE_VERSION=`curl -v --silent https://pub.cellframe.net/linux/ 2>&1 | grep -oP ">cellframe-node-\K5.1.[0-9]{3}" | sort | tail -n1` \
+    && NODE_VERSION=`curl -v --silent https://pub.cellframe.net/linux/cellframe-node/master/ 2>&1 | grep -oP ">cellframe-node-\K5.1.[0-9]{3}" | sort | tail -n1` \
     && ARCH=`dpkg --print-architecture` \
     && case "${ARCH}" in \
       amd64) ARCH='amd64';; \
@@ -54,8 +54,8 @@ RUN cd /tmp \
       armhf) ARCH='armhf';; \
       *) echo "Unsupported architecture, exiting..."; exit 1 ;; \
     esac \
-    && curl -O https://pub.cellframe.net/linux/cellframe-node-${NODE_VERSION}-${ARCH}.deb \
-    && dpkg -i cellframe-node-${NODE_VERSION}-${ARCH}.deb
+    && curl -O https://pub.cellframe.net/linux/cellframe-node/master/cellframe-node-${NODE_VERSION}-${ARCH}.deb \
+    && dpkg -i *.deb
 
 RUN apt-get -y autoremove --purge && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
