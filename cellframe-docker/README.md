@@ -1,4 +1,4 @@
-# Dockerfile for building your own Docker image
+# Dockerfile for building your own Cellframe Node Docker image
 
 With this Dockerfile you can build your own Cellframe node docker image from the latest node version available.
 
