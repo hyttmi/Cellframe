@@ -62,13 +62,8 @@ build() {
 	cmake --build build
 }
 
-check() {
-	echo "Skipping tests..."
-}
-
 package() {
 	cd "$pkgname"
-	echo "$pkgdir"
 	DESTDIR="$pkgdir" cmake --install build
 	echo "-- Creating default configuration files for Cellframe node..."
 
@@ -110,18 +105,14 @@ package() {
 	mkdir -p $PREFIX/var/{run,lib/wallet,lib/global_db,lib/plugins,log}
 
 	if [[ $(command -v logrotate) ]] ; then
-	        echo "-- Symlinking logrotate file..."
+	        echo "-- Installing logrotate file..."
 	        install -D $PREFIX/share/logrotate/$pkgname $pkgdir/etc/logrotate.d/$pkgname || return 1
 	else
 	    echo "-- Logrotate not available, skipping logrotate configuration file installation..."
 	fi
-	if [[ $(ps --no-headers -o comm 1) == "systemd" ]] ; then
-	    echo "-- Installing cellframe-node.service..."
-		install -D $PREFIX/share/$pkgname.service $pkgdir/etc/systemd/system/$pkgname.service || return 1
-		systemctl daemon-reload
-	else
-	    echo "-- Systemd not available on your system, skipping cellframe-node.service installation..."
-	fi
+	
+	echo "-- Installing cellframe-node.service..."
+	install -D $PREFIX/share/$pkgname.service $pkgdir/etc/systemd/system/$pkgname.service || return 1
 
 	echo
 	echo
@@ -131,4 +122,6 @@ package() {
 	echo
 	echo "Configuration files are available at /opt/cellframe-node/etc"
 	echo "-----------------------------------------------------------------------------------"
+	echo
+	echo
 }
