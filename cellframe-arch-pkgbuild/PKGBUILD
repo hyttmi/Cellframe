@@ -1,0 +1,134 @@
+# Maintainer: Mika Hyttinen <mika.hyttinen@gmail.com>
+pkgname=cellframe-node
+pkgver=5.1.355
+pkgrel=1
+epoch=
+pkgdesc=""
+arch=(x86_64)
+url="https://cellframe.net"
+license=('unknown')
+groups=()
+depends=(python)
+makedepends=(cmake python)
+checkdepends=()
+optdepends=(logrotate)
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=(!buildflags !makeflags)
+install=
+changelog=
+source=("git+https://gitlab.demlabs.net/cellframe/$pkgname.git")
+noextract=()
+md5sums=('SKIP')
+validpgpkeys=()
+
+pkgver() {
+	cd "$pkgname"
+	grep -Po '=\K[0-9]*' version.mk | tr '\n' '.' | head -c -1
+}
+	
+prepare() {
+	cd "$pkgname"
+	cat << EOF > .gitmodules
+[submodule "python-cellframe"]
+	path = python-cellframe
+	url = https://gitlab.demlabs.net/cellframe/python-cellframe.git
+	branch = master
+[submodule "cellframe-sdk"]
+	path = cellframe-sdk
+	url = https://gitlab.demlabs.net/cellframe/cellframe-sdk.git
+	branch = master
+[submodule "prod_build"]
+	path = prod_build
+	url = https://gitlab.demlabs.net/cellframe/prod_build_cellframe-node
+[submodule "dap-sdk"]
+	path = dap-sdk
+	url = https://gitlab.demlabs.net/dap/dap-sdk
+	branch = develop
+[submodule "test/libdap-test"]
+	path = test/libdap-test
+	url = https://gitlab.demlabs.net/cellframe/libdap-test.git
+	branch = master
+EOF
+	git submodule sync
+	git submodule update --init --recursive
+}
+
+build() {
+	cd "$pkgname"
+	cmake -B build
+	cmake --build build
+}
+
+check() {
+	echo "Skipping tests..."
+}
+
+package() {
+	cd "$pkgname"
+	echo "$pkgdir"
+	DESTDIR="$pkgdir" cmake --install build
+	echo "-- Creating default configuration files for Cellframe node..."
+
+	PREFIX="$pkgdir/opt/$pkgname"
+
+	CFG_TPL="$PREFIX/share/configs/$pkgname.cfg.tpl"
+	CFG="$PREFIX/etc/$pkgname.cfg"
+
+	AUTO_ONLINE="true"
+	SERVER_ENABLED="true"
+	SERVER_ADDR="0.0.0.0"
+	SERVER_PORT="8079"
+	NOTIFY_ADDR="127.0.0.1"
+	NOTIFY_PORT="8080"
+	DEBUG_MODE="false"
+
+	NETS=( Backbone subzero kelvpn-minkowski mileena )
+	NODE_ROLE="full"
+
+	for NET_NAME in "${NETS[@]}"
+	do
+	    CFG_NET="$PREFIX/etc/network/$NET_NAME.cfg"
+	    CFG_NET_TPL="$PREFIX/share/configs/network/$NET_NAME.cfg.tpl"
+	    cat $CFG_NET_TPL > $CFG_NET
+	    sed -i "s|{NODE_TYPE}|$NODE_ROLE|g" $CFG_NET
+	done
+
+	cat $CFG_TPL > $CFG
+	sed -i "s|{PREFIX}|/opt|g" $CFG
+	sed -i "s|{DEBUG_MODE}|$DEBUG_MODE|g" $CFG
+	sed -i "s|{AUTO_ONLINE}|$AUTO_ONLINE|g" $CFG
+	sed -i "s|{SERVER_ENABLED}|$SERVER_ENABLED|g" $CFG
+	sed -i "s|{SERVER_PORT}|$SERVER_PORT|g" $CFG
+	sed -i "s|{SERVER_ADDR}|$SERVER_ADDR|g" $CFG
+	sed -i "s|{NOTIFY_SRV_ADDR}|$NOTIFY_ADDR|g" $CFG
+	sed -i "s|{NOTIFY_SRV_PORT}|$NOTIFY_PORT|g" $CFG
+
+	echo "-- Creating directories..."
+	mkdir -p $PREFIX/var/{run,lib/wallet,lib/global_db,lib/plugins,log}
+
+	if [[ $(command -v logrotate) ]] ; then
+	        echo "-- Symlinking logrotate file..."
+	        install -D $PREFIX/share/logrotate/$pkgname $pkgdir/etc/logrotate.d/$pkgname || return 1
+	else
+	    echo "-- Logrotate not available, skipping logrotate configuration file installation..."
+	fi
+	if [[ $(ps --no-headers -o comm 1) == "systemd" ]] ; then
+	    echo "-- Installing cellframe-node.service..."
+		install -D $PREFIX/share/$pkgname.service $pkgdir/etc/systemd/system/$pkgname.service || return 1
+		systemctl daemon-reload
+	else
+	    echo "-- Systemd not available on your system, skipping cellframe-node.service installation..."
+	fi
+
+	echo
+	echo
+	echo "-----------------------------------------------------------------------------------"
+	echo "Run cellframe-node manually from /opt/cellframe-node/bin/cellframe-node"
+	echo "If you want to run node automatically, do systemctl enable --now cellframe-node"
+	echo
+	echo "Configuration files are available at /opt/cellframe-node/etc"
+	echo "-----------------------------------------------------------------------------------"
+}
