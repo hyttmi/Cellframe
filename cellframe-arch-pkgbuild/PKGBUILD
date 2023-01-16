@@ -1,28 +1,18 @@
 # Maintainer: Mika Hyttinen <mika.hyttinen@gmail.com>
 pkgname=cellframe-node
 pkgver=5.1.355
-pkgrel=1
-epoch=
-pkgdesc=""
-arch=(x86_64)
+pkgrel=19
+pkgdesc="Quantum safe, service oriented blockchain platform."
+arch=('x86_64' 'aarch64')
 url="https://cellframe.net"
 license=('unknown')
-groups=()
 depends=(python logrotate)
 makedepends=(cmake python)
-checkdepends=()
-optdepends=()
-provides=()
-conflicts=()
-replaces=()
-backup=()
+provides=("cellframe-node" "cellframe-node-cli" "cellframe-node-tool")
 options=(!buildflags !makeflags)
-install=$pkgname.install
-changelog=
 source=("git+https://gitlab.demlabs.net/cellframe/$pkgname.git")
-noextract=()
 md5sums=('SKIP')
-validpgpkeys=()
+install=$pkgname.install
 
 pkgver() {
 	cd "$pkgname"
@@ -67,44 +57,12 @@ build() {
 package() {
 	cd "$pkgname"
 	DESTDIR="$pkgdir" cmake --install build
-	echo "-- Creating default configuration files for Cellframe node..."
 
-	PREFIX="$pkgdir/opt/$pkgname"
-	CFG_TPL="$PREFIX/share/configs/$pkgname.cfg.tpl"
-	CFG="$PREFIX/etc/$pkgname.cfg"
+	prefix="$pkgdir/opt/$pkgname"
 
-	AUTO_ONLINE="true"
-	SERVER_ENABLED="true"
-	SERVER_ADDR="0.0.0.0"
-	SERVER_PORT="8079"
-	NOTIFY_ADDR="127.0.0.1"
-	NOTIFY_PORT="8080"
-	DEBUG_MODE="false"
-
-	NETS=( Backbone subzero kelvpn-minkowski mileena )
-	NODE_ROLE="full"
-
-	for NET_NAME in "${NETS[@]}"
-	do
-	    CFG_NET="$PREFIX/etc/network/$NET_NAME.cfg"
-	    CFG_NET_TPL="$PREFIX/share/configs/network/$NET_NAME.cfg.tpl"
-	    cat $CFG_NET_TPL > $CFG_NET
-	    sed -i "s|{NODE_TYPE}|$NODE_ROLE|g" $CFG_NET
-	done
-
-	cat $CFG_TPL > $CFG
-	sed -i "s|{PREFIX}|/opt/$pkgname|g" $CFG
-	sed -i "s|{DEBUG_MODE}|$DEBUG_MODE|g" $CFG
-	sed -i "s|{AUTO_ONLINE}|$AUTO_ONLINE|g" $CFG
-	sed -i "s|{SERVER_ENABLED}|$SERVER_ENABLED|g" $CFG
-	sed -i "s|{SERVER_PORT}|$SERVER_PORT|g" $CFG
-	sed -i "s|{SERVER_ADDR}|$SERVER_ADDR|g" $CFG
-	sed -i "s|{NOTIFY_SRV_ADDR}|$NOTIFY_ADDR|g" $CFG
-	sed -i "s|{NOTIFY_SRV_PORT}|$NOTIFY_PORT|g" $CFG
-
-	install -Dm 644 $PREFIX/share/logrotate/$pkgname -t $pkgdir/etc/logrotate.d || return 1
+	install -Dm 644 $prefix/share/logrotate/$pkgname -t $pkgdir/etc/logrotate.d || return 1
 	
-	install -Dm 644 $PREFIX/share/$pkgname.service -t $pkgdir/usr/lib/systemd/system || return 1
+	install -Dm 644 $prefix/share/$pkgname.service -t $pkgdir/usr/lib/systemd/system || return 1
 
-	install -Dm 644 $PREFIX/share/profile.d/$pkgname.sh -t $pkgdir/etc/profile.d || return 1
+	install -Dm 644 $prefix/share/profile.d/$pkgname.sh -t $pkgdir/etc/profile.d || return 1
 }
