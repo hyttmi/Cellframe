@@ -1,7 +1,7 @@
 # Maintainer: Mika Hyttinen <mika.hyttinen@gmail.com>
 pkgname=cellframe-node
 pkgver=5.1.355
-pkgrel=19
+pkgrel=1
 pkgdesc="Quantum safe, service oriented blockchain platform."
 arch=('x86_64' 'aarch64')
 url="https://cellframe.net"
