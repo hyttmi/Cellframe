@@ -8,16 +8,16 @@ arch=(x86_64)
 url="https://cellframe.net"
 license=('unknown')
 groups=()
-depends=(python)
+depends=(python logrotate)
 makedepends=(cmake python)
 checkdepends=()
-optdepends=(logrotate)
+optdepends=()
 provides=()
 conflicts=()
 replaces=()
 backup=()
 options=(!buildflags !makeflags)
-install=
+install=$pkgname.install
 changelog=
 source=("git+https://gitlab.demlabs.net/cellframe/$pkgname.git")
 noextract=()
@@ -58,8 +58,10 @@ EOF
 
 build() {
 	cd "$pkgname"
-	cmake -B build
-	cmake --build build
+	cmake -B build \
+		-DCMAKE_BUILD_TYPE='Release' \
+        -Wno-dev
+	cmake --build build -j$(nproc)
 }
 
 package() {
@@ -68,7 +70,6 @@ package() {
 	echo "-- Creating default configuration files for Cellframe node..."
 
 	PREFIX="$pkgdir/opt/$pkgname"
-
 	CFG_TPL="$PREFIX/share/configs/$pkgname.cfg.tpl"
 	CFG="$PREFIX/etc/$pkgname.cfg"
 
@@ -92,7 +93,7 @@ package() {
 	done
 
 	cat $CFG_TPL > $CFG
-	sed -i "s|{PREFIX}|/opt|g" $CFG
+	sed -i "s|{PREFIX}|/opt/$pkgname|g" $CFG
 	sed -i "s|{DEBUG_MODE}|$DEBUG_MODE|g" $CFG
 	sed -i "s|{AUTO_ONLINE}|$AUTO_ONLINE|g" $CFG
 	sed -i "s|{SERVER_ENABLED}|$SERVER_ENABLED|g" $CFG
@@ -101,27 +102,9 @@ package() {
 	sed -i "s|{NOTIFY_SRV_ADDR}|$NOTIFY_ADDR|g" $CFG
 	sed -i "s|{NOTIFY_SRV_PORT}|$NOTIFY_PORT|g" $CFG
 
-	echo "-- Creating directories..."
-	mkdir -p $PREFIX/var/{run,lib/wallet,lib/global_db,lib/plugins,log}
-
-	if [[ $(command -v logrotate) ]] ; then
-	        echo "-- Installing logrotate file..."
-	        install -D $PREFIX/share/logrotate/$pkgname $pkgdir/etc/logrotate.d/$pkgname || return 1
-	else
-	    echo "-- Logrotate not available, skipping logrotate configuration file installation..."
-	fi
+	install -Dm 644 $PREFIX/share/logrotate/$pkgname -t $pkgdir/etc/logrotate.d || return 1
 	
-	echo "-- Installing cellframe-node.service..."
-	install -D $PREFIX/share/$pkgname.service $pkgdir/etc/systemd/system/$pkgname.service || return 1
+	install -Dm 644 $PREFIX/share/$pkgname.service -t $pkgdir/usr/lib/systemd/system || return 1
 
-	echo
-	echo
-	echo "-----------------------------------------------------------------------------------"
-	echo "Run cellframe-node manually from /opt/cellframe-node/bin/cellframe-node"
-	echo "If you want to run node automatically, do systemctl enable --now cellframe-node"
-	echo
-	echo "Configuration files are available at /opt/cellframe-node/etc"
-	echo "-----------------------------------------------------------------------------------"
-	echo
-	echo
+	install -Dm 644 $PREFIX/share/profile.d/$pkgname.sh -t $pkgdir/etc/profile.d || return 1
 }

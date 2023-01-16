@@ -1,0 +1,28 @@
+post_install() {
+	echo "-- Creating default configuration files or Cellframe node..."
+	APP_NAME="cellframe-node"
+    PREFIX="/opt/${APP_NAME}"
+
+	mkdir -p $PREFIX/var/{run,lib/wallet,lib/global_db,lib/plugins,log} # Make sure these directories are created and not removed on package removal.
+
+	source /etc/profile.d/${APP_NAME}.sh
+
+    cat << EOF
+    ########################################################################
+    ########################################################################
+    ##                                                                    ##
+    ##  Cellframe node                                                    ##
+    ##  ____________                                                      ##
+    ##                                                                    ##
+    ##  To start Cellframe node                                           ##
+    ##                                                                    ##
+    ##      # systemctl start cellframe-node                              ##
+    ##                                                                    ##
+    ##                                                                    ##
+    ##  Config:        /opt/cellframe-node/etc/cellframe-node.cfg         ##
+    ##  Documentation: https://wiki.cellframe.net/en/home                 ##
+    ##                                                                    ##
+    ########################################################################
+    ########################################################################
+EOF
+}
