@@ -2,7 +2,7 @@
 pkgname=cellframe-node
 pkgver=5.1.355
 pkgrel=1
-pkgdesc="Quantum safe, service oriented blockchain platform."
+pkgdesc="Cellframe node"
 arch=('x86_64' 'aarch64')
 url="https://cellframe.net"
 license=('LGPL3')
