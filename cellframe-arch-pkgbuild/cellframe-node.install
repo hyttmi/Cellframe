@@ -1,46 +1,5 @@
 post_install() {
-	echo "-->> Creating default configuration files or Cellframe node..."
-	APP_NAME="cellframe-node"
-    PREFIX="/opt/$APP_NAME"
-	CFG_TPL="$PREFIX/share/configs/$APP_NAME.cfg.tpl"
-	CFG="$PREFIX/etc/$APP_NAME.cfg"
-
-	AUTO_ONLINE="true"
-	SERVER_ENABLED="true"
-	SERVER_ADDR="0.0.0.0"
-	SERVER_PORT="8079"
-	NOTIFY_ADDR="127.0.0.1"
-	NOTIFY_PORT="8080"
-	DEBUG_MODE="false"
-
-	NETS=( Backbone subzero kelvpn-minkowski mileena )
-	NODE_ROLE="full"
-
-	for NET_NAME in "${NETS[@]}"
-	do
-	    CFG_NET="$PREFIX/etc/network/$NET_NAME.cfg"
-	    CFG_NET_TPL="$PREFIX/share/configs/network/$NET_NAME.cfg.tpl"
-	    cat $CFG_NET_TPL > $CFG_NET
-	    sed -i "s|{NODE_TYPE}|$NODE_ROLE|g" $CFG_NET
-	done
-
-	if [[ -f $CFG ]]; then
-		echo "-->> Old configuration file found, not overwriting it..."
-	else
-		cat $CFG_TPL > $CFG
-		sed -i "s|{PREFIX}|$PREFIX|g" $CFG
-		sed -i "s|{DEBUG_MODE}|$DEBUG_MODE|g" $CFG
-		sed -i "s|{AUTO_ONLINE}|$AUTO_ONLINE|g" $CFG
-		sed -i "s|{SERVER_ENABLED}|$SERVER_ENABLED|g" $CFG
-		sed -i "s|{SERVER_PORT}|$SERVER_PORT|g" $CFG
-		sed -i "s|{SERVER_ADDR}|$SERVER_ADDR|g" $CFG
-		sed -i "s|{NOTIFY_SRV_ADDR}|$NOTIFY_ADDR|g" $CFG
-		sed -i "s|{NOTIFY_SRV_PORT}|$NOTIFY_PORT|g" $CFG
-	fi
-
 	mkdir -p $PREFIX/var/{run,lib/wallet,lib/global_db,lib/plugins,log} # Make sure these directories are created and not removed on package removal.
-
-	source /etc/profile.d/$APP_NAME.sh
 
     cat << EOF
     ########################################################################
@@ -49,18 +8,23 @@ post_install() {
     ##  Cellframe node                                                    ##
     ##  ____________                                                      ##
     ##                                                                    ##
-    ##  To start Cellframe node                                           ##
+    ##  To start Cellframe node manually:                                 ##
     ##                                                                    ##
-    ##      # systemctl start cellframe-node                              ##
+    ##      # Run from /opt/cellframe-node/bin                            ##
+	##                                                                    ##
+	##  Run automatically:                                                ##
+	##      # systemctl enable --now cellframe-node.service               ##
     ##                                                                    ##
     ##                                                                    ##
-    ##  Config:        /opt/cellframe-node/etc/cellframe-node.cfg         ##
+    ##  Configuration file: /opt/cellframe-node/etc/cellframe-node.cfg    ##
     ##  Documentation: https://wiki.cellframe.net/en/home                 ##
     ##                                                                    ##
     ########################################################################
     ########################################################################
 EOF
 }
+
+source /etc/profile.d/cellframe-node.sh
 
 pre_upgrade() {
 	post_install
