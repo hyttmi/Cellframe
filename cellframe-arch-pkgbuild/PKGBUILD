@@ -13,6 +13,7 @@ options=(!buildflags !makeflags)
 source=(git+https://gitlab.demlabs.net/cellframe/$pkgname.git
 		git+https://gitlab.demlabs.net/cellframe/cellframe-sdk.git
 		git+https://gitlab.demlabs.net/cellframe/python-cellframe.git
+		cellframe-node.cfg
 		Backbone.cfg
 		kelvpn-minkowski.cfg
 		mileena.cfg
@@ -24,6 +25,7 @@ source=(git+https://gitlab.demlabs.net/cellframe/$pkgname.git
 md5sums=('SKIP'
          'SKIP'
          'SKIP'
+         '47f1aa606f2b91d4dfbc22ea263d540a'
          '65a864051d256b08d656079d1c6fa7af'
          '0b5a872c2ea133a4df0443a415e9f311'
          'f5bc95f5f8915d074c66398b2acb0907'
@@ -33,6 +35,12 @@ md5sums=('SKIP'
          '797a5e1704727d387713105e1f101d99'
          'e6a600fd5e1d9cbde2d983680233ad02')
 install=$pkgname.install
+backup=('opt/cellframe-node/etc/cellframe-node.cfg')
+_netcfg=(
+		Backbone.cfg
+		kelvpn-minkowski.cfg
+		mileena.cfg
+		subzero.cfg)
 
 pkgver() {
 	cd "$pkgname"
@@ -41,10 +49,10 @@ pkgver() {
 	
 prepare() {
 	cd "$srcdir"
-	rm -rf "$pkgname/cellframe-sdk"
-	rm -rf "$pkgname/python-cellframe"
-	mv -f cellframe-sdk "$pkgname"
-	mv -f python-cellframe "$pkgname"
+	rm -rf "$srcdir/$pkgname/cellframe-sdk"
+	rm -rf "$srcdir/$pkgname/python-cellframe"
+	ln -sf "$srcdir/cellframe-sdk" "$srcdir/$pkgname/cellframe-sdk"
+	ln -sf "$srcdir/python-cellframe" "$srcdir/$pkgname/python-cellframe"
 }
 
 build() {
@@ -57,16 +65,23 @@ build() {
 
 package() {
 	cd "$pkgname"
+
+	_prefix="$pkgdir/opt/$pkgname"
 	
 	DESTDIR="$pkgdir" cmake --install build
 
-	_prefix="$pkgdir/opt/$pkgname"
-
 	install -Dm 644 "$srcdir/$pkgname/LICENSE" -t "$pkgdir/usr/share/licenses/$pkgname" || return 1
 
-	install -Dm 644 "$srcdir/$pkgname.logrotate" -t "$pkgdir/etc/logrotate.d/$pkgname" || return 1
+	install -Dm 644 "$srcdir/$pkgname.logrotate" "$pkgdir/etc/logrotate.d/$pkgname" || return 1
 	
 	install -Dm 644 "$srcdir/$pkgname.service" -t "$pkgdir/usr/lib/systemd/system" || return 1
 
-	install -Dm 644 "$srcdir/$pkgname.sh" -t "$pkgdir/etc/profile.d"
+	install -Dm 644 "$srcdir/$pkgname.sh" -t "$pkgdir/etc/profile.d" || return 1
+
+	install -Dm 644 "$srcdir/$pkgname.cfg" -t "$_prefix/etc" || return 1
+
+	for _nets in "${_netcfg[@]}"
+	do
+		install -Dm 644 "$srcdir/$_nets" -t "$_prefix/etc/network" || return 1
+	done
 }

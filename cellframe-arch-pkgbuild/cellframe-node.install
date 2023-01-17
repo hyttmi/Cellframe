@@ -1,5 +1,5 @@
 post_install() {
-	mkdir -p $PREFIX/var/{run,lib/wallet,lib/global_db,lib/plugins,log} # Make sure these directories are created and not removed on package removal.
+	mkdir -p "$_prefix/var/{run,lib/wallet,lib/global_db,lib/plugins,log}" # Make sure these directories are created and not removed on package removal.
 
     cat << EOF
     ########################################################################
@@ -11,9 +11,9 @@ post_install() {
     ##  To start Cellframe node manually:                                 ##
     ##                                                                    ##
     ##      # Run from /opt/cellframe-node/bin                            ##
-	##                                                                    ##
-	##  Run automatically:                                                ##
-	##      # systemctl enable --now cellframe-node.service               ##
+    ##                                                                    ##
+    ##  Run automatically:                                                ##
+    ##      # systemctl enable --now cellframe-node.service               ##
     ##                                                                    ##
     ##                                                                    ##
     ##  Configuration file: /opt/cellframe-node/etc/cellframe-node.cfg    ##
