@@ -46,10 +46,8 @@ prepare() {
 	cd "$srcdir"
 	rm -rf "$srcdir/$pkgname/cellframe-sdk"
 	rm -rf "$srcdir/$pkgname/python-cellframe"
-	rm -rf "$srcdir/$pkgname/dap-sdk"
 	ln -sf "$srcdir/cellframe-sdk" "$srcdir/$pkgname/cellframe-sdk"
 	ln -sf "$srcdir/python-cellframe" "$srcdir/$pkgname/python-cellframe"
-	ln -sf "$srcdir/dap-sdk" "$srcdir/$pkgname/dap-sdk"
 }
 
 build() {
