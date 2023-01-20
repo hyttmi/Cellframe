@@ -2,6 +2,7 @@ post_install() {
     systemctl daemon-reload
 
     cat << EOF
+
     ########################################################################
     ########################################################################
     ##                                                                    ##
@@ -16,7 +17,7 @@ post_install() {
     ##                                                                    ##
     ##      # systemctl enable --now cellframe-node.service               ##
     ##                                                                    ##
-    ##  Network  configuration is set to full mode by default.            ##
+    ##  Network configuration is set to full mode by default.            ##
     ##  you can modify the network configuration parameters in:           ##
     ##                                                                    ##
     ##      # /opt/cellframe-node/etc/network/*.cfg                       ##
@@ -29,6 +30,7 @@ post_install() {
     ##                                                                    ##
     ########################################################################
     ########################################################################
+
 EOF
 
     source /etc/profile.d/cellframe-node.sh

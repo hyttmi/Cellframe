@@ -2,7 +2,7 @@
 pkgname=cellframe-node
 pkgver=5.1.355
 pkgrel=1
-pkgdesc="Cellframe blockchain node with powerful SDK"
+pkgdesc="Cellframe blockchain node with a powerful SDK"
 arch=('x86_64' 'aarch64')
 url="https://cellframe.net"
 license=('LGPL3')
@@ -46,14 +46,16 @@ prepare() {
 	cd "$srcdir"
 	rm -rf "$srcdir/$pkgname/cellframe-sdk"
 	rm -rf "$srcdir/$pkgname/python-cellframe"
+	rm -rf "$srcdir/$pkgname/dap-sdk"
 	ln -sf "$srcdir/cellframe-sdk" "$srcdir/$pkgname/cellframe-sdk"
 	ln -sf "$srcdir/python-cellframe" "$srcdir/$pkgname/python-cellframe"
+	ln -sf "$srcdir/dap-sdk" "$srcdir/$pkgname/dap-sdk"
 }
 
 build() {
 	cd "$pkgname"
 	cmake -B build \
-		-DCMAKE_BUILD_TYPE='None' \
+		-DCMAKE_BUILD_TYPE='Release' \
         -Wno-dev
 	cmake --build build -j$(nproc)
 }
