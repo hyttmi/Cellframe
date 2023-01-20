@@ -1,7 +1,7 @@
 # Maintainer: Mika Hyttinen <mika.hyttinen@gmail.com>
 pkgname=cellframe-node
 pkgver=5.1.355
-pkgrel=2
+pkgrel=4
 pkgdesc="Cellframe node"
 arch=('x86_64' 'aarch64')
 url="https://cellframe.net"
@@ -58,7 +58,7 @@ prepare() {
 build() {
 	cd "$pkgname"
 	cmake -B build \
-		-DCMAKE_BUILD_TYPE='Release' \
+		-DCMAKE_BUILD_TYPE='None' \
         -Wno-dev
 	cmake --build build -j$(nproc)
 }

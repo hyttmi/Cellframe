@@ -1,5 +1,5 @@
 post_install() {
-	mkdir -p "$_prefix/var/{run,lib/wallet,lib/global_db,lib/plugins,log}" # Make sure these directories are created and not removed on package removal.
+    systemctl daemon-reload
 
     cat << EOF
     ########################################################################
@@ -22,10 +22,18 @@ post_install() {
     ########################################################################
     ########################################################################
 EOF
-}
 
-source /etc/profile.d/cellframe-node.sh
+    source /etc/profile.d/cellframe-node.sh
+
+}
 
 pre_upgrade() {
 	post_install
 }
+
+pre_remove() {
+    systemctl stop cellframe-node.service
+    systemctl disable cellframe-node.service
+    systemctl daemon-reload
+}
+
