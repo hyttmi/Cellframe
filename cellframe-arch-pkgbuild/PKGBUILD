@@ -1,8 +1,8 @@
 # Maintainer: Mika Hyttinen <mika.hyttinen@gmail.com>
 pkgname=cellframe-node
 pkgver=5.1.355
-pkgrel=4
-pkgdesc="Cellframe node"
+pkgrel=1
+pkgdesc="Cellframe blockchain node with powerful SDK"
 arch=('x86_64' 'aarch64')
 url="https://cellframe.net"
 license=('LGPL3')
@@ -36,11 +36,6 @@ md5sums=('SKIP'
          'e6a600fd5e1d9cbde2d983680233ad02')
 install=$pkgname.install
 backup=('opt/cellframe-node/etc/cellframe-node.cfg')
-_netcfg=(
-		Backbone.cfg
-		kelvpn-minkowski.cfg
-		mileena.cfg
-		subzero.cfg)
 
 pkgver() {
 	cd "$pkgname"
@@ -80,7 +75,7 @@ package() {
 
 	install -Dm 644 "$srcdir/$pkgname.cfg" -t "$_prefix/etc" || return 1
 
-	for _nets in "${_netcfg[@]}"
+	for _nets in Backbone.cfg kelvpn-minkowski.cfg mileena.cfg subzero.cfg
 	do
 		install -Dm 644 "$srcdir/$_nets" -t "$_prefix/etc/network" || return 1
 	done
