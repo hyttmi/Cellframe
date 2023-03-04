@@ -1,0 +1,35 @@
+diff --git a/CellFrameWallet/GUI/forms/controls/PopupInfo.qml b/CellFrameWallet/GUI/forms/controls/PopupInfo.qml
+index 86cbf64..582ff37 100644
+--- a/CellFrameWallet/GUI/forms/controls/PopupInfo.qml
++++ b/CellFrameWallet/GUI/forms/controls/PopupInfo.qml
+@@ -14,6 +14,8 @@ Popup {
+     property string infoText: ""
+     property int commonHeight: 20
+     property int yShift: 50
++    property int shadowOffset: 5
++    property int shadowRadius: 8
+ 
+     property real startY: -popup.parent.y - height
+     property real stopY: -popup.parent.y + yShift
+@@ -21,7 +23,7 @@ Popup {
+     width: rectItem.width
+     height: rectItem.height
+ 
+-    x: parent.width/2 - width/2
++    x: parent.width/2 - width/2 - (shadowOffset + shadowRadius)
+ 
+     opacity: 0
+     visible: false
+@@ -96,9 +98,9 @@ Popup {
+     {
+         id: shadow
+         anchors.fill: rectItem
+-        horizontalOffset: 5
+-        verticalOffset: 5
+-        radius: 8
++        horizontalOffset: shadowOffset
++        verticalOffset: shadowOffset
++        radius: shadowRadius
+         samples: 10
+         cached: true
+         color: currTheme.shadowColor
