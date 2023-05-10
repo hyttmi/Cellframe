@@ -1,18 +1,21 @@
-Submodule python-cellframe contains modified content
-diff --git a/python-cellframe/CellFrame/python-cellframe_common.c b/python-cellframe/CellFrame/python-cellframe_common.c
-index 7504317..c1eb23e 100644
---- a/python-cellframe/CellFrame/python-cellframe_common.c
-+++ b/python-cellframe/CellFrame/python-cellframe_common.c
-@@ -13,10 +13,10 @@ char* _PyErr_get_stacktrace(PyObject *a_obj){
+diff --git a/CellFrame/python-cellframe_common.c b/CellFrame/python-cellframe_common.c
+index 08dc1b9..34217d5 100644
+--- a/CellFrame/python-cellframe_common.c
++++ b/CellFrame/python-cellframe_common.c
+@@ -13,10 +13,15 @@ char* _PyErr_get_stacktrace(PyObject *a_obj){
      char  *s = "\tStack trace:\n";
      size_t cnt = 0;
-     while (l_traceback != NULL) {
--        PyCodeObject *l_code = l_traceback->tb_frame->f_code;
+     while (l_traceback != NULL)  {
++#if PY_VERSION_HEX < 0x030900B1
+         PyCodeObject *l_code = l_traceback->tb_frame->f_code;
++        int l_lineo = l_traceback->tb_lineno;
++#else
 +        PyCodeObject *l_code = PyFrame_GetCode(l_traceback->tb_frame);
++        int l_lineo = PyFrame_GetLineNumber(l_traceback->tb_frame);
++#endif
          const char *l_name = PyUnicode_AsUTF8(l_code->co_name);
          const char *l_file = PyUnicode_AsUTF8(l_code->co_filename);
 -        int l_lineo = l_traceback->tb_lineno;
-+        int l_lineo = PyFrame_GetLineNumber(l_traceback->tb_frame);
          s = dap_strdup_printf("%s\t\t(%zu) File \"%s\", line %d, in %s\n", s, cnt, l_file, l_lineo, l_name);
          l_traceback = l_traceback->tb_next;
          cnt++;
