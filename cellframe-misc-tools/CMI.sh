@@ -78,25 +78,25 @@ download_and_install_node() {
 
 create_cert() {
     read -p "--- Input a desired name to your certificate: " cert
-        if [[ "$cert" =~ ^[a-zA-Z0-9]*$ ]]; then
+        if [[ $cert =~ ^[a-zA-Z0-9]*$ ]]; then
             echo "--- Your certificate backbone.$cert will be created..."
             sh -c "/opt/cellframe-node/bin/cellframe-node-tool cert create backbone.$cert sig_dil"
             declare -x -g CERT="backbone.$cert"
             create_wallet
         else
-            echo "Supported characters are a-z, A-Z, 0-9."
+            echo "--- Supported characters are a-z, A-Z, 0-9."
             create_cert
         fi
 }
 
 create_wallet() {
     read -p "--- Input a desired name to your wallet: " walletname
-        if [[ "$walletname" =~ ^[a-zA-Z0-9]*$ ]]; then
+        if [[ $walletname =~ ^[a-zA-Z0-9]*$ ]]; then
             echo "--- Your wallet $walletname will be created..."
             declare -x -g WALLETNAME=$walletname
             get_seed
         else
-            echo "Supported characters are a-z, A-Z, 0-9."
+            echo "--- Supported characters are a-z, A-Z, 0-9."
             create_wallet
         fi
 }
@@ -110,7 +110,7 @@ get_seed() {
             declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
             configure_node
         else
-            echo "Not a 24 word seed phrase, your seed phrase had $count words!"
+            echo "--- Not a 24 word seed phrase, your seed phrase had $count words!"
             get_seed
         fi
 }
@@ -130,7 +130,7 @@ configure_node() {
     sed -i "s/^#blocks-sign-cert=.*/blocks-sign-cert=$CERT/g" $BACKBONE_CONFIG_FILE
     sed -i "s/^#fee_addr=.*/fee_addr=$WALLETADDRESS/g" $BACKBONE_CONFIG_FILE
     read -p "--- Input the amount of CELL tokens which will be automatically collected after a desired amount is accumulated: " collectamount
-    if [[ $collectamount =~ ^[0-9] ]]; then
+    if [[ $collectamount =~ ^[0-9]*$ ]]; then
         echo "--- Setting to $collectamount of CELL tokens..."
     else
         echo "--- Unsupported value, using default value of 2 CELL tokens"
