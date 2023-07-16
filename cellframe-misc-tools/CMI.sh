@@ -30,6 +30,10 @@ showinfo() {
     ##                                                                    ##
     ##      1.) Seed phrase from your wallet (24 words)                   ##
     ##                                                                    ##
+    ##            OR                                                      ##
+    ##                                                                    ##
+    ##      2.) .dwallet file (place to same directory with the script)   ##
+    ##                                                                    ##
     ##  Problems may occur and therefore the creator of this script       ##
     ##  won't be responsible about any lost funds or wallets if/when      ##
     ##  using this script!                                                ##
@@ -83,7 +87,6 @@ download_and_install_node() {
     wget -q https://pub.cellframe.net/linux/cellframe-node/master/$LATEST_VERSION
     DEBIAN_FRONTEND=noninteractive apt install -y -qq ./$LATEST_VERSION > /dev/null #stdout to nothingness!
     rm $LATEST_VERSION
-    echo "--- Restarting cellframe-node.service..."
     configure_node
 }
 
@@ -91,6 +94,13 @@ configure_node() {
     NODE_CONFIG_FILE="/opt/cellframe-node/etc/cellframe-node.cfg"
     BACKBONE_CONFIG_FILE="/opt/cellframe-node/etc/network/Backbone.cfg"
     declare -x -g NODE_ADDR=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli net -net Backbone get status | grep -oP '[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}'")
+    read -p "--- Input the amount of CELL tokens which will be automatically collected after a desired amount is accumulated: " collectamount
+    if [[ $collectamount =~ ^[0-9]*$ ]]; then
+        echo "--- Setting to $collectamount CELL tokens..."
+    else
+        echo "--- Unsupported value!"
+        configure_node
+    fi
     echo "--- Modifying node configuration..."
     sed -i "s/^auto_online=.*/auto_online=true/g" $NODE_CONFIG_FILE
     sed -i "0,/enabled=false/s//enabled=true/" $NODE_CONFIG_FILE
@@ -101,16 +111,9 @@ configure_node() {
     sed -i "s/^node-role=.*/node-role=master/g"  $BACKBONE_CONFIG_FILE
     sed -i "s/^#blocks-sign-cert=.*/blocks-sign-cert=$CERT/g" $BACKBONE_CONFIG_FILE
     sed -i "s/^#fee_addr=.*/fee_addr=$WALLETADDRESS/g" $BACKBONE_CONFIG_FILE
-    read -p "--- Input the amount of CELL tokens which will be automatically collected after a desired amount is accumulated: " collectamount
-    if [[ $collectamount =~ ^[0-9]*$ ]]; then
-        echo "--- Setting to $collectamount of CELL tokens..."
-    else
-        echo "--- Unsupported value, using default value of 2 \$CELL tokens"
-        collectamount=2
-    fi
     sed -i "/^\[esbocs\]/a set_collect_fee=$collectamount" $BACKBONE_CONFIG_FILE
+    echo "--- Restarting cellframe-node, please wait..."
     systemctl restart cellframe-node.service
-    echo "--- Waiting 30 seconds for node to restart..."
     sleep 30
     create_cert
 }
@@ -121,11 +124,58 @@ create_cert() {
             echo "--- Your certificate backbone.$cert will be created..."
             sh -c "/opt/cellframe-node/bin/cellframe-node-tool cert create backbone.$cert sig_dil"
             declare -x -g CERT="backbone.$cert"
-            create_wallet
+            check_wallet_files
         else
             echo "--- Supported characters are a-z, A-Z, 0-9. No spaces."
             create_cert
         fi
+}
+
+check_wallet_files() {
+    SCRIPT_DIR=$(dirname "$0")
+    WALLETPATH="/opt/cellframe-node/var/lib/wallet/"
+    WALLETFILES=($(find $SCRIPT_DIR -iname '*.dwallet' -type f -printf '%f '))
+    ARRAY_LEN=${#WALLETFILES[@]}
+    if [[ ! -z $WALLETFILES ]]; then
+        if [[ $ARRAY_LEN -gt 1 ]]; then
+            echo "--- Found multiple wallets in current directory..."
+            for i in ${!WALLETFILES[@]}
+            do
+                echo -e "\t==> [$i] -- ${WALLETFILES[$i]}"
+            done
+            read -p "--- Which one would you like to restore?: " number
+            MAX_VALUE=$(($ARRAY_LEN - 1))
+            if [[ $number =~ ^[0-9]$ && ! $number -gt $MAX_VALUE ]]; then 
+                cp "$SCRIPT_DIR/${WALLETFILES[$number]}" $WALLETPATH
+                echo "--- Wallet ${WALLETFILES[$number]} restored!"
+                walletname="${WALLETFILES[$number]%.*}"
+                declare -x -g WALLETNAME=$walletname
+                echo "--- Restarting cellframe-node to load new wallet files..."
+                systemctl restart cellframe-node.service
+                sleep 30
+                declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
+                create_validator_order
+            else
+                echo "--- Not a valid number!"
+                check_wallet_files
+            fi
+        else
+            echo "--- Found .dwallet file current directory, copying to $WALLETPATH..."
+            for i in ${WALLETFILES[@]}
+            do
+                walletname="${WALLETFILES[$i]%.*}"
+                declare -x -g WALLETNAME=$walletname
+                cp "$SCRIPT_DIR/$i" $WALLETPATH
+                echo "--- Restarting cellframe-node to load new wallet files..."
+                systemctl restart cellframe-node.service
+                sleep 30
+                declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
+                create_validator_order
+            done
+        fi
+    else
+        create_wallet
+    fi
 }
 
 create_wallet() {
@@ -139,6 +189,7 @@ create_wallet() {
             create_wallet
         fi
 }
+
 get_seed() {
     read -p "--- Input your 24 word seed phrase: " words
         count=$(echo $words | wc -w)
