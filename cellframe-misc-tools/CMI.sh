@@ -87,7 +87,6 @@ download_and_install_node() {
     wget -q https://pub.cellframe.net/linux/cellframe-node/master/$LATEST_VERSION
     DEBIAN_FRONTEND=noninteractive apt install -y -qq ./$LATEST_VERSION > /dev/null #stdout to nothingness!
     rm $LATEST_VERSION
-    systemctl is-active
     echo "--- Waiting 1 minute to make sure cellframe-node is running..."
     sleep 1m
     create_cert
@@ -223,7 +222,7 @@ publish_node() {
 
 check_wallet_balance() {
     echo "--- Checking your wallet balance..."
-    BALANCE=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w test -net Backbone | grep -oP '\(\d+\) mCELL' | tr -d '()' | cut -d ' ' -f 1 | wc -m")
+    BALANCE=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP '\(\d+\) mCELL' | tr -d '()' | cut -d ' ' -f 1 | wc -m")
     if [[ $BALANCE -lt 21 ]]; then
         echo "--- Looks like you don't have enough mCELL on your wallet. It's possible that node is still syncing wallet data. Will wait for 5 minutes..."
         sleep 5m
