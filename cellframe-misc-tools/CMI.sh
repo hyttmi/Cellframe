@@ -138,7 +138,7 @@ check_wallet_files() {
             echo "--- Found .dwallet file current directory, copying to $WALLETPATH..."
             for i in ${WALLETFILES[@]}
             do
-                walletname="${WALLETFILES[$i]%.*}"
+                walletname=$(basename "$i" .dwallet)
                 declare -x -g WALLETNAME=$walletname
                 cp "$SCRIPT_DIR/$i" $WALLETPATH
                 echo "--- Restarting cellframe-node to load new wallet files..."
@@ -224,7 +224,7 @@ check_wallet_balance() {
     echo "--- Checking your wallet balance..."
     BALANCE=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP '\(\d+\) mCELL' | tr -d '()' | cut -d ' ' -f 1 | wc -m")
     if [[ $BALANCE -lt 21 ]]; then
-        echo "--- Looks like you don't have enough mCELL on your wallet. It's possible that node is still syncing wallet data. Will wait for 5 minutes..."
+        echo "--- Looks like you don't have enough mCELL on your wallet. It's possible that node is still syncing wallet data. Will wait for 5 minutes (cancel with CTRL+C)..."
         sleep 5m
         check_wallet_balance
     else
@@ -235,12 +235,12 @@ check_wallet_balance() {
 lock_mcell() {
     echo "--- OK, time to lock your mCELL for mastenode..."
     read -p "Enter the amount which you want to lock for your mastenode (no decimals): " MCELL
-    if [[ ! $MCELL =~ ^[0-9]{2,}$ ]]; then
+    if [[ ! $MCELL =~ ^[0-9]{2,}$ && $MCELL -lt 10 ]]; then
         echo "--- Invalid amount of tokens! Let's try again..."
         lock_mcell
     else
         echo "--- Delegating stake..."
-        sh -c "/opt/cellframe-node/bin/cellframe-node-cli srv_stake delegate -cert $CERT -net Backbone -wallet $WALLETADDRESS -value $MCELL.0e+18 -node_addr $NODE_ADDR -fee 0.05e+18 | tee -a $LOG"
+        sh -c "/opt/cellframe-node/bin/cellframe-node-cli srv_stake delegate -cert $CERT -net Backbone -wallet $WALLETNAME -value $MCELL.0e+18 -node_addr $NODE_ADDR -fee 0.05e+18 | tee -a $LOG"
         msg_ready
     fi
 }
