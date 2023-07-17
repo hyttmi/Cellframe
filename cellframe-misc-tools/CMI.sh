@@ -87,36 +87,12 @@ download_and_install_node() {
     wget -q https://pub.cellframe.net/linux/cellframe-node/master/$LATEST_VERSION
     DEBIAN_FRONTEND=noninteractive apt install -y -qq ./$LATEST_VERSION > /dev/null #stdout to nothingness!
     rm $LATEST_VERSION
-    configure_node
-}
-
-configure_node() {
-    NODE_CONFIG_FILE="/opt/cellframe-node/etc/cellframe-node.cfg"
-    BACKBONE_CONFIG_FILE="/opt/cellframe-node/etc/network/Backbone.cfg"
-    declare -x -g NODE_ADDR=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli net -net Backbone get status | grep -oP '[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}'")
-    read -p "--- Input the amount of CELL tokens which will be automatically collected after a desired amount is accumulated: " collectamount
-    if [[ $collectamount =~ ^[0-9]*$ ]]; then
-        echo "--- Setting to $collectamount CELL tokens..."
-    else
-        echo "--- Unsupported value!"
-        configure_node
-    fi
-    echo "--- Modifying node configuration..."
-    sed -i "s/^auto_online=.*/auto_online=true/g" $NODE_CONFIG_FILE
-    sed -i "0,/enabled=false/s//enabled=true/" $NODE_CONFIG_FILE
-    sed -i "s/^auto_proc=.*/auto_proc=true/g"  $NODE_CONFIG_FILE
-    sed -i "/^\[general\]/a node_addr_type=static" $NODE_CONFIG_FILE
-    sed -i "/^\[general\]/a node-addr=$NODE_ADDR" $NODE_CONFIG_FILE
-    echo "--- Modifying Backbone configuration..."
-    sed -i "s/^node-role=.*/node-role=master/g"  $BACKBONE_CONFIG_FILE
-    sed -i "s/^#blocks-sign-cert=.*/blocks-sign-cert=$CERT/g" $BACKBONE_CONFIG_FILE
-    sed -i "s/^#fee_addr=.*/fee_addr=$WALLETADDRESS/g" $BACKBONE_CONFIG_FILE
-    sed -i "/^\[esbocs\]/a set_collect_fee=$collectamount" $BACKBONE_CONFIG_FILE
-    echo "--- Restarting cellframe-node, please wait..."
-    systemctl restart cellframe-node.service
-    sleep 30
+    systemctl is-active
+    echo "--- Waiting 1 minute to make sure cellframe-node is running..."
+    sleep 1m
     create_cert
 }
+
 
 create_cert() {
     read -p "--- Input a desired name to your certificate: " cert
@@ -154,7 +130,7 @@ check_wallet_files() {
                 systemctl restart cellframe-node.service
                 sleep 30
                 declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
-                create_validator_order
+                configure_node
             else
                 echo "--- Not a valid number!"
                 check_wallet_files
@@ -170,7 +146,7 @@ check_wallet_files() {
                 systemctl restart cellframe-node.service
                 sleep 30
                 declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
-                create_validator_order
+                configure_node
             done
         fi
     else
@@ -198,11 +174,39 @@ get_seed() {
             echo "--- Your SHA256SUM of seed phrase is: $SHA256"
             sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet new -w $WALLETNAME -sign sig_dil -restore 0x$SHA256 -force | tee -a $LOG"
             declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
-            create_validator_order
+            configure_node
         else
             echo "--- Not a 24 word seed phrase, your seed phrase had $count words!"
             get_seed
         fi
+}
+
+configure_node() {
+    NODE_CONFIG_FILE="/opt/cellframe-node/etc/cellframe-node.cfg"
+    BACKBONE_CONFIG_FILE="/opt/cellframe-node/etc/network/Backbone.cfg"
+    declare -x -g NODE_ADDR=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli net -net Backbone get status | grep -oP '[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}'")
+    read -p "--- Input the amount of CELL tokens which will be automatically collected after a desired amount is accumulated: " collectamount
+    if [[ $collectamount =~ ^[0-9]*$ ]]; then
+        echo "--- Setting to $collectamount CELL tokens..."
+    else
+        echo "--- Unsupported value!"
+        configure_node
+    fi
+    echo "--- Modifying node configuration..."
+    sed -i "s/^auto_online=.*/auto_online=true/g" $NODE_CONFIG_FILE
+    sed -i "0,/enabled=false/s//enabled=true/" $NODE_CONFIG_FILE
+    sed -i "s/^auto_proc=.*/auto_proc=true/g"  $NODE_CONFIG_FILE
+    sed -i "/^\[general\]/a node_addr_type=static" $NODE_CONFIG_FILE
+    sed -i "/^\[general\]/a node-addr=$NODE_ADDR" $NODE_CONFIG_FILE
+    echo "--- Modifying Backbone configuration..."
+    sed -i "s/^node-role=.*/node-role=master/g"  $BACKBONE_CONFIG_FILE
+    sed -i "s/^#blocks-sign-cert=.*/blocks-sign-cert=$CERT/g" $BACKBONE_CONFIG_FILE
+    sed -i "s/^#fee_addr=.*/fee_addr=$WALLETADDRESS/g" $BACKBONE_CONFIG_FILE
+    sed -i "/^\[esbocs\]/a set_collect_fee=$collectamount" $BACKBONE_CONFIG_FILE
+    echo "--- Restarting cellframe-node, please wait..."
+    systemctl restart cellframe-node.service
+    sleep 30
+    create_validator_order
 }
 
 create_validator_order() {
