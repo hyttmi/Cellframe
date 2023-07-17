@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG="/tmp/CMI.log"
+LOG="/tmp/$(date '+%d-%m-%Y-%T_')CMI.log"
 
 check_root() {
     if [[ $EUID -ne 0 ]] ; then
@@ -58,12 +58,9 @@ EOF
 
 check_node_presence() {
     NODE_PATH="/opt/cellframe-node"
-    if [[ -d $NODE_PATH ]]; then
-        echo "--- Detected $NODE_PATH path, this script is meant for completely clean installs only. Exiting..."
-        exit 1
-    else
-        check_deps
-    fi
+    [[ -d $NODE_PATH ]] &&  echo "--- Detected $NODE_PATH path, this script is meant for completely clean installs only. Exiting..." \
+    && exit 1
+    check_deps
 }
 
 check_deps() {
@@ -224,7 +221,7 @@ check_wallet_balance() {
     echo "--- Checking your wallet balance..."
     BALANCE=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP '\(\d+\) mCELL' | tr -d '()' | cut -d ' ' -f 1 | wc -m")
     if [[ $BALANCE -lt 21 ]]; then
-        echo "--- Looks like you don't have enough mCELL on your wallet. It's possible that node is still syncing wallet data. Will wait for 5 minutes (cancel with CTRL+C)..."
+        echo "--- Looks like you don't have enough mCELL on your wallet. It's possible that cellframe-node is still syncing wallet data. Will wait for 5 minutes (cancel with CTRL+C)..."
         sleep 5m
         check_wallet_balance
     else
@@ -235,8 +232,8 @@ check_wallet_balance() {
 lock_mcell() {
     echo "--- OK, time to lock your mCELL for mastenode..."
     read -p "Enter the amount which you want to lock for your mastenode (no decimals): " MCELL
-    if [[ ! $MCELL =~ ^[0-9]{2,}$ && $MCELL -lt 10 ]]; then
-        echo "--- Invalid amount of tokens! Let's try again..."
+    if [[ ! $MCELL =~ ^[0-9]*$ && $MCELL -lt 10 ]]; then
+        echo "--- Invalid amount of tokens! Please try again..."
         lock_mcell
     else
         echo "--- Delegating stake..."
