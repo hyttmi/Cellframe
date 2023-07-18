@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1"
+VERSION="0.1.1"
 
 
 LOG="/tmp/$(date '+%d-%m-%Y-%T_')CMI_$VERSION.log"
@@ -195,9 +195,9 @@ configure_node() {
     sed -i "s/^auto_online=.*/auto_online=true/g" $NODE_CONFIG_FILE
     sed -i "0,/enabled=false/s//enabled=true/" $NODE_CONFIG_FILE
     sed -i "s/^auto_proc=.*/auto_proc=true/g"  $NODE_CONFIG_FILE
-    sed -i "/^\[general\]/a node_addr_type=static" $NODE_CONFIG_FILE
-    sed -i "/^\[general\]/a node-addr=$NODE_ADDR" $NODE_CONFIG_FILE
     echo "--- Modifying Backbone configuration..."
+    sed -i "/^\[general\]/a node_addr_type=static" $BACKBONE_CONFIG_FILE
+    sed -i "/^\[general\]/a node-addr=$NODE_ADDR" $BACKBONE_CONFIG_FILE
     sed -i "s/^node-role=.*/node-role=master/g"  $BACKBONE_CONFIG_FILE
     sed -i "s/^#blocks-sign-cert=.*/blocks-sign-cert=$CERT/g" $BACKBONE_CONFIG_FILE
     sed -i "s/^#fee_addr=.*/fee_addr=$WALLETADDRESS/g" $BACKBONE_CONFIG_FILE
