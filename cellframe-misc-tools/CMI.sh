@@ -1,13 +1,13 @@
 #!/bin/bash
 
-VERSION="0.1.1"
+VERSION="0.1.2"
 
 
 LOG="/tmp/$(date '+%d-%m-%Y-%T_')CMI_$VERSION.log"
 
 check_root() {
     if [[ $EUID -ne 0 ]] ; then
-        echo "Need root rights, exiting..."
+        echo "--- Need root rights, exiting..."
         exit 1
     else
         showinfo
@@ -26,7 +26,7 @@ showinfo() {
     ##  Welcome to Cellframe Mastenode installation script.               ##
     ##                                                                    ##
     ##  This script tries to install the latest Cellframe Node and        ##
-    ##  setup it as a master node to your computer with minimal           ##
+    ##  setup it as a master node to your computer with as minimal        ##
     ##  as possible user input.                                           ##
     ##                                                                    ##
     ##  PREREQUISITES:                                                    ##
@@ -82,8 +82,21 @@ check_deps() {
 }
 
 download_and_install_node() {
+    ARCH=$(dpkg --print-architecture)
+    case "$ARCH" in \
+      amd64) ARCH='amd64' && echo "--- Detected $ARCH architecture..." \
+      && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-updtr-amd64.deb" | sort | tail -n1)
+      ;;
+      arm64) ARCH='arm64' && echo "--- Detected $ARCH architecture..." \
+      && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-arm64.deb" | sort | tail -n1)
+      ;;
+      armhf) ARCH='armhf' && echo "--- Detected $ARCH architecture..." \
+      && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-arm64.deb" | sort | tail -n1)
+      ;;
+      *) echo "Unsupported architecture, exiting..." && exit 1
+      ;;
+    esac
     echo "--- Downloading latest version of Cellframe node..."
-    LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-updtr-amd64.deb" | sort | tail -n1)
     wget -q https://pub.cellframe.net/linux/cellframe-node/master/$LATEST_VERSION
     DEBIAN_FRONTEND=noninteractive apt install -y -qq ./$LATEST_VERSION > /dev/null #stdout to nothingness!
     rm $LATEST_VERSION
