@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.3"
+VERSION="0.1.4"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
@@ -11,6 +11,14 @@ check_root() {
     else
         showinfo
     fi
+}
+
+verify_node_running () {
+    echo "--- Verifying that cellframe-node is running..." # Test that node is actually running and cli connects to socket.
+    until sh -c "/opt/cellframe-node/bin/cellframe-node-cli version | grep -i 'cellframe-node version' > /dev/null"
+    do
+        sleep 1
+    done
 }
 
 showinfo() {
@@ -101,8 +109,7 @@ download_and_install_node() {
     echo "--- Installing $LATEST_VERSION..."
     DEBIAN_FRONTEND=noninteractive apt install -y -qq ./$LATEST_VERSION > /dev/null #stdout to nothingness!
     rm $LATEST_VERSION
-    echo "--- Waiting 1 minute to make sure cellframe-node is running..."
-    sleep 1m
+    verify_node_running
     create_cert
 }
 
@@ -141,7 +148,7 @@ check_wallet_files() {
                 declare -x -g WALLETNAME=$walletname
                 echo "--- Restarting cellframe-node to load new wallet files..."
                 systemctl restart cellframe-node.service
-                sleep 30
+                verify_node_running
                 declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
                 configure_node
             else
@@ -157,7 +164,7 @@ check_wallet_files() {
                 cp "$SCRIPT_DIR/$i" $WALLETPATH
                 echo "--- Restarting cellframe-node to load new wallet files..."
                 systemctl restart cellframe-node.service
-                sleep 30
+                verify_node_running
                 declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
                 configure_node
             done
@@ -219,7 +226,7 @@ configure_node() {
     sed -i "/^\[esbocs\]/a set_collect_fee=$collectamount" $BACKBONE_CONFIG_FILE
     echo "--- Restarting cellframe-node, please wait..."
     systemctl restart cellframe-node.service
-    sleep 30
+    verify_node_running
     create_validator_order
 }
 
@@ -263,7 +270,7 @@ lock_mcell() {
 
 msg_ready() {
     echo "--- Everything done, please post your stake transaction hash to the Cellframe Support Telegram group"
-    read -p "Do you want to look at the log file? (Y/N) " confirm
+    read -p "Do you want to view the log file? (Y/N) " confirm
     if [[ $confirm =~ ^[yY]$ ]]; then
         cat $LOG
     else
