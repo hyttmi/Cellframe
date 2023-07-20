@@ -2,7 +2,7 @@
 
 VERSION="0.1.3"
 
-LOG="/tmp/CMI_$VERSION_$(date '+%d-%m-%Y-%T').log"
+LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
 check_root() {
     if [[ $EUID -ne 0 ]] ; then
@@ -98,6 +98,7 @@ download_and_install_node() {
     esac
     echo "--- Downloading latest version of Cellframe node..."
     wget -q https://pub.cellframe.net/linux/cellframe-node/master/$LATEST_VERSION
+    echo "--- Installing $LATEST_VERSION..."
     DEBIAN_FRONTEND=noninteractive apt install -y -qq ./$LATEST_VERSION > /dev/null #stdout to nothingness!
     rm $LATEST_VERSION
     echo "--- Waiting 1 minute to make sure cellframe-node is running..."
