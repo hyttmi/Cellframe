@@ -34,7 +34,8 @@ showinfo() {
     ##                                                                    ##
     ##            OR                                                      ##
     ##                                                                    ##
-    ##      2.) .dwallet file (place to same directory with the script)   ##
+    ##      2.) .dwallet file (place to the same directory with           ##
+    ##          the script)                                               ##
     ##                                                                    ##
     ##  Problems may occur and therefore the creator of this script       ##
     ##  won't be responsible about any lost funds or wallets if/when      ##
