@@ -2,4 +2,4 @@
 
 Usage:
 
-    `sudo ./CMI.sh`
+    sudo ./CMI.sh
