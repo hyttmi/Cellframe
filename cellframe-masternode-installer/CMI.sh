@@ -2,7 +2,6 @@
 
 VERSION="0.1.3"
 
-
 LOG="/tmp/CMI_$VERSION_$(date '+%d-%m-%Y-%T_').log"
 
 check_root() {
@@ -13,8 +12,6 @@ check_root() {
         showinfo
     fi
 }
-
-configure_node
 
 showinfo() {
     cat << EOF
