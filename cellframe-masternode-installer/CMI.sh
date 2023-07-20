@@ -2,7 +2,7 @@
 
 VERSION="0.1.3"
 
-LOG="/tmp/CMI_$VERSION_$(date '+%d-%m-%Y-%T_').log"
+LOG="/tmp/CMI_$VERSION_$(date '+%d-%m-%Y-%T').log"
 
 check_root() {
     if [[ $EUID -ne 0 ]] ; then
