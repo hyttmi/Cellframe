@@ -1,9 +1,9 @@
 #!/bin/bash
 
-VERSION="0.1.2"
+VERSION="0.1.3"
 
 
-LOG="/tmp/$(date '+%d-%m-%Y-%T_')CMI_$VERSION.log"
+LOG="/tmp/CMI_$VERSION_$(date '+%d-%m-%Y-%T_').log"
 
 check_root() {
     if [[ $EUID -ne 0 ]] ; then
@@ -13,6 +13,8 @@ check_root() {
         showinfo
     fi
 }
+
+configure_node
 
 showinfo() {
     cat << EOF
@@ -85,7 +87,7 @@ download_and_install_node() {
     ARCH=$(dpkg --print-architecture)
     case "$ARCH" in \
       amd64) ARCH='amd64' && echo "--- Detected $ARCH architecture..." \
-      && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-updtr-amd64.deb" | sort | tail -n1)
+      && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-updtr-amd64.deb" | sort | tail -n1) # Use the automatic updater version for amd64 architecture
       ;;
       arm64) ARCH='arm64' && echo "--- Detected $ARCH architecture..." \
       && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-arm64.deb" | sort | tail -n1)
@@ -197,6 +199,7 @@ configure_node() {
     NODE_CONFIG_FILE="/opt/cellframe-node/etc/cellframe-node.cfg"
     BACKBONE_CONFIG_FILE="/opt/cellframe-node/etc/network/Backbone.cfg"
     declare -x -g NODE_ADDR=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli net -net Backbone get status | grep -oP '[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}'")
+    [[ -z "${NODE_ADDR// }" ]] && echo "--- Can't get node address! Trying again..." && sleep 5 && configure_node || echo "--- Got node address: $NODE_ADDR"
     read -p "--- Input the amount of CELL tokens which will be automatically collected after a desired amount is accumulated: " collectamount
     if [[ $collectamount =~ ^[0-9]*$ ]]; then
         echo "--- Setting to $collectamount CELL tokens..."
