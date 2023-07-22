@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.4"
+VERSION="0.1.5"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
@@ -237,8 +237,9 @@ create_validator_order() {
 }
 
 publish_node() {
-    IP=$(ip route get 1 | grep -oP 'src \K([0-9]{1,3}[\.]){3}[0-9]{1,3}')
-    sh -c "/opt/cellframe-node/bin/cellframe-node-cli node add -net Backbone -addr $NODE_ADDR -cell 0x0000000000000000 -ipv4 $IP -port 8079"
+    IP=$(dig @resolver1.opendns.com myip.opendns.com +short)
+    [[ -z "${IP// }" ]] && echo "--- Can't get your external IP address! Trying again..." && sleep 5 && publish_node || echo "--- Your current external IP address seems to be $IP..."
+    sh -c "/opt/cellframe-node/bin/cellframe-node-cli node add -net Backbone -addr $NODE_ADDR -cell 0x0000000000000000 -ipv4 $IP -port 8079 | tee -a $LOG"
     check_wallet_balance
 }
 
