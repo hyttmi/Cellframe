@@ -239,7 +239,10 @@ create_validator_order() {
 publish_node() {
     IP=$(dig @resolver1.opendns.com myip.opendns.com +short)
     [[ -z "${IP// }" ]] && echo "--- Can't get your external IP address! Trying again..." && sleep 5 && publish_node || echo "--- Your current external IP address seems to be $IP..."
+    echo "--- Publishing node...."
     sh -c "/opt/cellframe-node/bin/cellframe-node-cli node add -net Backbone -addr $NODE_ADDR -cell 0x0000000000000000 -ipv4 $IP -port 8079 | tee -a $LOG"
+    echo "--- Adding diagnostics data file to /opt/cellframe-node/etc/diagdata.json..."
+    echo "{\"name\":\"$NODE_ADDR\", \"category\":\"validator\", \"ip_addr\": \"$IP\"}" > /opt/cellframe-node/etc/diagdata.json
     check_wallet_balance
 }
 
@@ -254,6 +257,7 @@ check_wallet_balance() {
         lock_mcell
     fi
 }
+
 
 lock_mcell() {
     BALANCE=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP '[0-9]*\.[0-9]+ \([0-9]*\) mCELL' | tr -d '()' | cut -d ' ' -f 1")
