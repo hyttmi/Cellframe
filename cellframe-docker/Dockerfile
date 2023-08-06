@@ -1,7 +1,7 @@
 ARG AUTO_ONLINE="true"
 ARG SERVER_ENABLED="true" 
 
-FROM debian:stable-slim
+FROM debian:12
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -24,11 +24,5 @@ RUN cd /tmp \
     && rm $LATEST_VERSION
 
 RUN apt -y autoremove --purge && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-#COPY cellframe-node.sh /usr/bin/
-
-#RUN chmod 777 /usr/bin/cellframe-node.sh
-
-#CMD [ "/usr/bin/cellframe-node.sh" ]
 
 RUN /opt/cellframe-node/bin/cellframe-node
