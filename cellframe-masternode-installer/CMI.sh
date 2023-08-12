@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.5"
+VERSION="0.1.5b"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
@@ -99,7 +99,7 @@ download_and_install_node() {
       && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-arm64.deb" | sort | tail -n1)
       ;;
       armhf) ARCH='armhf' && echo "--- Detected $ARCH architecture..." \
-      && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-arm64.deb" | sort | tail -n1)
+      && LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/ | grep -oP "\Kcellframe-node-5.2.[0-9]{3}-armhf.deb" | sort | tail -n1)
       ;;
       *) echo "Unsupported architecture, exiting..." && exit 1
       ;;
