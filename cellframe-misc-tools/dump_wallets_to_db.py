@@ -40,8 +40,6 @@ def wallets_to_db():
             addr = match.group(1)
             token = match.group(2)
             balance = match.group(3)
-            balance = int(balance) / 10**18
-            print(f"{addr}: {token}: {balance}")
             with connection:
                 try:
                     connection.execute("INSERT INTO wallet_data (address, token, balance) VALUES (?, ?, ?)",
