@@ -32,7 +32,7 @@ def wallets_to_db():
         """)
     command = fire_and_split_command("cellframe-node-cli ledger list balance -net Backbone", True)
     for line in command:
-        if "null" in line or not "mCELL" in line:
+        if "null" in line or not "CELL" in line:
             continue
         command_regex = re.compile(r"Ledger balance key: (\w+).+token_ticker:(\w+).+balance:(\d+)")
         match = re.search(command_regex, line)
