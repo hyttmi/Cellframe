@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.5b"
+VERSION="0.1.6"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
@@ -233,17 +233,38 @@ configure_node() {
 create_validator_order() {
     echo "--- Creating order for the validator fee... (using the recommended value of 0.05 \$CELL)"
     sh -c "/opt/cellframe-node/bin/cellframe-node-cli srv_stake order create -net Backbone -value 0.05e+18 -cert $CERT | tee -a $LOG"
-    publish_node
+    get_public_ip
+}
+
+get_public_ip() {
+    echo "--- Trying to get your current public IP address..."
+    IP=$(wget -qO- api.ipify.org)
+    [[ -z "${IP// }" ]] && echo "--- Can't get your public IP address, please input it manually!" && input_ip || declare -x -g IP=$IP && publish_node
+}
+
+input_ip() {
+    read -p "--- Please input your IP address manually: " IP
+    if [[ $IP =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        echo "--- Using $IP as your public IP address..."
+        declare -x -g IP=$IP
+        publish_node
+    else
+        echo "Not a valid IP address, please try again..."
+        input_ip
+    fi
 }
 
 publish_node() {
-    IP=$(dig @resolver1.opendns.com myip.opendns.com +short)
-    [[ -z "${IP// }" ]] && echo "--- Can't get your external IP address! Trying again..." && sleep 5 && publish_node || echo "--- Your current external IP address seems to be $IP..."
-    echo "--- Publishing node...."
-    sh -c "/opt/cellframe-node/bin/cellframe-node-cli node add -net Backbone -addr $NODE_ADDR -cell 0x0000000000000000 -ipv4 $IP -port 8079 | tee -a $LOG"
-    echo "--- Adding diagnostics data file to /opt/cellframe-node/etc/diagdata.json..."
-    echo "{\"name\":\"$NODE_ADDR\", \"category\":\"validator\", \"ip_addr\": \"$IP\"}" > /opt/cellframe-node/etc/diagdata.json
-    check_wallet_balance
+    read -p "--- Your current external IP address seems to be $IP. Does it look correct? (Y/N)" confirm
+    if [[ $confirm =~ ^[yY]$ ]]; then
+        echo "--- Publishing node...."
+        sh -c "/opt/cellframe-node/bin/cellframe-node-cli node add -net Backbone -ipv4 $IP -port 8079 | tee -a $LOG"
+        echo "--- Adding diagnostics data file to /opt/cellframe-node/etc/diagdata.json..."
+        echo "{\"name\":\"$NODE_ADDR\", \"category\":\"validator\", \"ip_addr\": \"$IP\"}" > /opt/cellframe-node/etc/diagdata.json
+        check_wallet_balance
+    else
+        input_ip
+    fi
 }
 
 check_wallet_balance() {
