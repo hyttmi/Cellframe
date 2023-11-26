@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.6b"
+VERSION="0.1.7"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
@@ -262,9 +262,14 @@ publish_node() {
     if [[ $confirm =~ ^[yY]$ ]]; then
         echo "--- Publishing node...."
         sh -c "/opt/cellframe-node/bin/cellframe-node-cli node add -net Backbone -ipv4 $IP -port 8079 | tee -a $LOG"
-        echo "--- Adding diagnostics data file to /opt/cellframe-node/etc/diagdata.json..."
-        echo "{\"name\":\"$NODE_ADDR\", \"category\":\"validator\", \"ip_addr\": \"$IP\"}" > /opt/cellframe-node/etc/diagdata.json
-        check_wallet_balance
+        if [[ $(cat $LOG | grep "Can't do handshake") ]]; then
+            echo "--- Handshake failed to your node, are you behind a firewall/NAT? You may cancel with Ctrl+C"
+            publish_node
+        else
+            echo "--- Adding diagnostics data file to /opt/cellframe-node/etc/diagdata.json..."
+            echo "{\"name\":\"$NODE_ADDR\", \"category\":\"validator\", \"ip_addr\": \"$IP\"}" > /opt/cellframe-node/etc/diagdata.json
+            check_wallet_balance
+        fi
     else
         input_ip
     fi
