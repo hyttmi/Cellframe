@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.6"
+VERSION="0.1.6b"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
@@ -38,11 +38,14 @@ showinfo() {
     ##                                                                    ##
     ##  PREREQUISITES:                                                    ##
     ##                                                                    ##
-    ##      1.) Seed phrase from your wallet (24 words)                   ##
+    ##      1) Your public IP address (If script can't fetch it           ##
+    ##         automatically)                                             ##
+    ##                                                                    ##
+    ##      2a) Seed phrase from your wallet (24 words)                   ##
     ##                                                                    ##
     ##            OR                                                      ##
     ##                                                                    ##
-    ##      2.) .dwallet file (place to the same directory with           ##
+    ##      2b) .dwallet file (place to the same directory with           ##
     ##          the script)                                               ##
     ##                                                                    ##
     ##  Problems may occur and therefore the creator of this script       ##
@@ -255,7 +258,7 @@ input_ip() {
 }
 
 publish_node() {
-    read -p "--- Your current external IP address seems to be $IP. Does it look correct? (Y/N)" confirm
+    read -p "--- Your current external IP address seems to be $IP. Does it look correct? (Y/N) " confirm
     if [[ $confirm =~ ^[yY]$ ]]; then
         echo "--- Publishing node...."
         sh -c "/opt/cellframe-node/bin/cellframe-node-cli node add -net Backbone -ipv4 $IP -port 8079 | tee -a $LOG"
