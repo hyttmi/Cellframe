@@ -1,8 +1,10 @@
 #!/bin/bash
 
-VERSION="0.1.7"
+VERSION="0.1.8"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
+
+CELLFRAME_NODE_CLI_PATH="/opt/cellframe-node/bin/cellframe-node-cli"
 
 check_root() {
     if [[ $EUID -ne 0 ]] ; then
@@ -15,10 +17,14 @@ check_root() {
 
 verify_node_running () {
     echo "--- Verifying that cellframe-node is running..." # Test that node is actually running and cli connects to socket.
-    until sh -c "/opt/cellframe-node/bin/cellframe-node-cli version | grep -i 'cellframe-node version' > /dev/null"
+    until run_cli version | grep -i 'cellframe-node version' > /dev/null
     do
         sleep 1
     done
+}
+
+run_cli() {
+    /opt/cellframe-node/bin/cellframe-node-cli "$@"
 }
 
 showinfo() {
@@ -113,6 +119,9 @@ download_and_install_node() {
     DEBIAN_FRONTEND=noninteractive apt install -y -qq ./$LATEST_VERSION > /dev/null #stdout to nothingness!
     rm $LATEST_VERSION
     verify_node_running
+    if [ -f $CELLFRAME_NODE_CLI_PATH ] && [ ! -x $CELLFRAME_NODE_CLI_PATH ]; then
+        chmod +x $CELLFRAME_NODE_CLI_PATH #Make sure cli is executable
+    fi
     create_cert
 }
 
@@ -121,7 +130,7 @@ create_cert() {
     read -p "--- Input a desired name to your certificate: " cert
         if [[ $cert =~ ^[a-zA-Z0-9]*$ ]]; then
             echo "--- Your certificate backbone.$cert will be created..."
-            sh -c "/opt/cellframe-node/bin/cellframe-node-tool cert create backbone.$cert sig_dil"
+            /opt/cellframe-node/bin/cellframe-node-tool cert create backbone.$cert sig_dil
             declare -x -g CERT="backbone.$cert"
             check_wallet_files
         else
@@ -152,7 +161,7 @@ check_wallet_files() {
                 echo "--- Restarting cellframe-node to load new wallet files..."
                 systemctl restart cellframe-node.service
                 verify_node_running
-                declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
+                declare -x -g WALLETADDRESS=$(run_cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$')
                 configure_node
             else
                 echo "--- Not a valid number!"
@@ -168,7 +177,7 @@ check_wallet_files() {
                 echo "--- Restarting cellframe-node to load new wallet files..."
                 systemctl restart cellframe-node.service
                 verify_node_running
-                declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
+                declare -x -g WALLETADDRESS=$(run_cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$')
                 configure_node
             done
         fi
@@ -195,8 +204,8 @@ get_seed() {
         if [[ $count -eq 24 ]]; then
             SHA256=$(echo -n $words | tr -d [:blank:] | sha256sum | cut -d " " -f1)
             echo "--- Your SHA256SUM of seed phrase is: $SHA256"
-            sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet new -w $WALLETNAME -sign sig_dil -restore 0x$SHA256 -force | tee -a $LOG"
-            declare -x -g WALLETADDRESS=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$'")
+            run_cli wallet new -w $WALLETNAME -sign sig_dil -restore 0x$SHA256 -force | tee -a $LOG
+            declare -x -g WALLETADDRESS=$(run_cli wallet info -w $WALLETNAME -net Backbone | grep -oP 'addr: \K.*$')
             configure_node
         else
             echo "--- Not a 24 word seed phrase, your seed phrase had $count words!"
@@ -207,7 +216,7 @@ get_seed() {
 configure_node() {
     NODE_CONFIG_FILE="/opt/cellframe-node/etc/cellframe-node.cfg"
     BACKBONE_CONFIG_FILE="/opt/cellframe-node/etc/network/Backbone.cfg"
-    declare -x -g NODE_ADDR=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli net -net Backbone get status | grep -oP '[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}'")
+    declare -x -g NODE_ADDR=$(run_cli net -net Backbone get status | grep -oP '[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}::[0-9A-Z]{4}')
     [[ -z "${NODE_ADDR// }" ]] && echo "--- Can't get node address! Trying again..." && sleep 5 && configure_node || echo "--- Got node address: $NODE_ADDR"
     read -p "--- Input the amount of CELL tokens which will be automatically collected after a desired amount is accumulated: " collectamount
     if [[ $collectamount =~ ^[0-9]*$ ]]; then
@@ -235,7 +244,7 @@ configure_node() {
 
 create_validator_order() {
     echo "--- Creating order for the validator fee... (using the recommended value of 0.05 \$CELL)"
-    sh -c "/opt/cellframe-node/bin/cellframe-node-cli srv_stake order create -net Backbone -value 0.05e+18 -cert $CERT | tee -a $LOG"
+    run_cli srv_stake order create -net Backbone -value 0.05e+18 -cert $CERT | tee -a $LOG
     get_public_ip
 }
 
@@ -261,7 +270,7 @@ publish_node() {
     read -p "--- Your current external IP address seems to be $IP. Does it look correct? (Y/N) " confirm
     if [[ $confirm =~ ^[yY]$ ]]; then
         echo "--- Publishing node...."
-        sh -c "/opt/cellframe-node/bin/cellframe-node-cli node add -net Backbone -ipv4 $IP -port 8079 | tee -a $LOG"
+        run_cli node add -net Backbone -ipv4 $IP -port 8079 | tee -a $LOG
         if [[ $(cat $LOG | grep "Can't do handshake") ]]; then
             echo "--- Handshake failed to your node, are you behind a firewall/NAT? You may cancel with Ctrl+C"
             publish_node
@@ -277,7 +286,7 @@ publish_node() {
 
 check_wallet_balance() {
     echo "--- Checking your wallet balance..."
-    BALANCE=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP '[0-9]*\.[0-9]+ \([0-9]*\) mCELL' | tr -d '()' | cut -d ' ' -f 1 | wc -m")
+    BALANCE=$(run_cli wallet info -w $WALLETNAME -net Backbone | grep -oP '[0-9]*\.[0-9]+ \([0-9]*\) mCELL' | tr -d '()' | cut -d ' ' -f 1 | wc -m)
     if [[ $BALANCE -lt 21 ]]; then
         echo "--- Looks like you don't have enough mCELL on your wallet. It's possible that cellframe-node is still syncing wallet data. Will wait for 5 minutes (cancel with CTRL+C)..."
         sleep 5m
@@ -289,7 +298,7 @@ check_wallet_balance() {
 
 
 lock_mcell() {
-    BALANCE=$(sh -c "/opt/cellframe-node/bin/cellframe-node-cli wallet info -w $WALLETNAME -net Backbone | grep -oP '[0-9]*\.[0-9]+ \([0-9]*\) mCELL' | tr -d '()' | cut -d ' ' -f 1")
+    BALANCE=$(run_cli wallet info -w $WALLETNAME -net Backbone | grep -oP '[0-9]*\.[0-9]+ \([0-9]*\) mCELL' | tr -d '()' | cut -d ' ' -f 1)
     echo "--- Your current wallet balance is $BALANCE"
     read -p "Enter the amount which you want to lock for your mastenode (no decimals): " MCELL
     if [[ ! $MCELL =~ ^[0-9]*$ && $MCELL -lt 10 ]]; then
@@ -297,7 +306,7 @@ lock_mcell() {
         lock_mcell
     else
         echo "--- Delegating stake..."
-        sh -c "/opt/cellframe-node/bin/cellframe-node-cli srv_stake delegate -cert $CERT -net Backbone -wallet $WALLETNAME -value $MCELL.0e+18 -node_addr $NODE_ADDR -fee 0.05e+18 | tee -a $LOG"
+        run_cli srv_stake delegate -cert $CERT -net Backbone -wallet $WALLETNAME -value $MCELL.0e+18 -node_addr $NODE_ADDR -fee 0.05e+18 | tee -a $LOG
         msg_ready
     fi
 }
