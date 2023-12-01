@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.8b"
+VERSION="0.1.9"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
