@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.1.8"
+VERSION="0.1.8b"
 
 LOG="/tmp/CMI_v${VERSION}_$(date '+%d-%m-%Y-%T').log"
 
@@ -306,7 +306,7 @@ lock_mcell() {
         lock_mcell
     else
         echo "--- Delegating stake..."
-        run_cli srv_stake delegate -cert $CERT -net Backbone -wallet $WALLETNAME -value $MCELL.0e+18 -node_addr $NODE_ADDR -fee 0.05e+18 | tee -a $LOG
+        run_cli srv_stake delegate -cert $CERT -net Backbone -w $WALLETNAME -value $MCELL.0e+18 -node_addr $NODE_ADDR -fee 0.05e+18 | tee -a $LOG
         msg_ready
     fi
 }
