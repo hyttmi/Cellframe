@@ -288,8 +288,8 @@ check_wallet_balance() {
     echo "--- Checking your wallet balance..."
     BALANCE=$(run_cli wallet info -w $WALLETNAME -net Backbone | grep -oP '[0-9]*\.[0-9]+ \([0-9]*\) mCELL' | tr -d '()' | cut -d ' ' -f 1 | wc -m)
     if [[ $BALANCE -lt 21 ]]; then
-        echo "--- Looks like you don't have enough mCELL on your wallet. It's possible that cellframe-node is still syncing wallet data. Will wait for 5 minutes (cancel with CTRL+C)..."
-        sleep 5m
+        echo "--- Looks like you don't have enough mCELL on your wallet. It's possible that cellframe-node is still syncing wallet data. Will wait for 1 hour (cancel with CTRL+C)..."
+        sleep 1h
         check_wallet_balance
     else
         lock_mcell
