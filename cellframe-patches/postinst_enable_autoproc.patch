@@ -1,0 +1,21 @@
+diff --git a/os/debian/postinst b/os/debian/postinst
+index b2ca9596..0d9fb933 100755
+--- a/os/debian/postinst
++++ b/os/debian/postinst
+@@ -261,6 +261,16 @@ if [ "$RET" = "true" ]; then
+     echo "[*] Enabled Python plugins"
+ fi
+ 
++#Set up auto_proc=true incase Backbone or KelVPN node type is master
++db_get cellframe-node/backbone_node_type || true
++BACKBONE_NODE_TYPE=${RET}
++db_get cellframe-node/kelvpn_node_type || true
++KELVPN_NODE_TYPE=${RET}
++
++if [ ${KELVPN_NODE_TYPE} == "master" ] || [ ${BACKBONE_NODE_TYPE} == "master" ]; then
++    sed -i "s/^auto_proc=.*$/auto_proc=true/g" $DAP_CFG  || true
++fi
++
+ cat /etc/passwd| grep cellframe-node || adduser --system --no-create-home --group --home /opt/cellframe-node cellframe-node || true
+ 
+ #unconditianly create directories on pkg instllation
