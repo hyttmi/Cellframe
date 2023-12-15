@@ -34,7 +34,6 @@
 # Log file path
 LOG_FILE="~/node_error.log"
 
-
 # Function to log error messages
 log_error() {
     local message="$1"
@@ -226,6 +225,14 @@ fi
 
 
 
+#Check
+
+
+
+
+
+
+
    while read -ra wallet; do
 
                 wallet_info=$(/opt/cellframe-node/bin/cellframe-node-cli wallet info -net "$network" -w $wallet)
@@ -235,10 +242,29 @@ fi
                 fi
 
                 if [[ ! -z "$wallet_info" ]]; then
-                        echo "WARNING :  After delegation you should remove your wallet(s) physically from the server for security reasons"
-               fi
+                      #  echo "WARNING :  After delegation you should remove your wallet(s) physically from the server for security reasons"
+                         echo "="
+                fi
 
         done <<< "$wallets"
+
+ echo "Available certificate information on $network"
+
+
+                block_list=$(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" -unspent)
+                cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name" -unspent)
+                hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert "$cert_name" -unspent | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
+                autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main)
+
+                                echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
+                                echo "$autostatuss"
+hashnumber=0
+for hash in ${hashes[@]}
+                                do
+                                        let hashnumber=hashnumber+1
+                                done
+
+
 
 
    echo "Available Wallet information on $network"
@@ -250,24 +276,6 @@ fi
 
 
 
-
-
-
-echo ""
-        echo "Available certificate information on $network"
-
-
-                block_list=$(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" -unspent)
-                cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name" -unspent)
-                hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert "$cert_name" -unspent | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
-
-                                echo "Delegated $cert_status" | grep  "Stake value"  | sed 's/^[[:space:]]*//'
-                                echo ""
-hashnumber=0
-for hash in ${hashes[@]}
-                                do
-                                        let hashnumber=hashnumber+1
-                                done
 
 #check
 if $(/opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert $cert | grep -q) "Have 0 blocks";then
