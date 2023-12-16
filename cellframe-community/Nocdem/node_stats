@@ -133,7 +133,6 @@ while read -ra network; do
     node_address=$(echo "$status" | grep -oP 'cur node address \K\S+')
     node_state=$(echo "$status" | grep 'has state' | sed 's/.*has state //; s/,.*//; s/([^()]*)//g')
     network_target_state=$(echo "$status" | grep 'target state' | sed 's/.*target state //; s/),.*//')
-
     fee_addr=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep "fee_addr="  | sed 's/^.........//')
     cert_name=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep "blocks-sign-cert="  | sed 's/^.................//')
     node_status=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep node-role)
@@ -157,17 +156,6 @@ if ! /opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$netwo
 
 fi
 
-#Check
-#if "$node_state" -ne "NET_STATE_OFFLINE"
-
-#echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px;'> Net State offline!</span>"
-
-
-#else
-
-#echo "network check"
-
-#fi
 
 #check node state
     if [[ $checklist -eq 3 ]]; then
@@ -223,61 +211,26 @@ echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; bo
 
 fi
 
-
-
-#Check
-
-
-
-
-
-
-
-   while read -ra wallet; do
-
-                wallet_info=$(/opt/cellframe-node/bin/cellframe-node-cli wallet info -net "$network" -w $wallet)
-
-                if [[ "$wallet_info" == *"balance: 0"* ]]; then
-                        continue
-                fi
-
-                if [[ ! -z "$wallet_info" ]]; then
-                      #  echo "WARNING :  After delegation you should remove your wallet(s) physically from the server for security reasons"
-                         echo "="
-                fi
-
-        done <<< "$wallets"
-
- echo "Available certificate information on $network"
-
+#Certificate and rewards
 
                 block_list=$(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" -unspent)
                 cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name" -unspent)
-                hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert "$cert_name" -unspent | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
-                autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main)
+                hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
+                autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main | tail -n +3)
+                b_reward=$(/opt/cellframe-node/bin/cellframe-node-cli block reward -net "$network" -chain main show)
+                c_reward=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward)
 
-                                echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
-                                echo "$autostatuss"
-hashnumber=0
-for hash in ${hashes[@]}
-                                do
-                                        let hashnumber=hashnumber+1
-                                done
-
-
-        c_reward=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr $fee_addr | grep -B 1 reward)
-
-
-echo "Claimed Rewards "
-echo "$c_reward"
-
-
+        echo "=== Certificate ==="
+        echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
+        echo "$b_reward"
+        echo "$autostatuss"
+        echo "Claimed Rewards "
+        echo "$c_reward"
 
 #check
 if $(/opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert $cert | grep -q) "Have 0 blocks";then
 
 echo /opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert $cert_name | grep -q "Have 0 blocks"
-
 
 echo "0 blocks available to collect"
 
@@ -285,12 +238,11 @@ else
 
 echo /opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert $cert_name | grep -q "Have 0 blocks"
 
-echo "$hashnumber blocks available to collect"
+echo ""
+echo "Signed blocks ${#hashes[@]}"
+echo ""
 
 fi
-
-
-
 
                                 echo "          <button onclick=\"var blockList = document.getElementById('$cert-$network-list'); if (blockList.style.display === 'none') { blockList.style.display = 'block'; this.innerHTML = 'Hashes'; } else { blockList.style.display = 'none'; this.innerHTML = 'Hashes'; }\">Hashes</button>"
                                 echo "    <div id=\"$cert-$network-list\" style=\"display:none\">"
@@ -302,8 +254,6 @@ fi
                                 done
 
                                 echo "</div>"
-
-
 
 
     echo "</div>"
