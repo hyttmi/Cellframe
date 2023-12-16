@@ -265,15 +265,11 @@ for hash in ${hashes[@]}
                                 done
 
 
+        c_reward=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr $fee_addr | grep -B 1 reward)
 
 
-   echo "Available Wallet information on $network"
-
-
-        feewallet_info=$(/opt/cellframe-node/bin/cellframe-node-cli wallet info -net "$network" -addr  $fee_addr)
-        echo "    $feewallet_info" | sed -n '/([^)]\+)/p'  | sed 's/^[ \t]*//' | sed 's/([^)]*)//g'
-
-
+echo "Claimed Rewards "
+echo "$c_reward"
 
 
 
