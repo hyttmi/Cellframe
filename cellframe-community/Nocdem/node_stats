@@ -210,8 +210,6 @@ while read -r amount; do
     total_rewards=$(echo "$total_rewards + $amount" | bc)
 done <<< "$reward_data"
 echo ""
-echo "Total Validator Rewards: $total_rewards"
-echo ""
 
 output_timestamp=$(date -d "$output_date" +"%s")
 current_timestamp=$(date +"%s")
@@ -223,7 +221,8 @@ apy=$(echo "scale=5; ($yearly_e_gain / $initial_investment) * 100 / 1000" | bc)
 echo ""
 echo "=== Certificate ==="
 echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
-echo "Estimated Apy % $apy"
+echo "Total Claimed Rewards: $total_rewards"
+echo "Estimated apy % $apy"
 
 #check
 if $(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert" | grep -q) "Have 0 blocks";then
