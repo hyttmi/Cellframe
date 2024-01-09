@@ -33,6 +33,8 @@
 # - Customize the script output to match your specific Node application environment.
 # - Make sure the web server user has the necessary permissions to execute the script and access relevant files.
 
+#!/bin/bash
+
 # Log file path
 LOG_FILE="~/node_error.log"
 
@@ -189,9 +191,9 @@ echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; bo
 fi
 
 #Certificate and rewards
-block_list=$(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" -unspent)
-cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name" -unspent)
-hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
+block_list=$(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name")
+cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name")
+hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" -unspent | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
 autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main | tail -n +3)
 b_reward=$(/opt/cellframe-node/bin/cellframe-node-cli block reward -net "$network" -chain main show)
 c_reward=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward)
@@ -209,7 +211,6 @@ while read -r amount; do
     # Sum the rewards
     total_rewards=$(echo "$total_rewards + $amount" | bc)
 done <<< "$reward_data"
-echo ""
 
 output_timestamp=$(date -d "$output_date" +"%s")
 current_timestamp=$(date +"%s")
@@ -221,24 +222,36 @@ apy=$(echo "scale=5; ($yearly_e_gain / $initial_investment) * 100 / 1000" | bc)
 echo ""
 echo "=== Certificate ==="
 echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
-echo "Total Claimed Rewards: $total_rewards"
-echo "Estimated apy % $apy"
+echo "Total Distributed Rewards: $total_rewards"
+echo "Estimated Apy % $apy"
 
 #check
-if $(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert" | grep -q) "Have 0 blocks";then
-echo /opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" | grep -q "Have 0 blocks"
+if $(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" | grep -q) "Have 0 blocks";then
+echo /opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" | grep -q "Have 0 blocks"
 echo "0 blocks available to collect"
 else
-echo /opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" | grep -q "Have 0 blocks"
+echo /opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" | grep -q "Have 0 blocks"
 echo ""
-echo "Signed blocks ${#hashes[@]}"
+echo "Signed blocks : "
+echo -n "$block_list" | grep ".main: Have" | awk '{print $3}'
 echo ""
 fi
-echo "          <button onclick=\"var blockList = document.getElementById('$cert-$network-list'); if (blockList.style.display === 'none') { blockList.style.display = 'block'; this.innerHTML = 'Hashes'; } else { blockList.style.display = 'none'; this.innerHTML = 'Hashes'; }\">Hashes</button>"
-echo "    <div id=\"$cert-$network-list\" style=\"display:none\">"
+echo "<button onclick=\"var blockList = document.getElementById('$cert-$network-list'); if (blockList.style.display === 'none') { blockList.style.display = 'block'; this.innerHTML = 'Unclaimed Block Rewards'; } else { blockList.style.display = 'none'; this.innerHTML = 'Unclaimed Block Rewards'; }\">Unclaimed Block Rewards</button>"
+echo "<div id=\"$cert-$network-list\" style=\"display:none\">"
 for hash in ${hashes[@]}
 do
-echo "    $hash"
+
+echo "<button onclick=\"var blockList = document.getElementById('$hash'); if (blockList.style.display === 'none') { blockList.style.display = 'block'; this.innerHTML = 'Collected'; } else { blockList.style.display = 'none'; this.innerHTML = '$hash'; }\">$hash</button>"
+echo "<div id=\"$hash\" style=\"display:none\">"
+echo "/opt/cellframe-node/bin/cellframe-node-cli block reward collect -cert $cert_name -addr $fee_addr -net $network -chain main -hashes $hash -fee 0.05e+18"
+/opt/cellframe-node/bin/cellframe-node-cli block reward collect -cert $cert_name -addr $fee_addr -net $network -chain main -hashes $hash -fee 0.05e+18
+
+
+
+echo "</div>"
+
+
+
 done
 echo "</div>"
 echo "</div>"
