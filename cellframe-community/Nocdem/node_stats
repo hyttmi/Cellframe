@@ -81,7 +81,6 @@ else
   echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version >> $latest_version</span>"
 fi
 
-cpu_stats=$(/opt/cellframe-node/bin/cellframe-node-cli stats cpu)  # Get CPU statistics using cellframe-node-cli
 mem_stats=$(cat /proc/meminfo)  # Read memory statistics from /proc/meminfo
 
 total_memory=$(echo "$mem_stats" | grep "MemTotal" | awk '{print $2}')  # Extract total memory value
@@ -90,7 +89,7 @@ free_memory=$(echo "$mem_stats" | grep "MemAvailable" | awk '{print $2}')  # Ext
 used_memory=$((total_memory - free_memory))  # Calculate used memory
 memory_utilization=$((used_memory * 100 / total_memory))  # Calculate memory utilization percentage
 
-cpu_utilization=$(echo "$cpu_stats" | grep "Total" | sed 's/^......//' | sed 's/^[[:space:]]*//')  # Extract CPU utilization
+cpu_utilization=$(/opt/cellframe-node/bin/cellframe-node-cli stats cpu | grep -oP 'Total: \K\d+')  # Extract CPU utilization
 
 if [[ $cpu_utilization -gt 90 ]]; then
   cpu_color="red"
