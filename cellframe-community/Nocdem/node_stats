@@ -8,6 +8,8 @@
 # Prerequisites:
 # 1. Node Application - Make sure the Node application is installed and configured on your system.
 #
+# 2. bc
+#
 # Installation Steps:
 # 
 # 1. Set Execute Permissions:
@@ -40,7 +42,6 @@ log_error() {
     echo "$(date "+%Y-%m-%d %H:%M:%S") - ERROR: $message" >> "$LOG_FILE"
 }
 
-
 echo "Content-type: text/html"
 echo ""
 echo "<html>"
@@ -64,10 +65,7 @@ echo "</head>"
 echo "<body>"
 echo ""
 echo "<pre id=\"output\">"
-
-
 echo -n "Hostname :" ; hostname
-
 
 activetime=$(systemctl status cellframe-node) #
 echo "$activetime" | sed 's/^[[:space:]]*//' | grep Active
@@ -80,7 +78,6 @@ if [[ "$current_version" == "$latest_version" ]]; then
 else
   echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version >> $latest_version</span>"
 fi
-
 
 cpu_stats=$(/opt/cellframe-node/bin/cellframe-node-cli stats cpu)  # Get CPU statistics using cellframe-node-cli
 mem_stats=$(cat /proc/meminfo)  # Read memory statistics from /proc/meminfo
@@ -96,7 +93,6 @@ cpu_utilization=$(echo "$cpu_stats" | grep "Total" | sed 's/^......//' | sed 's/
 if [[ $cpu_utilization -gt 90 ]]; then
   cpu_color="red"
     log_error "High cpu usage"
-
 else
   cpu_color="green"
 fi
@@ -125,9 +121,7 @@ echo ""
 networks=$(/opt/cellframe-node/bin/cellframe-node-cli net list | grep -oP '(?<=^\t)[^ ]+')
 certs=$(ls /opt/cellframe-node/var/lib/ca/ | grep -oP '^(?!node-addr-).*dcert' | sed 's/.dcert//g')
 wallets=$(ls /opt/cellframe-node/var/lib/wallet/ | sed 's/.dwallet//g')
-
 while read -ra network; do
-
 #Get networrk information
     status=$(/opt/cellframe-node/bin/cellframe-node-cli net get status -net "$network")
     node_address=$(echo "$status" | grep -oP 'cur node address \K\S+')
@@ -136,14 +130,11 @@ while read -ra network; do
     fee_addr=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep "fee_addr="  | sed 's/^.........//')
     cert_name=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep "blocks-sign-cert="  | sed 's/^.................//')
     node_status=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep node-role)
-
 checklist=0
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli srv_stake order list -net "$network" | grep -q "$node_address"; then
 ((checklist++))
 fi
-
-
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli node dump  -net "$network" | grep -q "$node_address"; then
 ((checklist++))
@@ -155,8 +146,6 @@ if ! /opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$netwo
 ((checklist++))
 
 fi
-
-
 #check node state
     if [[ $checklist -eq 3 ]]; then
         echo -n "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px;'>Network >>>></span>"
@@ -170,96 +159,92 @@ fi
     echo "    Our Node Address     : $node_address"
     echo -n "    Our Node State       :"
 
-    if [[ "$node_state" == "NET_STATE_ONLINE " ]]; then
-        echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px;'>Online</span>"
+    if [[ "$node_state" == "NET_STATE_OFFLINE " ]]; then
+        echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px;'>OFFLINE</span>"
     else
-        echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px;'>$node_state</span>"
+        echo "<span> $node_state</span>"
     fi
-
         echo "    Network        State : $network_target_state"
         echo ""
-
-
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli srv_stake order list -net "$network" | grep -q "$node_address"; then
   echo ""
 else
-  echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px;'>$node_address does not have an active order</span>t"
+  echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px;'>$node_address does not have an active order</span>"
     log_error "$node_address does not have an active order"
-
 fi
-
-
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli node dump  -net "$network" | grep -q "$node_address"; then
   echo ""
 else
-  echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px;'>$node_address is not in node list</span>t"
+  echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px;'>$node_address is not in node list</span>"
 extip=$(dig +short myip.opendns.com @resolver1.opendns.com) #
-
 echo "cellframe-node-cli node add -net $network -ipv4 $extip -port 8079"
     log_error "$node_address is not in node list<"
-
 fi
-
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name" | grep -q "Active: false"; then
-
 echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px;'> Certificate not active!</span>"
     log_error " Certificate not active!"
-
-
 fi
 
 #Certificate and rewards
+block_list=$(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" -unspent)
+cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name" -unspent)
+hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
+autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main | tail -n +3)
+b_reward=$(/opt/cellframe-node/bin/cellframe-node-cli block reward -net "$network" -chain main show)
+c_reward=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward)
+output_date=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward | head -n 1 | sed 's/^[ \t]*//')
+stake_info=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name")
+initial_investment=$(echo "$stake_info" | grep "Stake value" | awk '{print $3}')
 
-                block_list=$(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" -unspent)
-                cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name" -unspent)
-                hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
-                autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main | tail -n +3)
-                b_reward=$(/opt/cellframe-node/bin/cellframe-node-cli block reward -net "$network" -chain main show)
-                c_reward=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward)
+echo "$autostatuss"
+echo "$b_reward"
+#echo "Claimed Rewards "
+#echo "$c_reward"
+reward_data=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep "reward" | awk '{print $2}')
+total_rewards=0
+while read -r amount; do
+    # Sum the rewards
+    total_rewards=$(echo "$total_rewards + $amount" | bc)
+done <<< "$reward_data"
+echo ""
+echo "Total Validator Rewards: $total_rewards"
+echo ""
 
-        echo "=== Certificate ==="
-        echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
-        echo "$b_reward"
-        echo "$autostatuss"
-        echo "Claimed Rewards "
-        echo "$c_reward"
+output_timestamp=$(date -d "$output_date" +"%s")
+current_timestamp=$(date +"%s")
+time_difference=$((current_timestamp - output_timestamp))
+days_passed=$((time_difference / 86400))
+yearly_e_gain=$(echo "scale=5; $total_rewards / $days_passed *365" | bc)
+apy=$(echo "scale=5; ($yearly_e_gain / $initial_investment) * 100 / 1000" | bc)
+
+echo ""
+echo "=== Certificate ==="
+echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
+echo "Estimated Apy % $apy"
 
 #check
-if $(/opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert $cert | grep -q) "Have 0 blocks";then
-
-echo /opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert $cert_name | grep -q "Have 0 blocks"
-
+if $(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert" | grep -q) "Have 0 blocks";then
+echo /opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" | grep -q "Have 0 blocks"
 echo "0 blocks available to collect"
-
 else
-
-echo /opt/cellframe-node/bin/cellframe-node-cli block list -net $network -chain main -cert $cert_name | grep -q "Have 0 blocks"
-
+echo /opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main -cert "$cert_name" | grep -q "Have 0 blocks"
 echo ""
 echo "Signed blocks ${#hashes[@]}"
 echo ""
-
 fi
-
-                                echo "          <button onclick=\"var blockList = document.getElementById('$cert-$network-list'); if (blockList.style.display === 'none') { blockList.style.display = 'block'; this.innerHTML = 'Hashes'; } else { blockList.style.display = 'none'; this.innerHTML = 'Hashes'; }\">Hashes</button>"
-                                echo "    <div id=\"$cert-$network-list\" style=\"display:none\">"
-
-                                for hash in ${hashes[@]}
-                                do
-                                        let hashnumber=hashnumber+1
-                                        echo "    $hash"
-                                done
-
-                                echo "</div>"
-
-
-    echo "</div>"
+echo "          <button onclick=\"var blockList = document.getElementById('$cert-$network-list'); if (blockList.style.display === 'none') { blockList.style.display = 'block'; this.innerHTML = 'Hashes'; } else { blockList.style.display = 'none'; this.innerHTML = 'Hashes'; }\">Hashes</button>"
+echo "    <div id=\"$cert-$network-list\" style=\"display:none\">"
+for hash in ${hashes[@]}
+do
+echo "    $hash"
+done
+echo "</div>"
+echo "</div>"
 done <<< "$networks"
-
-
 echo "</pre>"
 echo "</body>"
 echo "</html>"
+
