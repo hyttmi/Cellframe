@@ -72,7 +72,7 @@ echo "$activetime" | sed 's/^[[:space:]]*//' | grep Active
 #Get version & cpu & mem
 latest_version=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114.5" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
 current_version=$(/opt/cellframe-node/bin/cellframe-node-cli version | awk '{print $3}')
-echo -n "Current node version :"
+echo -n "node version         :"
 if [[ "$current_version" == "$latest_version" ]]; then
   echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version</span>"
 else
@@ -81,7 +81,7 @@ fi
 
 ns_latest_version=$(wget -qO- https://raw.githubusercontent.com/nocdem/Cellframe/main/cellframe-community/Nocdem/node_stats | grep -oP '(?<=# Nodestats ).*' | head -n 1)
 ns_current_version=$(cat /usr/lib/cgi-bin/node_stats  | grep -oP '(?<=# Nodestats ).*' | head -n 1)
-echo -n "Current node_stast v :"
+echo -n "node_stast version  :"
 if [[ "$ns_current_version" == "$ns_latest_version" ]]; then
   echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$ns_current_version</span>"
 else
