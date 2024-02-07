@@ -208,7 +208,7 @@ initial_investment=$(echo "$stake_info" | grep "Stake value" | awk '{print $3}')
 
 echo "$autostatuss"
 echo "$b_reward"
-total_rewards=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 3 "source_address: reward collecting" | awk '/recv_coins/  grep -B 3 "source_address: reward collecting" | awk '/recv_coins/ { total += $2 } END { print total }' )
+total_rewards=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 3 "source_address: reward collecting" | awk '/recv_coins/ { total += $2 } END { print total }' )
 output_timestamp=$(date -d "$output_date" +"%s")
 current_timestamp=$(date +"%s")
 time_difference=$((current_timestamp - output_timestamp))
