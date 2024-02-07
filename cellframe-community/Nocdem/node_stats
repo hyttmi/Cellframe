@@ -208,9 +208,7 @@ initial_investment=$(echo "$stake_info" | grep "Stake value" | awk '{print $3}')
 
 echo "$autostatuss"
 echo "$b_reward"
-#echo "Claimed Rewards "
-#echo "$c_reward"
-reward_data=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep "reward" | awk '{print $2}')
+reward_data=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 3 "source_address: reward collecting" | awk '/recv_coins/ {print $2}')
 total_rewards=0
 while read -r amount; do
     # Sum the rewards
