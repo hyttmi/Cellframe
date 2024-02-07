@@ -202,8 +202,7 @@ cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -ne
 hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" -unspent | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
 autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main | tail -n +3)
 b_reward=$(/opt/cellframe-node/bin/cellframe-node-cli block reward -net "$network" -chain main show)
-c_reward=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward)
-output_date=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward | head -n 1 | sed 's/^[ \t]*//')
+output_date=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 13 reward | head -n 1 | sed 's/^[ \t]*//' | sed 's/^tx_created: //')
 stake_info=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name")
 initial_investment=$(echo "$stake_info" | grep "Stake value" | awk '{print $3}')
 
