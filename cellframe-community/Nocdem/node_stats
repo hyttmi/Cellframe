@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nodestats 1.1
+# Nodestats 1.2
 # Telegram   : @Nocdem 
 # Description: This script generates an HTML page displaying various information about the status of a Cellframe node .
 #              It includes details about version, CPU and memory utilization, network, certificates, and wallet information.
@@ -77,6 +77,15 @@ if [[ "$current_version" == "$latest_version" ]]; then
   echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version</span>"
 else
   echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version >> $latest_version</span>"
+fi
+
+ns_latest_version=$(wget -qO- https://raw.githubusercontent.com/nocdem/Cellframe/main/cellframe-community/Nocdem/node_stats | grep -oP '(?<=# Nodestats ).*' | head -n 1)
+ns_current_version=$(cat /usr/lib/cgi-bin/node_stats  | grep -oP '(?<=# Nodestats ).*' | head -n 1)
+echo -n "Current node_stast v :"
+if [[ "$ns_current_version" == "$ns_latest_version" ]]; then
+  echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$ns_current_version</span>"
+else
+  echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$ns_current_version >> $ns_latest_version</span>"
 fi
 
 mem_stats=$(cat /proc/meminfo)  # Read memory statistics from /proc/meminfo
