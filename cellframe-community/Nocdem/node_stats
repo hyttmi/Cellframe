@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nodestats
+# Nodestats 1.1
 # Telegram   : @Nocdem 
 # Description: This script generates an HTML page displaying various information about the status of a Cellframe node .
 #              It includes details about version, CPU and memory utilization, network, certificates, and wallet information.
@@ -32,8 +32,6 @@
 # - The script is configured to refresh every 60 seconds by default. You can adjust this interval by modifying the `meta refresh` tag in the script.
 # - Customize the script output to match your specific Node application environment.
 # - Make sure the web server user has the necessary permissions to execute the script and access relevant files.
-
-#!/bin/bash
 
 # Log file path
 LOG_FILE="~/node_error.log"
@@ -72,7 +70,7 @@ echo -n "Hostname :" ; hostname
 activetime=$(systemctl status cellframe-node) #
 echo "$activetime" | sed 's/^[[:space:]]*//' | grep Active
 #Get version & cpu & mem
-latest_version=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
+latest_version=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114.5" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
 current_version=$(/opt/cellframe-node/bin/cellframe-node-cli version | awk '{print $3}')
 echo -n "Current node version :"
 if [[ "$current_version" == "$latest_version" ]]; then
