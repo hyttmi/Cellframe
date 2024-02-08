@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nodestats 1.22
+# Nodestats 1.23
 # Telegram   : @Nocdem 
 # Description: This script generates an HTML page displaying various information about the status of a Cellframe node .
 #              It includes details about version, CPU and memory utilization, network, certificates, and wallet information.
@@ -214,15 +214,17 @@ output_timestamp=$(date -d "$output_date" +"%s")
 current_timestamp=$(date +"%s")
 time_difference=$((current_timestamp - output_timestamp))
 days_passed=$((time_difference / 86400))
+yearly_e_gain=$(echo "scale=5; $total_rewards / $days_passed *365" | bc)
+apy=$(echo "scale=5; ($yearly_e_gain / $initial_investment) * 100 / 1000" | bc)
 
 echo ""
 echo "=== Certificate ==="
 echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
 echo "Total Distributed Rewards: $total_rewards"
+echo "Estimated Apy % $apy"
 echo ""
 echo "First Signed Block date $output_date ($days_passed days)"
 echo "Last Signed Block date  $last_date"
-
 
 #check
 if $(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" | grep -q) "Have 0 blocks";then
