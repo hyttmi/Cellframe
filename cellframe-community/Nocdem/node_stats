@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nodestats 1.21
+# Nodestats 1.22
 # Telegram   : @Nocdem 
 # Description: This script generates an HTML page displaying various information about the status of a Cellframe node .
 #              It includes details about version, CPU and memory utilization, network, certificates, and wallet information.
@@ -203,6 +203,7 @@ hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$n
 autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main | tail -n +3)
 b_reward=$(/opt/cellframe-node/bin/cellframe-node-cli block reward -net "$network" -chain main show)
 output_date=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 13 reward | head -n 1 | sed 's/^[ \t]*//' | sed 's/^tx_created: //')
+last_date=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 13 reward | grep tx_created | tail -n 1 | sed 's/^[ \t]*//' | sed 's/^tx_created: //')
 stake_info=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name")
 initial_investment=$(echo "$stake_info" | grep "Stake value" | awk '{print $3}')
 
@@ -213,14 +214,15 @@ output_timestamp=$(date -d "$output_date" +"%s")
 current_timestamp=$(date +"%s")
 time_difference=$((current_timestamp - output_timestamp))
 days_passed=$((time_difference / 86400))
-yearly_e_gain=$(echo "scale=5; $total_rewards / $days_passed *365" | bc)
-apy=$(echo "scale=5; ($yearly_e_gain / $initial_investment) * 100 / 1000" | bc)
 
 echo ""
 echo "=== Certificate ==="
 echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
 echo "Total Distributed Rewards: $total_rewards"
-echo "Estimated Apy % $apy"
+echo ""
+echo "First Signed Block date $output_date ($days_passed days)"
+echo "Last Signed Block date  $last_date"
+
 
 #check
 if $(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" | grep -q) "Have 0 blocks";then
