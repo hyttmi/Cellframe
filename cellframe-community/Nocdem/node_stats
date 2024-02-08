@@ -252,11 +252,7 @@ echo "<div id=\"$hash\" style=\"display:none\">"
 echo "/opt/cellframe-node/bin/cellframe-node-cli block reward collect -cert $cert_name -addr $fee_addr -net $network -chain main -hashes $hash -fee 0.05e+18"
 /opt/cellframe-node/bin/cellframe-node-cli block reward collect -cert $cert_name -addr $fee_addr -net $network -chain main -hashes $hash -fee 0.05e+18
 
-
-
 echo "</div>"
-
-
 
 done
 echo "</div>"
