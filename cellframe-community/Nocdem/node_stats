@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nodestats 1.23
+# Nodestats 1.231
 # Telegram   : @Nocdem 
 # Description: This script generates an HTML page displaying various information about the status of a Cellframe node .
 #              It includes details about version, CPU and memory utilization, network, certificates, and wallet information.
@@ -65,6 +65,11 @@ echo "</head>"
 echo "<body>"
 echo ""
 echo "<pre id=\"output\">"
+
+if ! command -v bc >/dev/null 2>&1; then
+    echo "dependency bc is not installed . "
+fi
+
 echo -n "Hostname :" ; hostname
 
 activetime=$(systemctl status cellframe-node) #
