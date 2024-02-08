@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nodestats 1.231
+# Nodestats 1.232
 # Telegram   : @Nocdem 
 # Description: This script generates an HTML page displaying various information about the status of a Cellframe node .
 #              It includes details about version, CPU and memory utilization, network, certificates, and wallet information.
@@ -143,6 +143,8 @@ while read -ra network; do
     fee_addr=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep "fee_addr="  | sed 's/^.........//')
     cert_name=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep "blocks-sign-cert="  | sed 's/^.................//')
     node_status=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep node-role)
+    current_block=$(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main | grep .main | awk '{print $3}')
+
 checklist=0
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli srv_stake order list -net "$network" | grep -q "$node_address"; then
@@ -177,8 +179,9 @@ fi
     else
         echo "<span> $node_state</span>"
     fi
-        echo "    Network        State : $network_target_state"
-        echo ""
+    echo "    Network        State : $network_target_state"
+    echo "    Current Block        : $current_block"
+
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli srv_stake order list -net "$network" | grep -q "$node_address"; then
   echo ""
