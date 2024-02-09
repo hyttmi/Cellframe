@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nodestats
+# Nodestats 1.232
 # Telegram   : @Nocdem 
 # Description: This script generates an HTML page displaying various information about the status of a Cellframe node .
 #              It includes details about version, CPU and memory utilization, network, certificates, and wallet information.
@@ -33,8 +33,6 @@
 # - Customize the script output to match your specific Node application environment.
 # - Make sure the web server user has the necessary permissions to execute the script and access relevant files.
 
-#!/bin/bash
-
 # Log file path
 LOG_FILE="~/node_error.log"
 
@@ -67,18 +65,32 @@ echo "</head>"
 echo "<body>"
 echo ""
 echo "<pre id=\"output\">"
+
+if ! command -v bc >/dev/null 2>&1; then
+    echo "dependency bc is not installed . "
+fi
+
 echo -n "Hostname :" ; hostname
 
 activetime=$(systemctl status cellframe-node) #
 echo "$activetime" | sed 's/^[[:space:]]*//' | grep Active
 #Get version & cpu & mem
-latest_version=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
+latest_version=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114.5" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
 current_version=$(/opt/cellframe-node/bin/cellframe-node-cli version | awk '{print $3}')
-echo -n "Current node version :"
+echo -n "node version         :"
 if [[ "$current_version" == "$latest_version" ]]; then
   echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version</span>"
 else
   echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version >> $latest_version</span>"
+fi
+
+ns_latest_version=$(wget -qO- https://raw.githubusercontent.com/nocdem/Cellframe/main/cellframe-community/Nocdem/node_stats | grep -oP '(?<=# Nodestats ).*' | head -n 1)
+ns_current_version=$(cat /usr/lib/cgi-bin/node_stats  | grep -oP '(?<=# Nodestats ).*' | head -n 1)
+echo -n "node_stats version   :"
+if [[ "$ns_current_version" == "$ns_latest_version" ]]; then
+  echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$ns_current_version</span>"
+else
+  echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$ns_current_version >> $ns_latest_version</span>"
 fi
 
 mem_stats=$(cat /proc/meminfo)  # Read memory statistics from /proc/meminfo
@@ -131,6 +143,8 @@ while read -ra network; do
     fee_addr=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep "fee_addr="  | sed 's/^.........//')
     cert_name=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep "blocks-sign-cert="  | sed 's/^.................//')
     node_status=$(cat /opt/cellframe-node/etc/network/"$network"".cfg" | grep node-role)
+    current_block=$(/opt/cellframe-node/bin/cellframe-node-cli block list -net "$network" -chain main | grep .main | awk '{print $3}')
+
 checklist=0
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli srv_stake order list -net "$network" | grep -q "$node_address"; then
@@ -165,8 +179,9 @@ fi
     else
         echo "<span> $node_state</span>"
     fi
-        echo "    Network        State : $network_target_state"
-        echo ""
+    echo "    Network        State : $network_target_state"
+    echo "    Current Block        : $current_block"
+
 #Check
 if /opt/cellframe-node/bin/cellframe-node-cli srv_stake order list -net "$network" | grep -q "$node_address"; then
   echo ""
@@ -195,22 +210,14 @@ cert_status=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -ne
 hashes=( $(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" -unspent | tr -d '\t' | grep -oP '^[a-zA-Z0-9]{66}') )
 autostatuss=$(/opt/cellframe-node/bin/cellframe-node-cli block autocollect status -net "$network" -chain main | tail -n +3)
 b_reward=$(/opt/cellframe-node/bin/cellframe-node-cli block reward -net "$network" -chain main show)
-c_reward=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward)
-output_date=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 1 reward | head -n 1 | sed 's/^[ \t]*//')
+output_date=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 13 reward | head -n 1 | sed 's/^[ \t]*//' | sed 's/^tx_created: //')
+last_date=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 13 reward | grep tx_created | tail -n 1 | sed 's/^[ \t]*//' | sed 's/^tx_created: //')
 stake_info=$(/opt/cellframe-node/bin/cellframe-node-cli srv_stake list keys -net "$network" -cert "$cert_name")
 initial_investment=$(echo "$stake_info" | grep "Stake value" | awk '{print $3}')
 
 echo "$autostatuss"
 echo "$b_reward"
-#echo "Claimed Rewards "
-#echo "$c_reward"
-reward_data=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep "reward" | awk '{print $2}')
-total_rewards=0
-while read -r amount; do
-    # Sum the rewards
-    total_rewards=$(echo "$total_rewards + $amount" | bc)
-done <<< "$reward_data"
-
+total_rewards=$(/opt/cellframe-node/bin/cellframe-node-cli tx_history -addr "$fee_addr" | grep -B 3 "source_address: reward collecting" | awk '/recv_coins/ { total += $2 } END { print total }' )
 output_timestamp=$(date -d "$output_date" +"%s")
 current_timestamp=$(date +"%s")
 time_difference=$((current_timestamp - output_timestamp))
@@ -223,6 +230,9 @@ echo "=== Certificate ==="
 echo "Delegated $cert_status" | grep  "Related weight"  | sed 's/^[[:space:]]*//'
 echo "Total Distributed Rewards: $total_rewards"
 echo "Estimated Apy % $apy"
+echo ""
+echo "First Signed Block date $output_date ($days_passed days)"
+echo "Last Signed Block date  $last_date"
 
 #check
 if $(/opt/cellframe-node/bin/cellframe-node-cli block list signed -net "$network" -chain main -cert "$cert_name" | grep -q) "Have 0 blocks";then
@@ -245,11 +255,7 @@ echo "<div id=\"$hash\" style=\"display:none\">"
 echo "/opt/cellframe-node/bin/cellframe-node-cli block reward collect -cert $cert_name -addr $fee_addr -net $network -chain main -hashes $hash -fee 0.05e+18"
 /opt/cellframe-node/bin/cellframe-node-cli block reward collect -cert $cert_name -addr $fee_addr -net $network -chain main -hashes $hash -fee 0.05e+18
 
-
-
 echo "</div>"
-
-
 
 done
 echo "</div>"
