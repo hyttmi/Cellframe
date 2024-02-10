@@ -57,6 +57,4 @@ def init():
     return 0
 
 def deinit():
-    os.remove(SCRIPT_PATH)
-    logIt.info(f"{SCRIPT_PATH} removed...")
     return 0
