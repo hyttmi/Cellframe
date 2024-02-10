@@ -2,16 +2,7 @@
 
 #@Nocdem, @CELLgainz
 
-# Log file path
-
-LOG_DIR=$(dirname "$0")
-LOG_FILE="$LOG_DIR/node_error.log"
-
-# Function to log error messages
-log_error() {
-    local message="$1"
-    echo "$(date "+%Y-%m-%d %H:%M:%S") - ERROR: $message" >> "$LOG_FILE"
-}
+# Check first if we are setup as a masternode...
 
 if [[ ! $(grep -r 'node-role=master'  /opt/cellframe-node/etc/network) ]]; then
   echo "Not a masternode, exiting..."
@@ -19,60 +10,92 @@ if [[ ! $(grep -r 'node-role=master'  /opt/cellframe-node/etc/network) ]]; then
   exit 0
 fi
 
-for utils_needed in bc dig wget
+
+# After that, let's see if needed utils are installed...
+for UTILS_NEEDED in bc dig wget hostname
 do
-  if ! command -v $utils_needed >/dev/null 2>&1; then
-    echo "Dependency $utils_needed is not installed. Exiting... "
-    log_error "Dependency $utils_needed is not installed. Exiting... "
+  if ! command -v $UTILS_NEEDED >/dev/null 2>&1; then
+    echo "Dependency $UTILS_NEEDED is not installed. Exiting... "
+    log_error "Dependency $UTILS_NEEDED is not installed. Exiting... "
     exit 0
   fi
 done
 
-echo "<html>"
-echo "<head>"
-echo "<title>Node Status</title>"
-echo "<meta http-equiv=\"refresh\" content=\"60\">"
-echo "<style>"
-echo "#block-list { display: none; }"
-echo "</style>"
-echo "<script>"
-echo "function toggleBlockList() {"
-echo "  var blockList = document.getElementById('block-list');"
-echo "  if (blockList.style.display === 'none') {"
-echo "    blockList.style.display = 'block';"
-echo "  } else {"
-echo "    blockList.style.display = 'none';"
-echo "  }"
-echo "}"
-echo "</script>"
-echo "</head>"
-echo "<body>"
-echo ""
-echo "<pre id=\"output\">"
+# Function to log error messages
 
-echo -n "Hostname :" ; hostname
+log_error() {
+    local message="$1"
+    echo "$(date "+%Y-%m-%d %H:%M:%S") - ERROR: $message" >> "$LOG_FILE"
+}
 
-activetime=$(systemctl status cellframe-node)
-echo "$activetime" | sed 's/^[[:space:]]*//' | grep Active
-#Get version & cpu & mem
-latest_version=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114.5" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
-current_version=$(/opt/cellframe-node/bin/cellframe-node-cli version | awk '{print $3}')
-echo -n "node version         :"
-if [[ "$current_version" == "$latest_version" ]]; then
-  echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version</span>"
-else
-  echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version >> $latest_version</span>"
-fi
+# Log file path
 
-mem_stats=$(cat /proc/meminfo)  # Read memory statistics from /proc/meminfo
+LOG_DIR=$(dirname "$0")
+LOG_FILE="$LOG_DIR/node_error.log"
 
-total_memory=$(echo "$mem_stats" | grep "MemTotal" | awk '{print $2}')  # Extract total memory value
-free_memory=$(echo "$mem_stats" | grep "MemAvailable" | awk '{print $2}')  # Extract availble memory value
+######### GETTERS ########
 
-used_memory=$((total_memory - free_memory))  # Calculate used memory
-memory_utilization=$((used_memory * 100 / total_memory))  # Calculate memory utilization percentage
+ACTIVETIME=$(ps -p $(pidof cellframe-node) -o etime= | sed 's/^[[:space:]]*//')
+HOSTNAME=$(hostname)
+LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114.5" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
+CURRENT_VERSION=$(/opt/cellframe-node/bin/cellframe-node-cli version | awk '{print $3}')
+MEM_STATS=$(cat /proc/meminfo)
+TOTAL_MEMORY=$(echo "$MEM_STATS" | grep "MemTotal" | awk '{print $2}')  # Extract total memory value
+FREE_MEMORY=$(echo "$MEM_STATS" | grep "MemAvailable" | awk '{print $2}')  # Extract availble memory value
+USED_MEMORY=$((TOTAL_MEMORY- FREE_MEMORY))  # Calculate used memory
+MEMORY_UTILIZATION=$((USED_MEMORY * 100 / TOTAL_MEMORY))  # Calculate memory utilization percentage
+CPU_UTILIZATION=$(/opt/cellframe-node/bin/cellframe-node-cli stats cpu | grep -oP 'Total: \K\d+')  # Extract CPU utilization
 
-cpu_utilization=$(/opt/cellframe-node/bin/cellframe-node-cli stats cpu | grep -oP 'Total: \K\d+')  # Extract CPU utilization
+cat << EOF
+<html>
+<head>
+<title>Node Status</title>
+<meta http-equiv=\"refresh\" content=\"60\">
+<style>
+#block-list { display: none; }
+</style>
+<script>
+function toggleBlockList() {
+  var blockList = document.getElementById('block-list');
+  if (blockList.style.display === 'none') {
+    blockList.style.display = 'block';
+  } else {
+    blockList.style.display = 'none';
+  }
+}
+</script>
+</head>
+<body>
+
+<pre id="output">
+<table border="0">
+  <tr>
+    <td>Hostname:</td>
+    <td>$HOSTNAME</td>
+  </tr>
+  <tr>
+    <td>Uptime:</td>
+    <td>$ACTIVETIME</td>
+  </tr>
+  <tr>
+    <td>Node version:</td>
+    <td>$CURRENT_VERSION</td>
+  </tr>
+  <tr>
+    <td>Latest available version:</td>
+    <td>$LATEST_VERSION</td>
+  </tr>
+  <tr>
+    <td>CPU Utilization:</td>
+    <td>$CPU_UTILIZATION</td>
+  </tr>
+  <tr>
+    <td>Memory Utilization</td>
+    <td>$MEMORY_UTILIZATION%</td>
+  </tr>
+</table>
+EOF
+
 
 if [[ $cpu_utilization -gt 90 ]]; then
   cpu_color="red"
@@ -89,17 +112,6 @@ if [[ $memory_utilization -gt 90 ]]; then
 else
   memory_color="green"
 fi
-
-echo ""
-# Display CPU Utilization with color based on utilization percentage
-echo -n "CPU Utilization      : "
-echo "<span style='background-color: $cpu_color; color: white; padding: 0.2em 0.5em; border-radius: 3px;'> $cpu_utilization</span>"
-
-# Display Memory Utilization with color based on utilization percentage
-echo -n "Memory Utilization   : "
-echo "<span style='background-color: $memory_color; color: white; padding: 0.2em 0.5em; border-radius: 3px;'> $memory_utilization %</span>"
-
-echo ""
 
 #Get networks certicaftes and wallet info.
 networks=$(/opt/cellframe-node/bin/cellframe-node-cli net list | grep -oP '(?<=^\t)[^ ]+')
