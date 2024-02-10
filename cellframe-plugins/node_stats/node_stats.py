@@ -44,6 +44,7 @@ def init():
     server = HTTPServer(('localhost', PORT), MyRequestHandler)
 
     if os.path.exists(SCRIPT_PATH):
+        logIt.info(f"{SCRIPT_PATH} found, removing it...")
         os.remove(SCRIPT_PATH)
 
     if not os.path.exists(SCRIPT_PATH):
