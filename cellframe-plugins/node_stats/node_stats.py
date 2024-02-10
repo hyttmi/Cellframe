@@ -3,6 +3,7 @@ from DAP.Core import logIt
 import subprocess, ipaddress, os, sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.request
+import threading
 
 ALLOWED_IP_RANGES = ["192.168.1.0/24", "10.0.0.0/8", "127.0.0.1"]  # Add the allowed IP ranges here
 PORT = 9999
@@ -31,6 +32,20 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b'<h1>Forbidden: You are not allowed to access this server.</h1>')
             return
+        
+        if not os.path.exists(SCRIPT_PATH):
+            try:
+                logIt.notice("Can't find node_stats script. Downloading latest...")
+                url = 'https://raw.githubusercontent.com/hyttmi/Cellframe/main/cellframe-community/Nocdem/node_stats'
+                destination = SCRIPT_PATH
+                urllib.request.urlretrieve(url, destination)
+            except Exception as e:
+                logIt.error(f"Fetching latest node_stats failed with error: {e}")
+                self.send_response(404)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(b'<h1>Fetching latest node_stats failed, please try again.</h1>')
+                return
 
         script_output = run_shell_script(SCRIPT_PATH)
 
@@ -40,25 +55,16 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 
         self.wfile.write(script_output.encode('utf-8'))
 
-def init():
-    server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
-
+def start_server_in_thread():
     if os.path.exists(SCRIPT_PATH):
-        logIt.info(f"{SCRIPT_PATH} found, removing it...")
+        logIt.notice(f"{SCRIPT_PATH} found, removing it...")
         os.remove(SCRIPT_PATH)
 
-    if not os.path.exists(SCRIPT_PATH):
-        try:
-            logIt.info("Can't find node_stats script. Downloading latest...")
-            url = 'https://raw.githubusercontent.com/hyttmi/Cellframe/main/cellframe-community/Nocdem/node_stats'
-            destination = SCRIPT_PATH
-            urllib.request.urlretrieve(url, destination)
-            logIt.notice(f'Server started on port {PORT}. Press Ctrl+C to stop.')
-            server.serve_forever()
-        except Exception as e:
-            logIt.error(f"Fetching latest node_stats failed with error: {e}")
+    server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
+    server.serve_forever()
+    logIt.notice(f"Server started on port {PORT}.")
 
-    return 0
-
-def deinit():
+def init():
+    server_thread = threading.Thread(target=start_server_in_thread)
+    server_thread.start()
     return 0
