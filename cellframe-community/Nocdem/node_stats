@@ -1,4 +1,7 @@
 #!/bin/bash
+
+#@Nocdem, @CELLgainz
+
 # Log file path
 
 LOG_DIR=$(dirname "$0")
