@@ -1,40 +1,8 @@
 #!/bin/bash
-# Nodestats 1.232
-# Telegram   : @Nocdem 
-# Description: This script generates an HTML page displaying various information about the status of a Cellframe node .
-#              It includes details about version, CPU and memory utilization, network, certificates, and wallet information.
-#              Some checks as well to run a masternode.               
-#              This script is intended to be run in a CGI environment.
-# Prerequisites:
-# 1. Node Application - Make sure the Node application is installed and configured on your system.
-#
-# 2. bc
-#
-# Installation Steps:
-# 
-# 1. Set Execute Permissions:
-#    chmod +x node_status
-#
-# 2. Update Paths (Optional):
-#    If necessary, update paths in the script to match the location of your `cellframe-node-cli` tool and other dependencies.
-#
-# 3. Configure Web Server:
-#    Configure your web server to execute CGI scripts. 
-#    
-# 4. Copy the scrpt to
-#    /cgi-bin/ /path/to/cgi-bin/
-#
-# 5. Access the Web Page:
-#    Access the Node Status web page in your browser. The URL will depend on your web server configuration.
-#    http://your-server/cgi-bin/node_status
-#
-# Note:
-# - The script is configured to refresh every 60 seconds by default. You can adjust this interval by modifying the `meta refresh` tag in the script.
-# - Customize the script output to match your specific Node application environment.
-# - Make sure the web server user has the necessary permissions to execute the script and access relevant files.
-
 # Log file path
-LOG_FILE="~/node_error.log"
+
+LOG_DIR=$(dirname "$0")
+LOG_FILE="$LOG_DIR/node_error.log"
 
 # Function to log error messages
 log_error() {
@@ -42,8 +10,21 @@ log_error() {
     echo "$(date "+%Y-%m-%d %H:%M:%S") - ERROR: $message" >> "$LOG_FILE"
 }
 
-echo "Content-type: text/html"
-echo ""
+if [[ ! $(grep -r 'node-role=master'  /opt/cellframe-node/etc/network) ]]; then
+  echo "Not a masternode, exiting..."
+  log_error "Not a masternode, exiting..."
+  exit 0
+fi
+
+for utils_needed in bc dig wget
+do
+  if ! command -v $utils_needed >/dev/null 2>&1; then
+    echo "Dependency $utils_needed is not installed. Exiting... "
+    log_error "Dependency $utils_needed is not installed. Exiting... "
+    exit 0
+  fi
+done
+
 echo "<html>"
 echo "<head>"
 echo "<title>Node Status</title>"
@@ -66,13 +47,9 @@ echo "<body>"
 echo ""
 echo "<pre id=\"output\">"
 
-if ! command -v bc >/dev/null 2>&1; then
-    echo "dependency bc is not installed . "
-fi
-
 echo -n "Hostname :" ; hostname
 
-activetime=$(systemctl status cellframe-node) #
+activetime=$(systemctl status cellframe-node)
 echo "$activetime" | sed 's/^[[:space:]]*//' | grep Active
 #Get version & cpu & mem
 latest_version=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114.5" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
@@ -82,15 +59,6 @@ if [[ "$current_version" == "$latest_version" ]]; then
   echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version</span>"
 else
   echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$current_version >> $latest_version</span>"
-fi
-
-ns_latest_version=$(wget -qO- https://raw.githubusercontent.com/nocdem/Cellframe/main/cellframe-community/Nocdem/node_stats | grep -oP '(?<=# Nodestats ).*' | head -n 1)
-ns_current_version=$(cat /usr/lib/cgi-bin/node_stats  | grep -oP '(?<=# Nodestats ).*' | head -n 1)
-echo -n "node_stats version   :"
-if [[ "$ns_current_version" == "$ns_latest_version" ]]; then
-  echo "<span style='background-color: green; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$ns_current_version</span>"
-else
-  echo "<span style='background-color: red; color: white; padding: 0.2em 0.5em; border-radius: 3px; margin-left: 10px;'>$ns_current_version >> $ns_latest_version</span>"
 fi
 
 mem_stats=$(cat /proc/meminfo)  # Read memory statistics from /proc/meminfo
