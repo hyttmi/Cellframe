@@ -41,7 +41,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(script_output.encode('utf-8'))
 
 def init():
-    server = HTTPServer(('localhost', PORT), MyRequestHandler)
+    server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
 
     if os.path.exists(SCRIPT_PATH):
         logIt.info(f"{SCRIPT_PATH} found, removing it...")
