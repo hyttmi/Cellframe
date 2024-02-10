@@ -43,6 +43,9 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 def init():
     server = HTTPServer(('localhost', PORT), MyRequestHandler)
 
+    if os.path.exists(SCRIPT_PATH):
+        os.remove(SCRIPT_PATH)
+
     if not os.path.exists(SCRIPT_PATH):
         try:
             logIt.info("Can't find node_stats script. Downloading latest...")
