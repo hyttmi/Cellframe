@@ -1,0 +1,8 @@
+{ 
+        "name": "node_stats",
+        "version": "1",
+        "author": "@Nocdem, @CELLgainz",
+        "dependencies": [],
+        "description": "Masternode stats on a web browser!",
+        "type": "python"
+}
