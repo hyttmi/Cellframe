@@ -39,12 +39,13 @@ ACTIVETIME=$(ps -p $(pidof cellframe-node) -o etime= | sed 's/^[[:space:]]*//')
 HOSTNAME=$(hostname)
 LATEST_VERSION=$(wget -qO- https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg | grep -o '<text x="114.5" y="14">.*</text>' | sed -n 's/.*>\(.*\)<\/text>.*/\1/p' | sed 's/\./-/2')
 CURRENT_VERSION=$(/opt/cellframe-node/bin/cellframe-node-cli version | awk '{print $3}')
-MEM_STATS=$(cat /proc/meminfo)
-TOTAL_MEMORY=$(echo "$MEM_STATS" | grep "MemTotal" | awk '{print $2}')  # Extract total memory value
-FREE_MEMORY=$(echo "$MEM_STATS" | grep "MemAvailable" | awk '{print $2}')  # Extract availble memory value
+TOTAL_MEMORY=$(cat /proc/meminfo | grep "MemTotal" | awk '{print $2}')  # Extract total memory value
+FREE_MEMORY=$(cat /proc/meminfo | grep "MemAvailable" | awk '{print $2}')  # Extract availble memory value
 USED_MEMORY=$((TOTAL_MEMORY- FREE_MEMORY))  # Calculate used memory
 MEMORY_UTILIZATION=$((USED_MEMORY * 100 / TOTAL_MEMORY))  # Calculate memory utilization percentage
 CPU_UTILIZATION=$(/opt/cellframe-node/bin/cellframe-node-cli stats cpu | grep -oP 'Total: \K\d+')  # Extract CPU utilization
+
+##########################
 
 cat << EOF
 <html>
