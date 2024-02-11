@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
 import html_gen
 
-ALLOWED_IP_RANGES = ["192.168.1.0/24", "10.0.0.0/8", "127.0.0.1", "46.0.0.0/8"]
+ALLOWED_IP_RANGES = ["192.168.1.0/24", "10.0.0.0/8", "127.0.0.1"]
 PORT = 9999
 PLUGIN_NAME = "Cellframe Masternode WebUI"
 
