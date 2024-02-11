@@ -36,7 +36,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         if not os.path.exists(SCRIPT_PATH):
             try:
                 logIt.notice("Can't find node_stats script. Downloading latest...")
-                url = 'https://raw.githubusercontent.com/hyttmi/Cellframe/main/cellframe-community/Nocdem/node_stats'
+                url = 'https://raw.githubusercontent.com/nocdem/Cellframe/main/cellframe-community/Nocdem/node_stats'
                 destination = SCRIPT_PATH
                 urllib.request.urlretrieve(url, destination)
             except Exception as e:
