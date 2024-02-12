@@ -41,8 +41,8 @@ def generateNetworkInfo():
       </div>
       '''
     else:
-      html += '''
-      <pre class="stats mx-auto">No data</pre>
+      html += f'''
+      <pre class="stats mx-auto">No data available for {network}</pre>
       '''
 
   return html
