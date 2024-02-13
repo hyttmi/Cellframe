@@ -10,20 +10,14 @@ import base64
 ALLOWED_IP_RANGES = ["0.0.0.0/0"]
 PLUGIN_NAME = "Cellframe Masternode WebUI"
 
-try:
-    PORT = int(DAP.configGetItem("webui", "port"))
-except ValueError:
-    PORT = 9999
-
-try:
-    USERNAME = DAP.configGetItem("webui", "username")
-except ValueError:
-    USERNAME = None
-
-try:
-    PASSWORD = DAP.configGetItem("webui", "password")
-except ValueError:
-    PASSWORD = None
+def get_config_value(section, key, default=None, cast=None):
+    try:
+        value = DAP.configGetItem(section, key)
+        if cast is not None:
+            value = cast(value)
+        return value
+    except (ValueError, KeyError):
+        return default
 
 def is_ip_allowed(client_ip):
     for allowed_range in ALLOWED_IP_RANGES:
@@ -32,7 +26,10 @@ def is_ip_allowed(client_ip):
     return False
 
 class MyRequestHandler(BaseHTTPRequestHandler):
-    
+
+    USERNAME = get_config_value("webui", "username", default=None)
+    PASSWORD = get_config_value("webui", "password", default=None)
+
     def do_GET(self):
         client_ip = self.client_address[0]
         logIt.notice(f"Connection from: {client_ip}")
@@ -43,7 +40,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'<h1>Forbidden: You are not allowed to access this server.</h1>')
             return
         
-        if USERNAME is not None and PASSWORD is not None:
+        if self.USERNAME is not None and self.PASSWORD is not None:
             auth_header = self.headers.get('Authorization')
             if auth_header is None or not self.check_basic_auth(auth_header):
                 self.send_response(401)
@@ -66,10 +63,11 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             decoded_bytes = base64.b64decode(auth_data.encode('utf-8'))
             decoded_str = decoded_bytes.decode('utf-8')
             username, password = decoded_str.split(':', 1)
-            return username == USERNAME and password == PASSWORD
+            return username == self.USERNAME and password == self.PASSWORD
         return False
 
 def start_server_in_thread():
+    PORT = get_config_value("webui", "port", default=9999, cast=int)
     server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
     try:
         server.serve_forever()
