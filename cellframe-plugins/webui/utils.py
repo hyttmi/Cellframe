@@ -4,13 +4,10 @@ import urllib.request
 import re
 
 def CLICommand(command):
-
     full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command}"
-    
     try:
         result = subprocess.check_output(full_command, shell=True, text=True).strip()
         return result
-
     except subprocess.CalledProcessError as e:
         return f"Error: {e}"
 
@@ -20,7 +17,6 @@ def shellCommand(command):
         return result
     except subprocess.CalledProcessError as e:
         return f"Error: {e}"
-
 
 def getCurrentVersion():
     test = CLICommand("version")
@@ -32,9 +28,8 @@ def getHostname():
     return hostname
 
 def getSystemUptime():
-    uptime = shellCommand("uptime")
-    uptime = uptime.split()
-    return uptime[0]
+    uptime = shellCommand("uptime -p")
+    return uptime
 
 def getNodeUptime():
     uptime = shellCommand("ps -p $(pidof cellframe-node) -o etime= | sed 's/^[[:space:]]*//'")
