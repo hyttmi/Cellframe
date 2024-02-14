@@ -3,7 +3,7 @@ from DAP.Core import logIt
 
 import subprocess, ipaddress, os, sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import threading
+import multiprocessing
 import html_gen
 import base64
 
@@ -66,7 +66,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             return username == self.USERNAME and password == self.PASSWORD
         return False
 
-def start_server_in_thread():
+def start_server():
     PORT = get_config_value("webui", "port", default=9999, cast=int)
     server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
     try:
@@ -76,8 +76,8 @@ def start_server_in_thread():
         logIt.notice(f"Server startup failed: {e}.")
 
 def init():
-    server_thread = threading.Thread(target=start_server_in_thread)
-    server_thread.start()
+    server_process = multiprocessing.Process(target=start_server)
+    server_process.start()
     return 0
 
 def deinit():

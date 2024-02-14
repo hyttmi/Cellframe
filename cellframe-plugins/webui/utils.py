@@ -2,6 +2,7 @@ import subprocess
 import socket
 import urllib.request
 import re
+import os
 
 def CLICommand(command):
     full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command}"
@@ -18,10 +19,13 @@ def shellCommand(command):
     except subprocess.CalledProcessError as e:
         return f"Error: {e}"
 
+def getPID():
+    node_pid = os.getpid()
+    return node_pid
+
 def getCurrentVersion():
-    test = CLICommand("version")
-    test += shellCommand("cat /proc/meminfo")
-    return test
+    xurrentversion = CLICommand("version")
+    return currentversion
 
 def getHostname():
     hostname = socket.gethostname()
@@ -32,7 +36,8 @@ def getSystemUptime():
     return uptime
 
 def getNodeUptime():
-    uptime = shellCommand("ps -p $(pidof cellframe-node) -o etime= | sed 's/^[[:space:]]*//'")
+    PID = getPID()
+    uptime = shellCommand(f"ps -p {PID} -o etime= | sed 's/^[[:space:]]*//'")
     return uptime
 
 def getCurrentNodeVersion():
@@ -53,11 +58,13 @@ def getLatestNodeVersion():
         return "N/A"
 
 def getCPUStats():
-    cpu_stats = shellCommand("ps -p $(pidof cellframe-node) -o %cpu= | sed 's/^[[:space:]]*//'")
+    PID = getPID()
+    cpu_stats = shellCommand(f"ps -p {PID} -o %cpu= | sed 's/^[[:space:]]*//'")
     return cpu_stats
 
 def getMemoryStats():
-    mem_stats = shellCommand("ps -p $(pidof cellframe-node) -o %mem= | sed 's/^[[:space:]]*//'")
+    PID = getPID()
+    mem_stats = shellCommand(f"ps -p {PID} -o %mem= | sed 's/^[[:space:]]*//'")
     return mem_stats
 
 def getListNetworks():
