@@ -24,7 +24,7 @@ def getPID():
     return node_pid
 
 def getCurrentVersion():
-    xurrentversion = CLICommand("version")
+    currentversion = CLICommand("version")
     return currentversion
 
 def getHostname():
