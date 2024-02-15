@@ -4,10 +4,13 @@ import subprocess, ipaddress, os, sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.request
 import threading
+import base64
 
-ALLOWED_IP_RANGES = ["192.168.1.0/24", "10.0.0.0/8", "127.0.0.1"]  # Add the allowed IP ranges here
+ALLOWED_IP_RANGES = ["0.0.0.0"] 
 PORT = 9999
 SCRIPT_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/node_stats"
+USERNAME=""
+PASSWORD=""
 
 def is_ip_allowed(client_ip):
     for allowed_range in ALLOWED_IP_RANGES:
@@ -33,6 +36,15 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'<h1>Forbidden: You are not allowed to access this server.</h1>')
             return
         
+        if USERNAME is not None and PASSWORD is not None:
+            auth_header = self.headers.get('Authorization')
+            if auth_header is None or not self.check_basic_auth(auth_header):
+                self.send_response(401)
+                self.send_header('WWW-Authenticate', 'Basic realm="Access to the server"')
+                self.end_headers()
+                self.wfile.write(b'<h1>Unauthorized</h1>')
+                return
+        
         if not os.path.exists(SCRIPT_PATH):
             try:
                 logIt.notice("Can't find node_stats script. Downloading latest...")
@@ -54,6 +66,15 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         self.wfile.write(script_output.encode('utf-8'))
+
+    def check_basic_auth(self, auth_header):
+        auth_type, auth_data = auth_header.split(None, 1)
+        if auth_type.lower() == 'basic':
+            decoded_bytes = base64.b64decode(auth_data.encode('utf-8'))
+            decoded_str = decoded_bytes.decode('utf-8')
+            username, password = decoded_str.split(':', 1)
+            return username == USERNAME and password == PASSWORD
+        return False
 
 def start_server_in_thread():
     if os.path.exists(SCRIPT_PATH):
