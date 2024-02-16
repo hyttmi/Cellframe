@@ -48,7 +48,7 @@ def generateNetworkInfo():
       '''
     else:
       html += f'''
-      <div class="{network} row">
+      <div class="{network} row collapse">
         <pre class="stats mx-auto">No data available for {network}</pre>
       </div>
       '''
