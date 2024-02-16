@@ -19,9 +19,11 @@ def generateNetworkInfo():
       address = match.group(3)
 
       html += f'''
-      <button data-target="{network}" class="toggleButton btn btn-custom">{network}</button>
       <div class="row">
-      <pre id="{network}" class="stats mx-auto">
+      <button data-bs-toggle="collapse" data-bs-target=".{network}" aria-expanded="false" class="mx-auto btn btn-custom">{network}</button>
+      </div>
+      <div class="{network} row collapse">
+      <pre class="stats mx-auto">
       <table border="0" class="mx-auto">
         <tr>
           <td>Network state:</td>
@@ -38,7 +40,7 @@ def generateNetworkInfo():
       </table>
       </pre>
       </div>
-      <div class="row">
+      <div class="{network} row collapse">
       <pre class="stats mx-auto">
       {autocollect_cmd}
       </pre>
@@ -46,7 +48,7 @@ def generateNetworkInfo():
       '''
     else:
       html += f'''
-      <div class="row>
+      <div class="{network} row">
         <pre class="stats mx-auto">No data available for {network}</pre>
       </div>
       '''
