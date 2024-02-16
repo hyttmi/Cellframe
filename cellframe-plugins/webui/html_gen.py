@@ -32,17 +32,23 @@ def generateNetworkInfo():
           <td>{target_state}</td>
         </tr>
         <tr>
-          <td>Address:</td>
+          <td>Node address:</td>
           <td>{address}</td>
         </tr>
       </table>
+      </pre>
+      </div>
+      <div class="row">
+      <pre class="stats mx-auto">
       {autocollect_cmd}
       </pre>
       </div>
       '''
     else:
       html += f'''
-      <pre class="stats mx-auto">No data available for {network}</pre>
+      <div class="row>
+        <pre class="stats mx-auto">No data available for {network}</pre>
+      </div>
       '''
 
   return html
