@@ -102,37 +102,32 @@ def getFirstSignedBlocks(network):
     pattern = r"Have (\d+) blocks"
     blocks_match = re.search(pattern, cmd_get_first_signed_blocks)
     if blocks_match:
-        return blocks_match.group(1)
+        result = blocks_match.group(1)
+        return result
     else:
         return None
 
 def getAllSignedBlocks(network):
     net_config = readNetworkConfig(network)
-    cmd_get_first_signed_blocks = CLICommand(f"block -net {network} -chain main list signed -cert {net_config[0]}")
+    cmd_get_all_signed_blocks = CLICommand(f"block -net {network} -chain main list signed -cert {net_config[0]}")
     pattern = r"Have (\d+) blocks"
-    blocks_match = re.search(pattern, cmd_get_first_signed_blocks)
+    blocks_match = re.search(pattern, cmd_get_all_signed_blocks)
     if blocks_match:
-        return blocks_match.group(1)
+        result = blocks_match.group(1)
+        return result
     else:
         return None
 
-def getFeeWalletInfo(network):
+def getFeeWalletTokens(network):
     get_config = readNetworkConfig(network)
     cmd_get_wallet_info = CLICommand(f"wallet info -addr {get_config[1]}")
     if cmd_get_wallet_info:
-        addr_pattern = r"addr: (\w+)"
-        network_pattern = r"network: (\w+)"
-        match_addr = re.search(addr_pattern, cmd_get_wallet_info)
-        match_network = re.search(network_pattern, cmd_get_wallet_info)
-        if match_addr and match_network:
-            addr = match_addr.group(1)
-            network = match_network.group(1)
         balance_pattern = r"(\d+\.\d+)\s+\((\d+)\)\s*(\S+)"
         tokens = re.findall(balance_pattern, cmd_get_wallet_info)
-        return addr, network, tokens
+        return tokens
     else:
         return None
-
+    
 def generateNetworkHTML():
     networks = getListNetworks()
     html = ""
@@ -143,7 +138,7 @@ def generateNetworkHTML():
         autocollect_status = getAutocollectStatus(network)
         get_first_signed_blocks = getFirstSignedBlocks(network)
         get_all_signed_blocks = getAllSignedBlocks(network)
-        wallet_info_addr, wallet_info_network, tokens = getFeeWalletInfo(network)
+        tokens = getFeeWalletTokens(network)
         
         if match:
             state = match.group(1)

@@ -73,7 +73,7 @@ def start_server():
         server.serve_forever()
         logIt.notice(f"({PLUGIN_NAME}) started on port {str(PORT)}.")
     except Exception as e:
-        logIt.notice(f"Server startup failed: {e}.")
+        logIt.notice(f"({PLUGIN_NAME}) server startup failed: {e}.")
 
 def init():
     server_process = multiprocessing.Process(target=start_server)
