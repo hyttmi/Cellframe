@@ -72,3 +72,90 @@ def getListNetworks():
     networks = networks.split()
     networks = networks[1:]
     return networks
+
+def getAutocollectStatus(network):
+    autocollect_cmd = CLICommand(f"block autocollect status -net {network} -chain main")
+    if not "is active" in autocollect_cmd:
+        return "Autocollect status is inactive"
+    else:
+        return "Autocollect status is active"
+    
+def readNetworkConfig(network):
+    net_config = []
+    config_file = f"/opt/cellframe-node/etc/network/{network}.cfg"
+    with open(config_file, "r") as file:
+        text = file.read()
+    pattern_cert = r"^blocks-sign-cert=(.+)$"
+    pattern_wallet = r"^fee_addr=(.+)$"
+    cert_match = re.search(pattern_cert, text)
+    wallet_match = re.search(pattern_wallet, text)
+    if cert_match and wallet_match:
+        net_config.append(cert_match.group(1))
+        net_config.append(wallet_match.group(1))
+        return net_config
+    else:
+        return None
+    
+def getFirstSignedBlocks(network):
+    net_config = readNetworkConfig(network)
+    cmd_get_first_signed_blocks = CLICommand("cellframe-node-cli block -net {network} -chain main list signed -cert {net_config[0]}")
+    pattern = r"Have (\d+) blocks"
+    blocks_match = re.search(pattern, cmd_get_first_signed_blocks)
+    if blocks_match:
+        return blocks_match.group(1)
+    else:
+        return None
+
+def generateNetworkHTML():
+  networks = getListNetworks()
+  html = ""
+  for network in networks:
+    net_status = CLICommand(f"net -net {network} get status")
+    status_pattern = r"has state (\w+) \(target state (\w+)\).*address ([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
+    match = re.search(status_pattern, net_status)
+    autocollect_status = getAutocollectStatus(network)
+    network_config = readNetworkConfig(network)
+    
+    if match:
+      state = match.group(1)
+      target_state = match.group(2)
+      address = match.group(3)
+
+      html += f'''
+      <div class="row">
+      <button data-bs-toggle="collapse" data-bs-target=".{network}" aria-expanded="false" class="mx-auto btn btn-custom">{network}</button>
+      </div>
+      <div class="{network} row collapse">
+      <pre class="stats mx-auto">
+      <table border="0" class="mx-auto">
+        <tr>
+          <td>Network state:</td>
+          <td>{state}</td>
+        </tr>
+        <tr>
+          <td>Target state:</td>
+          <td>{target_state}</td>
+        </tr>
+        <tr>
+          <td>Node address:</td>
+          <td>{address}</td>
+        </tr>
+      </table>
+      </pre>
+      </div>
+      <div class="{network} row collapse">
+      <pre class="stats mx-auto">
+      {autocollect_status}
+      </pre>
+      </div>
+      '''
+    else:
+      html += f'''
+      <div class="{network} row collapse">
+        <pre class="stats mx-auto">No data available for {network}</pre>
+      </div>
+      '''
+
+  return html
+
+
