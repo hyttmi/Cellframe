@@ -147,7 +147,7 @@ def generateNetworkHTML():
 
             html += f'''
             <div class="row">
-                <button data-bs-toggle="collapse" data-bs-target=".{network}" aria-expanded="false" class="mx-auto btn btn-custom">{network}</button>
+                <button data-bs-toggle="collapse" data-bs-target=".{network}" aria-expanded="false" class="mx-auto btn btn-custom btn-primary">{network}</button>
             </div>
             <div class="{network} row collapse">
                 <pre class="stats mx-auto">
