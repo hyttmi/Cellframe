@@ -141,7 +141,6 @@ def generateNetworkHTML():
         status_pattern = r"has state (\w+) \(target state (\w+)\).*address ([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
         match = re.search(status_pattern, net_status)
         autocollect_status = getAutocollectStatus(network)
-        network_config = readNetworkConfig(network)
         get_first_signed_blocks = getFirstSignedBlocks(network)
         get_all_signed_blocks = getAllSignedBlocks(network)
         wallet_info_addr, wallet_info_network, tokens = getFeeWalletInfo(network)
