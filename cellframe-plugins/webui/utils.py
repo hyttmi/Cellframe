@@ -98,33 +98,36 @@ def readNetworkConfig(network):
     
 def getFirstSignedBlocks(network):
     net_config = readNetworkConfig(network)
-    cmd_get_first_signed_blocks = CLICommand(f"block -net {network} -chain main list first_signed -cert {net_config[0]}")
-    pattern = r"Have (\d+) blocks"
-    blocks_match = re.search(pattern, cmd_get_first_signed_blocks)
-    if blocks_match:
-        result = blocks_match.group(1)
-        return result
+    if net_config is not None:
+        cmd_get_first_signed_blocks = CLICommand(f"block -net {network} -chain main list first_signed -cert {net_config[0]}")
+        pattern = r"Have (\d+) blocks"
+        blocks_match = re.search(pattern, cmd_get_first_signed_blocks)
+        if blocks_match:
+            result = blocks_match.group(1)
+            return result
     else:
         return None
 
 def getAllSignedBlocks(network):
     net_config = readNetworkConfig(network)
-    cmd_get_all_signed_blocks = CLICommand(f"block -net {network} -chain main list signed -cert {net_config[0]}")
-    pattern = r"Have (\d+) blocks"
-    blocks_match = re.search(pattern, cmd_get_all_signed_blocks)
-    if blocks_match:
-        result = blocks_match.group(1)
-        return result
+    if net_config is not None:
+        cmd_get_all_signed_blocks = CLICommand(f"block -net {network} -chain main list signed -cert {net_config[0]}")
+        pattern = r"Have (\d+) blocks"
+        blocks_match = re.search(pattern, cmd_get_all_signed_blocks)
+        if blocks_match:
+            result = blocks_match.group(1)
+            return result
     else:
         return None
 
 def getFeeWalletTokens(network):
-    get_config = readNetworkConfig(network)
-    cmd_get_wallet_info = CLICommand(f"wallet info -addr {get_config[1]}")
-    if cmd_get_wallet_info:
-        balance_pattern = r"(\d+\.\d+)\s+\((\d+)\)\s*(\S+)"
-        tokens = re.findall(balance_pattern, cmd_get_wallet_info)
-        return tokens
+    net_config = readNetworkConfig(network)
+    if net_config is not None:
+        cmd_get_wallet_info = CLICommand(f"wallet info -addr {net_config[1]}")
+        if cmd_get_wallet_info:
+            balance_pattern = r"(\d+\.\d+)\s+\((\d+)\)\s*(\S+)"
+            tokens = re.findall(balance_pattern, cmd_get_wallet_info)
+            return tokens
     else:
         return None
 
