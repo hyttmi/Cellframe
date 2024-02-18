@@ -87,8 +87,8 @@ def readNetworkConfig(network):
         text = file.read()
     pattern_cert = r"^blocks-sign-cert=(.+)"
     pattern_wallet = r"^fee_addr=(.+)"
-    cert_match = re.search(pattern_cert, text)
-    wallet_match = re.search(pattern_wallet, text)
+    cert_match = re.search(pattern_cert, text, re.MULTILINE)
+    wallet_match = re.search(pattern_wallet, text, re.MULTILINE)
     if cert_match and wallet_match:
         net_config.append(cert_match.group(1))
         net_config.append(wallet_match.group(1))
