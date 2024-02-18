@@ -93,7 +93,7 @@ def start_server():
         server.serve_forever()
         logIt.notice(f"({PLUGIN_NAME}) started on port {str(PORT)}.")
     except Exception as e:
-        logIt.notice(f"({PLUGIN_NAME}) server startup failed: {e}.")
+        logIt.error(f"({PLUGIN_NAME}) server startup failed: {e}.")
         print("")
 
 def init():
