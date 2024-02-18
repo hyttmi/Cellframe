@@ -127,10 +127,11 @@ def getFeeWalletTokens(network):
         return tokens
     else:
         return None
-    
-def generateNetworkHTML():
+
+def generateNetworkData():
     networks = getListNetworks()
-    html = ""
+    network_data = []
+
     for network in networks:
         net_status = CLICommand(f"net -net {network} get status")
         status_pattern = r"has state (\w+) \(target state (\w+)\).*address ([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
@@ -145,74 +146,22 @@ def generateNetworkHTML():
             target_state = match.group(2)
             address = match.group(3)
 
-            html += f'''
-            <div class="row">
-                <button data-bs-toggle="collapse" data-bs-target=".{network}" aria-expanded="false" class="mx-auto btn btn-custom btn-primary">{network}</button>
-            </div>
-            <div class="{network} row collapse">
-                <pre class="stats mx-auto">
-                    <table border="0" class="mx-auto">
-                        <tr>
-                            <td>Network state:</td>
-                            <td>{state}</td>
-                        </tr>
-                        <tr>
-                            <td>Target state:</td>
-                            <td>{target_state}</td>
-                        </tr>
-                        <tr>
-                            <td>Node address:</td>
-                            <td>{address}</td>
-                        </tr>
-                        <tr>
-                            <td>First signed blocks:</td>
-                            <td>{get_first_signed_blocks}</td>
-                        </tr>
-                        <tr>
-                            <td>All signed blocks:</td>
-                            <td>{get_all_signed_blocks}</td>
-                        </tr>
-                        <tr>
-                            <td>Autocollect status:</td>
-                            <td>{autocollect_status}</td>
-                        </tr>
-                    </table>
-                </pre>
-            </div>
-            <div class="{network} row collapse">
-                <pre class="stats mx-auto">
-                <p class="head"><strong>Fee wallet information:</strong></p>
-                    <table border="0" class="mx-auto">
-                        <thead>
-                            <tr>
-                                <th>Token</th>
-                                <th>Balance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            '''
+            network_info = {
+                'name': network,
+                'state': state,
+                'target_state': target_state,
+                'address': address,
+                'first_signed_blocks': get_first_signed_blocks,
+                'all_signed_blocks': get_all_signed_blocks,
+                'autocollect_status': autocollect_status,
+                'fee_wallet_tokens': [{'token': token[2], 'balance': token[0]} for token in tokens]
+            }
 
-            for token in tokens:
-                html += f'''
-                            <tr>
-                                <td>{token[2]}</td>
-                                <td>{token[0]}</td>
-                            </tr>
-                '''
-
-            html += '''
-                        </tbody>
-                    </table>
-                </pre>
-            </div>
-            '''
+            network_data.append(network_info)
         else:
-            html += f'''
-            <div class="{network} row collapse">
-                <pre class="stats mx-auto">No data available for {network}</pre>
-            </div>
-            '''
+            network_data.append({
+                'name': network,
+                'error': f'No data available for {network}'
+            })
 
-    return html
-
-
+    return network_data

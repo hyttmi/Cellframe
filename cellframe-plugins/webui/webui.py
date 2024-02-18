@@ -1,11 +1,14 @@
 import DAP
 from DAP.Core import logIt
 
-import subprocess, ipaddress, os, sys
+import subprocess, ipaddress, os, sys, utils, base64, multiprocessing
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import multiprocessing
-import html_gen
-import base64
+import utils
+from jinja2 import Environment, PackageLoader, select_autoescape
+env = Environment(
+    loader=PackageLoader("webui"),
+    autoescape=select_autoescape()
+)
 
 ALLOWED_IP_RANGES = ["0.0.0.0/0"]
 PLUGIN_NAME = "Cellframe Masternode WebUI"
@@ -25,6 +28,23 @@ def is_ip_allowed(client_ip):
             return True
     return False
 
+def generateHtml():
+    info = {
+        "hostname": utils.getHostname(),
+        "system_uptime": utils.getSystemUptime(),
+        "node_uptime": utils.getNodeUptime(),
+        "node_version": utils.getCurrentNodeVersion(),
+        "latest_node_version": utils.getLatestNodeVersion(),
+        "networks": utils.getListNetworks(),
+        "cpu_utilization": utils.getCPUStats(),
+        "memory_utilization": utils.getMemoryStats()
+    }
+
+    net_info = utils.generateNetworkData()
+    template = env.get_template(f"template.html")
+    output = template.render(info, net_info=net_info)
+    return output
+
 class MyRequestHandler(BaseHTTPRequestHandler):
 
     USERNAME = get_config_value("webui", "username", default=None)
@@ -32,7 +52,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         client_ip = self.client_address[0]
-        logIt.notice(f"Connection from: {client_ip}")
+        logIt.notice(f"({PLUGIN_NAME}) Connection from: {client_ip}")
         if not is_ip_allowed(client_ip):
             self.send_response(403)
             self.send_header('Content-type', 'text/html')
@@ -53,7 +73,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
-        html_data = html_gen.generateHtml()
+        html_data = generateHtml()
 
         self.wfile.write(html_data.encode('utf-8'))
     
@@ -74,6 +94,7 @@ def start_server():
         logIt.notice(f"({PLUGIN_NAME}) started on port {str(PORT)}.")
     except Exception as e:
         logIt.notice(f"({PLUGIN_NAME}) server startup failed: {e}.")
+        print("")
 
 def init():
     server_process = multiprocessing.Process(target=start_server)

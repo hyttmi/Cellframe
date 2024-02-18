@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 <head>
@@ -6,57 +7,58 @@
   <title>Cellframe Node Stats</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   <style type="text/css">
-    body {{
+    body {
     padding-top: 20px;
-    }}
+    }
 
-    .container {{
+    .container {
     text-align: center;
-    }}
+    }
 
-    .output {{
+    .output {
       text-align: center;
-    }}
+    }
 
-    .btn-custom {{
+    .btn-custom {
       border: 0;
       max-width: 100px;
       margin-bottom: 15px;
-    }}
+      margin-left: 15px;
+    }
 
-    .btn-custom:hover {{
+    .btn-custom:hover {
       border: 0;
-    }}
+    }
 
-    .node-stats {{
+    .node-stats {
       border: 0;
-    }}
+    }
 
-    .stats {{
+    .stats {
         text-align: center;
-    }}
+    }
 
-    .img-fluid {{
+    .img-fluid {
       max-width: 450px;
-    }}
+    }
 
-    table {{
+    table {
       text-align: left;
-    }}
+    }
 
-    table tr td:nth-child(2n), table thead th:nth-child(2n) {{
+    table tr td:nth-child(2n), table thead th:nth-child(2n) {
       padding-left: 15px;
-    }}
+    }
 
-    pre {{
+    pre {
       overflow-x: hidden;
       word-wrap: break-word;
       white-space: pre-wrap;
-    }}
+    }
 
-    .head {{
+    .head {
       text-transform: uppercase;
-    }}
+    }
   </style>
 </head>
 <body>
@@ -73,37 +75,96 @@
           <table class="mx-auto node-stats">
             <tr>
               <td>Hostname:</td>
-              <td>{HOSTNAME}</td>
+              <td>{{ hostname }}</td>
             </tr>
             <tr>
               <td>System uptime:</td>
-              <td>{UPTIME}</td>
+              <td>{{ system_uptime }}</td>
             </tr>
             <tr>
               <td>Node uptime:</td>
-              <td>{ACTIVETIME}</td>
+              <td>{{ node_uptime }}</td>
             </tr>
             <tr>
               <td>Node version:</td>
-              <td>{CURRENT_VERSION}</td>
+              <td>{{ node_version }}</td>
             </tr>
             <tr>
               <td>Latest available version:</td>
-              <td>{LATEST_VERSION}</td>
+              <td>{{ latest_node_version }}</td>
             </tr>
             <tr>
               <td>CPU utilization:</td>
-              <td>{CPU_UTILIZATION}%</td>
+              <td>{{ cpu_utilization }} %</td>
             </tr>
             <tr>
               <td>Memory utilization:</td>
-              <td>{MEMORY_UTILIZATION}%</td>
+              <td>{{ memory_utilization }} %</td>
             </tr>
           </table>
         </pre>
       </div>
-    </div>
-    {NETWORKINFO}
+    </div>    
+            <div class="row">
+                <div class="btn-grp">
+                {% for network in net_info %}
+                <button data-bs-toggle="collapse" data-bs-target=".{{ network.name }}" aria-expanded="false" class="mx-auto btn btn-custom btn-primary">{{ network.name }}</button>
+                {% endfor %}
+                </div>
+            </div>
+            {% for network in net_info %}
+            <div class="{{ network.name }} row collapse">
+                <pre class="stats mx-auto">
+                    <table border="0" class="mx-auto">
+                        <tr>
+                            <td>{{ network.name }} state:</td>
+                            <td>{{ network.state }}</td>
+                        </tr>
+                        <tr>
+                            <td>Target state:</td>
+                            <td>{{ network.target_state }}</td>
+                        </tr>
+                        <tr>
+                            <td>Node address:</td>
+                            <td>{{ network.address }}</td>
+                        </tr>
+                        <tr>
+                            <td>First signed blocks:</td>
+                            <td>{{ network.first_signed_blocks }}</td>
+                        </tr>
+                        <tr>
+                            <td>All signed blocks:</td>
+                            <td>{{ network.all_signed_blocks }}</td>
+                        </tr>
+                        <tr>
+                            <td>Autocollect status:</td>
+                            <td>{{ network.autocollect_status }}</td>
+                        </tr>
+                    </table>
+                </pre>
+            </div>
+            <div class="{{ network.name }} row collapse">
+                <pre class="stats mx-auto">
+                <p class="head"><strong>Fee wallet information:</strong></p>
+                    <table border="0" class="mx-auto">
+                        <thead>
+                            <tr>
+                                <th>Token</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for token in network.fee_wallet_tokens %}    
+                            <tr>
+                                <td>{{ token.token }}</td>
+                                <td>{{ token.balance }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </pre>
+            </div>
+            {% endfor %}
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
