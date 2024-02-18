@@ -157,7 +157,7 @@ def generateNetworkData():
                 'first_signed_blocks': get_first_signed_blocks,
                 'all_signed_blocks': get_all_signed_blocks,
                 'autocollect_status': autocollect_status,
-                'fee_wallet_tokens': [{'token': token[2], 'balance': token[0]} for token in tokens]
+                'fee_wallet_tokens': [{'token': token[2], 'balance': token[0]} for token in tokens] if tokens else []
             }
 
             network_data.append(network_info)
