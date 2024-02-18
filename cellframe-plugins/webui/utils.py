@@ -59,12 +59,12 @@ def getLatestNodeVersion():
 
 def getCPUStats():
     PID = getPID()
-    cpu_stats = shellCommand(f"ps -p {PID} -o %cpu= | sed 's/^[[:space:]]*//'")
+    cpu_stats = shellCommand(f"ps -p {PID} -o %cpu= | tr -d '[:blank:]'")
     return cpu_stats
 
 def getMemoryStats():
     PID = getPID()
-    mem_stats = shellCommand(f"ps -p {PID} -o %mem= | sed 's/^[[:space:]]*//'")
+    mem_stats = shellCommand(f"ps -p {PID} -o %mem= | tr -d '[:blank:]'")
     return mem_stats
 
 def getListNetworks():
@@ -85,8 +85,8 @@ def readNetworkConfig(network):
     config_file = f"/opt/cellframe-node/etc/network/{network}.cfg"
     with open(config_file, "r") as file:
         text = file.read()
-    pattern_cert = r"blocks-sign-cert=(.+)"
-    pattern_wallet = r"fee_addr=(.+)"
+    pattern_cert = r"^blocks-sign-cert=(.+)"
+    pattern_wallet = r"^fee_addr=(.+)"
     cert_match = re.search(pattern_cert, text)
     wallet_match = re.search(pattern_wallet, text)
     if cert_match and wallet_match:
