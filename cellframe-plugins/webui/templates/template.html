@@ -143,6 +143,7 @@
                     </table>
                 </pre>
             </div>
+            {% if network.fee_wallet_tokens is not none %}
             <div class="{{ network.name }} row collapse">
                 <pre class="stats mx-auto">
                 <p class="head"><strong>Fee wallet information:</strong></p>
@@ -164,6 +165,7 @@
                     </table>
                 </pre>
             </div>
+            {% endif %}
             {% endfor %}
     </div>
   </div>
