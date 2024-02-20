@@ -1,7 +1,0 @@
-{ 
-    "name": "tutorial",
-    "version": "0.1",
-    "author": "Mika Hyttinen (@CELLGainz)",
-    "dependencys": [],
-    "description": "A tutorial plugin for printing Hello World! to console"
-}

@@ -1,7 +1,0 @@
-{ 
-    "name": "log2web",
-    "version": "0.1",
-    "author": "Mika Hyttinen (@CELLgainz)",
-    "dependencies": [],
-    "description": "Shows the logfiles conveniently on your web browser"
-}

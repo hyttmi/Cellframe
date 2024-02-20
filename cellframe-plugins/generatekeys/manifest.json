@@ -1,7 +1,0 @@
-{ 
-    "name": "generatekeys",
-    "version": "0.1",
-    "author": "Mika Hyttinen (@CELLgainz)",
-    "dependencies": [],
-    "description": "Generates multiple keys (benchmarking)"
-}
