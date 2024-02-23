@@ -90,6 +90,7 @@ def start_server():
     PORT = get_config_value("webui", "port", default=9999, cast=int)
     server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
     try:
+        server.allow_reuse_address = True
         server.serve_forever()
     except Exception as e:
         logIt.error(f"({PLUGIN_NAME}) server startup failed: {e}.")
