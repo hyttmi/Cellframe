@@ -88,7 +88,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 
 def start_server():
     PORT = get_config_value("webui", "port", default=9999, cast=int)
-    server = HTTPServer(('0.0.0.0', 9666), MyRequestHandler)
+    server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
     try:
         server.serve_forever()
         logIt.notice(f"({PLUGIN_NAME}) started on port {str(PORT)}.")
