@@ -91,9 +91,10 @@ def start_server():
     server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
     try:
         server.serve_forever()
-        logIt.notice(f"({PLUGIN_NAME}) started on port {str(PORT)}.")
     except Exception as e:
         logIt.error(f"({PLUGIN_NAME}) server startup failed: {e}.")
+    finally:
+        logIt.notice(f"({PLUGIN_NAME}) started on port {str(PORT)}.")
 
 def init():
     server_process = multiprocessing.Process(target=start_server)
