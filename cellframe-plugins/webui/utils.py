@@ -134,7 +134,6 @@ def getFeeWalletTokens(network):
 def generateNetworkData():
     networks = getListNetworks()
     network_data = []
-
     for network in networks:
         net_status = CLICommand(f"net -net {network} get status")
         status_pattern = r"has state (\w+) \(target state (\w+)\).*address ([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"

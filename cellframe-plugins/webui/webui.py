@@ -19,7 +19,7 @@ def get_config_value(section, key, default=None, cast=None):
         if cast is not None:
             value = cast(value)
         return value
-    except (ValueError, KeyError):
+    except ValueError:
         return default
 
 def is_ip_allowed(client_ip):
@@ -37,12 +37,12 @@ def generateHtml():
         "latest_node_version": utils.getLatestNodeVersion(),
         "networks": utils.getListNetworks(),
         "cpu_utilization": utils.getCPUStats(),
-        "memory_utilization": utils.getMemoryStats()
+        "memory_utilization": utils.getMemoryStats(),
+        "net_info": utils.generateNetworkData()
     }
 
-    net_info = utils.generateNetworkData()
     template = env.get_template(f"template.html")
-    output = template.render(info, net_info=net_info)
+    output = template.render(info)
     return output
 
 class MyRequestHandler(BaseHTTPRequestHandler):
@@ -88,11 +88,12 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 
 def start_server():
     PORT = get_config_value("webui", "port", default=9999, cast=int)
-    server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
+    server = HTTPServer(('0.0.0.0', 9666), MyRequestHandler)
     try:
         server.serve_forever()
         logIt.notice(f"({PLUGIN_NAME}) started on port {str(PORT)}.")
     except Exception as e:
+        print(f"{e}")
         logIt.error(f"({PLUGIN_NAME}) server startup failed: {e}.")
 
 def init():
@@ -103,3 +104,5 @@ def init():
 def deinit():
     logIt.notice(f"{PLUGIN_NAME} stopped.")
     return 0
+
+init()
