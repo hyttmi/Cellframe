@@ -1,32 +1,15 @@
 import DAP
 from DAP.Core import logIt
 
-import subprocess, ipaddress, os, sys, utils, base64, multiprocessing
+import utils, base64, multiprocessing
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import utils
 from jinja2 import Environment, PackageLoader, select_autoescape
+
 env = Environment(
     loader=PackageLoader("webui"),
     autoescape=select_autoescape()
 )
-
-ALLOWED_IP_RANGES = ["0.0.0.0/0"]
-PLUGIN_NAME = "Cellframe Masternode WebUI"
-
-def get_config_value(section, key, default=None, cast=None):
-    try:
-        value = DAP.configGetItem(section, key)
-        if cast is not None:
-            value = cast(value)
-        return value
-    except ValueError:
-        return default
-
-def is_ip_allowed(client_ip):
-    for allowed_range in ALLOWED_IP_RANGES:
-        if ipaddress.ip_address(client_ip) in ipaddress.ip_network(allowed_range, strict=False):
-            return True
-    return False
 
 def generateHtml():
     info = {
@@ -47,19 +30,10 @@ def generateHtml():
 
 class MyRequestHandler(BaseHTTPRequestHandler):
 
-    USERNAME = get_config_value("webui", "username", default=None)
-    PASSWORD = get_config_value("webui", "password", default=None)
+    USERNAME = utils.get_config_value("webui", "username", default=None)
+    PASSWORD = utils.get_config_value("webui", "password", default=None)
 
     def do_GET(self):
-        client_ip = self.client_address[0]
-        logIt.notice(f"({PLUGIN_NAME}) Connection from: {client_ip}")
-        if not is_ip_allowed(client_ip):
-            self.send_response(403)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write(b'<h1>Forbidden: You are not allowed to access this server.</h1>')
-            return
-        
         if self.USERNAME is not None and self.PASSWORD is not None:
             auth_header = self.headers.get('Authorization')
             if auth_header is None or not self.check_basic_auth(auth_header):
@@ -87,15 +61,15 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         return False
 
 def start_server():
-    PORT = get_config_value("webui", "port", default=9999, cast=int)
+    PORT = utils.get_config_value("webui", "port", default=9999, cast=int)
     server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
     try:
         server.allow_reuse_address = True
         server.serve_forever()
     except Exception as e:
-        logIt.error(f"({PLUGIN_NAME}) server startup failed: {e}.")
+        logIt.error(f"(Cellframe Masternode WebUI) server startup failed: {e}.")
     finally:
-        logIt.notice(f"({PLUGIN_NAME}) started on port {str(PORT)}.")
+        logIt.notice(f"(Cellframe Masternode WebUI) started on port {str(PORT)}.")
 
 def init():
     server_process = multiprocessing.Process(target=start_server)
@@ -103,7 +77,7 @@ def init():
     return 0
 
 def deinit():
-    logIt.notice(f"{PLUGIN_NAME} stopped.")
+    logIt.notice(f"(Cellframe Masternode WebUI) stopped.")
     return 0
 
 init()

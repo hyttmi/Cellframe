@@ -1,8 +1,29 @@
+import DAP
+from DAP.Core import logIt
 import subprocess
 import socket
 import urllib.request
 import re
 import os
+
+def get_config_value(section, key, default=None, cast=None):
+    try:
+        value = DAP.configGetItem(section, key)
+        if cast is not None:
+            value = cast(value)
+        return value
+    except ValueError:
+        return default
+    
+def debug(fn):
+    def wrapper(*args, **kwargs):
+        logIt.notice(f"[DBG] (Cellframe Masternode WebUI) Invoking {fn.__name__}")
+        logIt.notice(f"[DBG] (Cellframe Masternode WebUI) args: {args}")
+        logIt.notice(f"[DBG] (Cellframe Masternode WebUI) kwargs: {kwargs}")
+        result = fn(*args, **kwargs)
+        logIt.notice(f"[DBG] (Cellframe Masternode WebUI) returned {result}")
+        return result
+    return wrapper
 
 def CLICommand(command):
     full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command}"
@@ -79,7 +100,7 @@ def getAutocollectStatus(network):
         return "Inactive"
     else:
         return "Active"
-    
+
 def readNetworkConfig(network):
     net_config = []
     config_file = f"/opt/cellframe-node/etc/network/{network}.cfg"
@@ -95,7 +116,7 @@ def readNetworkConfig(network):
         return net_config
     else:
         return None
-    
+
 def getFirstSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
