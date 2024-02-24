@@ -41,30 +41,22 @@ def shellCommand(command):
         return f"Error: {e}"
 
 def getPID():
-    node_pid = os.getpid()
-    return node_pid
-
-def getCurrentVersion():
-    currentversion = CLICommand("version")
-    return currentversion
+    return os.getpid()
 
 def getHostname():
-    hostname = socket.gethostname()
-    return hostname
+    return socket.gethostname()
 
 def getSystemUptime():
-    uptime = shellCommand("uptime -p")
-    return uptime
+    return shellCommand("uptime -p")
 
 def getNodeUptime():
     PID = getPID()
-    uptime = shellCommand(f"ps -p {PID} -o etime= | sed 's/^[[:space:]]*//'")
-    return uptime
+    return shellCommand(f"ps -p {PID} -o etime= | sed 's/^[[:space:]]*//'")
+
 
 def getCurrentNodeVersion():
-    version = CLICommand("version")
-    version = version.split()
-    return version[2]
+    version = CLICommand("version").replace("-",".")
+    return version.split()[2]
 
 def getLatestNodeVersion():
     badge_url = "https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg"
@@ -80,18 +72,15 @@ def getLatestNodeVersion():
 
 def getCPUStats():
     PID = getPID()
-    cpu_stats = shellCommand(f"ps -p {PID} -o %cpu= | tr -d '[:blank:]'")
-    return cpu_stats
+    return shellCommand(f"ps -p {PID} -o %cpu= | tr -d '[:blank:]'")
 
 def getMemoryStats():
     PID = getPID()
-    mem_stats = shellCommand(f"ps -p {PID} -o %mem= | tr -d '[:blank:]'")
-    return mem_stats
+    return shellCommand(f"ps -p {PID} -o %mem= | tr -d '[:blank:]'")
 
 def getListNetworks():
     networks = CLICommand("net list")
-    networks = networks.split()
-    networks = networks[1:]
+    networks = networks.split()[1:]
     return networks
 
 def getAutocollectStatus(network):
