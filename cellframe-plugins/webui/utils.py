@@ -5,6 +5,7 @@ import socket
 import urllib.request
 import re
 import os
+import time
 
 def get_config_value(section, key, default=None, cast=None):
     try:
@@ -47,7 +48,18 @@ def getHostname():
     return socket.gethostname()
 
 def getSystemUptime():
-    return shellCommand("uptime -p")
+    with open('/proc/uptime', 'r') as f:
+        uptime_seconds = float(f.readline().split()[0])
+
+    uptime_struct = time.gmtime(uptime_seconds)
+    days = uptime_struct.tm_yday - 1
+    hours = uptime_struct.tm_hour
+    minutes = uptime_struct.tm_min
+    seconds = uptime_struct.tm_sec
+    uptime_str = f"{days}-{hours:02}:{minutes:02}:{seconds:02}" if days > 0 else f"{hours:02}:{minutes:02}:{seconds:02}"
+
+    return uptime_str
+
 
 def getNodeUptime():
     PID = getPID()

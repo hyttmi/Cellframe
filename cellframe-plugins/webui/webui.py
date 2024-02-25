@@ -24,9 +24,17 @@ def generateHtml():
         "net_info": utils.generateNetworkData()
     }
 
-    template = env.get_template(f"template.html")
+    template_setting = utils.get_config_value("webui", "template", default=None)
+
+    template_path = f"{template_setting}/template.html"
+    try:
+        template = env.get_template(template_path)
+    except Exception:
+        template_path = "default/template.html"
+        template = env.get_template(template_path)
     output = template.render(info)
     return output
+        
 
 class MyRequestHandler(BaseHTTPRequestHandler):
 

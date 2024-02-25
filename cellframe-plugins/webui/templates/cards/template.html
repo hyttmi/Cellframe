@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset=" utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+
+
+    <title>Cellframe system & node stats</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/@adminkit/core@latest/dist/css/app.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@adminkit/core@latest/dist/js/app.js"></script>
+    <script src="https://kit.fontawesome.com/ed38ca7e1a.js" crossorigin="anonymous"></script>
+
+    <style>
+        .logo {
+            max-width: 300px;
+            padding-bottom: 20px;
+        }
+
+        table tr td:nth-child(2n),
+        table thead th:nth-child(2n) {
+            padding-left: 15px;
+        }
+
+        .card-title {
+            text-transform: uppercase;
+        }
+
+        .content {
+            background: #FFFFFF;
+        }
+
+        .row {
+            padding-top: 10px;
+        }
+
+        table {
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="main">
+
+            <main class="content">
+                <div class="container-fluid p-0">
+                    <div class="row">
+                        <h1 class="display-6">System info</h1>
+                        <div class="col-xl-6 col-xxl-6 d-flex">
+                            <div class="w-100">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">hostname</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-network-wired fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ hostname }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">ip address</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-computer fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">192.168.1.2</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">node cpu usage</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-microchip fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ cpu_utilization }}%</h4>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">node memory usage</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-memory fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ memory_utilization }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-xxl-6 d-flex">
+                            <div class="w-100">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">node uptime</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-regular fa-clock fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ node_uptime }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">system uptime</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-regular fa-clock fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ system_uptime }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">node version</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-v fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ node_version }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">latest available version</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-v fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ latest_node_version }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% for network in net_info %}
+                    <div class="row">
+                        <h1 class="display-6">{{ network.name }}</h1>
+                        <div class="col-xl-6 col-xxl-6 d-flex">
+                            <div class="w-100">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">state</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-network-wired fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ network.state }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">network target state</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-globe fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ network.target_state }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">node address</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-address-card fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ network.address }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">First signed blocks</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-cubes fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ network.first_signed_blocks }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-xxl-6 d-flex">
+                            <div class="w-100">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">All signed blocks</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-cubes fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ network.all_signed_blocks }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">Autocollect status</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-coins fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <h4 class="mt-1 mb-3">{{ network.autocollect_status }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if network.fee_wallet_tokens is not none %}
+                                    <div class="col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col mt-0">
+                                                        <h5 class="card-title">wallet information</h5>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <div class="stat text-primary">
+                                                            <i class="fa-solid fa-wallet fa-xl"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Token</th>
+                                                            <th>Balance</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for token in network.fee_wallet_tokens %}
+                                                        <tr>
+                                                            <td>{{ token.token }}</td>
+                                                            <td>{{ token.balance }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>
