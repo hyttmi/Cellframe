@@ -87,5 +87,3 @@ def init():
 def deinit():
     logIt.notice(f"(Cellframe Masternode WebUI) stopped.")
     return 0
-
-init()
