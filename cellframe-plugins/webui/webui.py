@@ -14,6 +14,7 @@ env = Environment(
 def generateHtml():
     info = {
         "hostname": utils.getHostname(),
+        "external_ip": utils.getExtIP(),
         "system_uptime": utils.getSystemUptime(),
         "node_uptime": utils.getNodeUptime(),
         "node_version": utils.getCurrentNodeVersion(),

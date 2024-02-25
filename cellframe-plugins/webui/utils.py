@@ -47,6 +47,14 @@ def getPID():
 def getHostname():
     return socket.gethostname()
 
+def getExtIP():
+    try:
+        with urllib.request.urlopen('https://ifconfig.me/ip') as response:
+            ip_address = response.read().decode('utf-8').strip()
+            return ip_address
+    except Exception as e:
+        return f"An error occurred: {e}"
+
 def getSystemUptime():
     with open('/proc/uptime', 'r') as f:
         uptime_seconds = float(f.readline().split()[0])
