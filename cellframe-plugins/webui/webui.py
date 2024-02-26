@@ -25,7 +25,7 @@ def generateHtml():
         "net_info": utils.generateNetworkData()
     }
 
-    template_setting = utils.get_config_value("webui", "template", default=None)
+    template_setting = utils.get_config_value("webui", "template")
 
     template_path = f"{template_setting}/template.html"
     try:
