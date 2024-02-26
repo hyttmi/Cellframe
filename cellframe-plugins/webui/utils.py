@@ -15,17 +15,22 @@ def get_config_value(section, key, default=None, cast=None):
         return value
     except ValueError:
         return default
-    
+
 def debug(fn):
     def wrapper(*args, **kwargs):
-        logIt.notice(f"[DBG] (Cellframe Masternode WebUI) Invoking {fn.__name__}")
-        logIt.notice(f"[DBG] (Cellframe Masternode WebUI) args: {args}")
-        logIt.notice(f"[DBG] (Cellframe Masternode WebUI) kwargs: {kwargs}")
-        result = fn(*args, **kwargs)
-        logIt.notice(f"[DBG] (Cellframe Masternode WebUI) returned {result}")
-        return result
+        dbg_enabled = get_config_value("webui", "debug")
+        if dbg_enabled:
+            logIt.notice(f"[DBG] (Cellframe Masternode WebUI) Invoking {fn.__name__}")
+            logIt.notice(f"[DBG] (Cellframe Masternode WebUI) args: {args}")
+            logIt.notice(f"[DBG] (Cellframe Masternode WebUI) kwargs: {kwargs}")
+            result = fn(*args, **kwargs)
+            logIt.notice(f"[DBG] (Cellframe Masternode WebUI) returned {result}")
+            return result
+        else:
+            return fn(*args, **kwargs)  # If debugging is not enabled, simply call the original function
     return wrapper
 
+@debug
 def CLICommand(command):
     full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command}"
     try:
@@ -34,6 +39,7 @@ def CLICommand(command):
     except subprocess.CalledProcessError as e:
         return f"Error: {e}"
 
+@debug
 def shellCommand(command):
     try:
         result = subprocess.check_output(command, shell=True, text=True).strip()
@@ -41,12 +47,15 @@ def shellCommand(command):
     except subprocess.CalledProcessError as e:
         return f"Error: {e}"
 
+@debug
 def getPID():
     return os.getpid()
 
+@debug
 def getHostname():
     return socket.gethostname()
 
+@debug
 def getExtIP():
     try:
         with urllib.request.urlopen('https://ifconfig.me/ip') as response:
@@ -55,6 +64,7 @@ def getExtIP():
     except Exception as e:
         return f"An error occurred: {e}"
 
+@debug
 def getSystemUptime():
     with open('/proc/uptime', 'r') as f:
         uptime_seconds = float(f.readline().split()[0])
@@ -68,16 +78,17 @@ def getSystemUptime():
 
     return uptime_str
 
-
+@debug
 def getNodeUptime():
     PID = getPID()
     return shellCommand(f"ps -p {PID} -o etime= | sed 's/^[[:space:]]*//'")
 
-
+@debug
 def getCurrentNodeVersion():
     version = CLICommand("version").replace("-",".")
     return version.split()[2]
 
+@debug
 def getLatestNodeVersion():
     badge_url = "https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg"
     response = urllib.request.urlopen(badge_url)
@@ -90,19 +101,23 @@ def getLatestNodeVersion():
     else:
         return "N/A"
 
+@debug
 def getCPUStats():
     PID = getPID()
     return shellCommand(f"ps -p {PID} -o %cpu= | tr -d '[:blank:]'")
 
+@debug
 def getMemoryStats():
     PID = getPID()
     return shellCommand(f"ps -p {PID} -o %mem= | tr -d '[:blank:]'")
 
+@debug
 def getListNetworks():
     networks = CLICommand("net list")
     networks = networks.split()[1:]
     return networks
 
+@debug
 def getAutocollectStatus(network):
     autocollect_cmd = CLICommand(f"block autocollect status -net {network} -chain main")
     if not "is active" in autocollect_cmd:
@@ -110,6 +125,7 @@ def getAutocollectStatus(network):
     else:
         return "Active"
 
+@debug
 def readNetworkConfig(network):
     net_config = []
     config_file = f"/opt/cellframe-node/etc/network/{network}.cfg"
@@ -126,6 +142,7 @@ def readNetworkConfig(network):
     else:
         return None
 
+@debug
 def getFirstSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
@@ -138,6 +155,7 @@ def getFirstSignedBlocks(network):
     else:
         return None
 
+@debug
 def getAllSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
@@ -150,6 +168,7 @@ def getAllSignedBlocks(network):
     else:
         return None
 
+@debug
 def getFeeWalletTokens(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
@@ -161,6 +180,7 @@ def getFeeWalletTokens(network):
     else:
         return None
 
+@debug
 def generateNetworkData():
     networks = getListNetworks()
     network_data = []
