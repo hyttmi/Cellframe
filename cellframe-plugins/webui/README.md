@@ -14,8 +14,8 @@ With this plugin, it's easy to check your node autocollect stats and some other 
 
 Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/opt/cellframe-node/etc/cellframe-node.cfg`. You just need to add new section `[webui]` to the end of the file and below that, add the settings which you want to change:
 
-`port=9797` - Changes port to 9797.
-`username=john` - Sets http authentication as user john.
-`password=p4a55w0rd` - Sets password to p4a55w0rd.
-`debug=true` - Enable debug mode, `debug=false` will disable it. Beware, it spams your log files quite a lot.
-`template=cards` - Change template to cards. If not set, default template will be used.
+- `port=9797` - Changes port to 9797.
+- `username=john` - Sets http authentication as user john.
+- `password=p4a55w0rd` - Sets password to p4a55w0rd.
+- `debug=true` - Enable debug mode, `debug=false` will disable it. Beware, it spams your log files quite a lot.
+- `template=cards` - Change template to cards. If not set, default template will be used.
