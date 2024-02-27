@@ -27,7 +27,7 @@ def debug(fn):
             logIt.notice(f"[DBG] (Cellframe Masternode WebUI) returned {result}")
             return result
         else:
-            return fn(*args, **kwargs)  # If debugging is not enabled, simply call the original function
+            return fn(*args, **kwargs)
     return wrapper
 
 @debug

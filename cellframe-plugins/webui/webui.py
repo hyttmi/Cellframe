@@ -25,15 +25,14 @@ def generateHtml():
         "net_info": utils.generateNetworkData()
     }
 
-    template_setting = utils.get_config_value("webui", "template")
-
+    template_setting = utils.get_config_value("webui", "template", default="cards")
     template_path = f"{template_setting}/template.html"
     try:
         template = env.get_template(template_path)
+        output = template.render(info)
     except Exception:
-        template_path = "default/template.html"
-        template = env.get_template(template_path)
-    output = template.render(info)
+        output = f"<h1>Error: Template {template_path} not found</h1>"
+
     return output
         
 
