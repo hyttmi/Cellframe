@@ -1,11 +1,6 @@
 import DAP
 from DAP.Core import logIt
-import subprocess
-import socket
-import urllib.request
-import re
-import os
-import time
+import subprocess, socket, urllib.request, re, os, time
 
 def get_config_value(section, key, default=None, cast=None):
     try:
@@ -114,8 +109,7 @@ def getMemoryStats():
 @debug
 def getListNetworks():
     networks = CLICommand("net list")
-    networks = networks.split()[1:]
-    return networks
+    return networks.split()[1:]
 
 @debug
 def getAutocollectStatus(network):
@@ -211,9 +205,6 @@ def generateNetworkData():
 
             network_data.append(network_info)
         else:
-            network_data.append({
-                'name': network,
-                'error': f'No data available for {network}'
-            })
+            return None
 
     return network_data

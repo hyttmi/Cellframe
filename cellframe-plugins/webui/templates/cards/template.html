@@ -187,6 +187,7 @@
                             </div>
                         </div>
                     </div>
+                    {% if network_data is not none %}
                     {% for network in net_info %}
                     <div class="row">
                         <h1 class="display-6">{{ network.name }}</h1>
@@ -334,6 +335,7 @@
                         </div> 
                     {% endfor %}
                     </div>
+                    {% endif %}
                 </div>
             </main>
         </div>

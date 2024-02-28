@@ -2,8 +2,8 @@ import DAP
 from DAP.Core import logIt
 
 import utils, base64, multiprocessing
+from utils import debug
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import utils
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 env = Environment(
@@ -11,6 +11,7 @@ env = Environment(
     autoescape=select_autoescape()
 )
 
+@debug
 def generateHtml():
     info = {
         "hostname": utils.getHostname(),
@@ -35,7 +36,7 @@ def generateHtml():
 
     return output
         
-
+@debug
 class MyRequestHandler(BaseHTTPRequestHandler):
 
     USERNAME = utils.get_config_value("webui", "username", default=None)
@@ -68,6 +69,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             return username == self.USERNAME and password == self.PASSWORD
         return False
 
+@debug
 def start_server():
     PORT = utils.get_config_value("webui", "port", default=9999, cast=int)
     server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
