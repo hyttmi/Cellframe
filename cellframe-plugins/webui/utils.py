@@ -167,11 +167,11 @@ def getAllSignedBlocks(network):
 def getFeeWalletTokens(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
-        cmd_get_wallet_info = CLICommand(f"wallet info -addr {net_config[1]}")
+        cmd_get_wallet_info = CLICommand(f"wallet info -addr Rj7J7MiX2bWy8sNyaiA3eUcpRu3mcy6adEw9UF4YxNr6HdVjvDf3zgtnyCjUYHrfJuZcQka5aTbMHpF1tzvyxUQCSNBpMYMs5iu2oj4Y")
         if cmd_get_wallet_info:
-            balance_pattern = r"(\d+\.\d+)\s+\((\d+)\)\s*(\S+)"
+            balance_pattern = r"coins: (\d+.\d+)\s+\S+\s+\d+\s+token: (\w+)"
             tokens = re.findall(balance_pattern, cmd_get_wallet_info)
-            return tokens
+            print(tokens)
     else:
         return None
     
