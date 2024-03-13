@@ -1,5 +1,6 @@
 import DAP
 from DAP.Core import logIt
+from CellFrame.Network import Net
 import subprocess, socket, urllib.request, re, os, time
 
 def get_config_value(section, key, default=None, cast=None):
@@ -108,7 +109,7 @@ def getMemoryStats():
 
 @debug
 def getListNetworks():
-    networks = CLICommand("net list")
+    networks = CLICommand("net list").replace(",","")
     return networks.split()[1:]
 
 @debug
@@ -173,33 +174,30 @@ def getFeeWalletTokens(network):
             return tokens
     else:
         return None
-
+    
 @debug
 def generateNetworkData():
     networks = getListNetworks()
     network_data = []
     for network in networks:
         net_status = CLICommand(f"net -net {network} get status")
-        status_pattern = r"has state (\w+) \(target state (\w+)\).*address ([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
-        match = re.search(status_pattern, net_status)
-        autocollect_status = getAutocollectStatus(network)
-        get_first_signed_blocks = getFirstSignedBlocks(network)
-        get_all_signed_blocks = getAllSignedBlocks(network)
+        addr_pattern = r"([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
+        state_pattern = r"current: (\w+)"
+        target_state_pattern = r"target: (\w+)"
+        addr_match = re.search(addr_pattern, net_status)
+        state_match = re.search(state_pattern, net_status)
+        target_state_match = re.search(target_state_pattern, net_status)
         tokens = getFeeWalletTokens(network)
         
-        if match:
-            state = match.group(1)
-            target_state = match.group(2)
-            address = match.group(3)
-
+        if addr_match and state_match and target_state_match:
             network_info = {
                 'name': network,
-                'state': state,
-                'target_state': target_state,
-                'address': address,
-                'first_signed_blocks': get_first_signed_blocks,
-                'all_signed_blocks': get_all_signed_blocks,
-                'autocollect_status': autocollect_status,
+                'state': state_match.group(1),
+                'target_state': target_state_match.group(1),
+                'address': addr_match.group(1),
+                'first_signed_blocks': getFirstSignedBlocks(network),
+                'all_signed_blocks': getAllSignedBlocks(network),
+                'autocollect_status': getAutocollectStatus(network),
                 'fee_wallet_tokens': [{'token': token[2], 'balance': token[0]} for token in tokens] if tokens else None
             }
 
