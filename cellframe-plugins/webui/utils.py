@@ -171,7 +171,7 @@ def getFeeWalletTokens(network):
         if cmd_get_wallet_info:
             balance_pattern = r"coins: (\d+.\d+)\s+\S+\s+\d+\s+token: (\w+)"
             tokens = re.findall(balance_pattern, cmd_get_wallet_info)
-            print(tokens)
+            return tokens
     else:
         return None
     
