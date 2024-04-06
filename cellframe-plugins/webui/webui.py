@@ -1,7 +1,7 @@
 import DAP
 from DAP.Core import logIt
 
-import utils, base64, multiprocessing
+import utils, base64, threading
 from utils import debug
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -82,7 +82,7 @@ def start_server():
         logIt.notice(f"(Cellframe Masternode WebUI) started on port {str(PORT)}.")
 
 def init():
-    server_process = multiprocessing.Process(target=start_server)
+    server_process = threading.Thread(target=start_server)
     server_process.start()
     return 0
 
