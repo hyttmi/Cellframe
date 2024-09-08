@@ -1,9 +1,11 @@
 import DAP
-from DAP.Core import logIt
+from pycfhelpers.node.logging import CFLog
 from CellFrame.Network import Net
 import subprocess, socket, urllib.request, re, os, time
 
-def get_config_value(section, key, default=None, cast=None):
+log = CFLog()
+
+def getConfigValue(section, key, default=None, cast=None):
     try:
         value = DAP.configGetItem(section, key)
         if cast is not None:
@@ -11,56 +13,45 @@ def get_config_value(section, key, default=None, cast=None):
         return value
     except ValueError:
         return default
-
-def debug(fn):
-    def wrapper(*args, **kwargs):
-        dbg_enabled = get_config_value("webui", "debug")
-        if dbg_enabled:
-            logIt.notice(f"[DBG] (Cellframe Masternode WebUI) Invoking {fn.__name__}")
-            logIt.notice(f"[DBG] (Cellframe Masternode WebUI) args: {args}")
-            logIt.notice(f"[DBG] (Cellframe Masternode WebUI) kwargs: {kwargs}")
-            result = fn(*args, **kwargs)
-            logIt.notice(f"[DBG] (Cellframe Masternode WebUI) returned {result}")
-            return result
-        else:
-            return fn(*args, **kwargs)
-    return wrapper
-
-@debug
+    
 def CLICommand(command):
     full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command}"
     try:
-        result = subprocess.check_output(full_command, shell=True, text=True).strip()
+        result = subprocess.check_output(full_command, shell=True, text=True, timeout=5).strip()
         return result
+    except subprocess.TimeoutExpired:
+        log.error(f"Command {full_command} timed out!")
+        return f"Command {full_command} timed out!"
     except subprocess.CalledProcessError as e:
+        log.error(f"Error: {e}")
         return f"Error: {e}"
 
-@debug
 def shellCommand(command):
     try:
-        result = subprocess.check_output(command, shell=True, text=True).strip()
+        result = subprocess.check_output(command, shell=True, text=True, timeout=5).strip()
         return result
+    except subprocess.TimeoutExpired:
+        log.error(f"Command {command} timed out!")
+        return f"Command {command} timed out!"
     except subprocess.CalledProcessError as e:
+        log.error(f"Error: {e}")
         return f"Error: {e}"
 
-@debug
 def getPID():
-    return os.getpid()
+    return shellCommand("pgrep -x cellframe-node")
 
-@debug
 def getHostname():
     return socket.gethostname()
 
-@debug
 def getExtIP():
     try:
         with urllib.request.urlopen('https://ifconfig.me/ip') as response:
             ip_address = response.read().decode('utf-8').strip()
             return ip_address
     except Exception as e:
-        return f"An error occurred: {e}"
+        log.error(f"Error: {e}")
+        return f"Error: {e}"
 
-@debug
 def getSystemUptime():
     with open('/proc/uptime', 'r') as f:
         uptime_seconds = float(f.readline().split()[0])
@@ -74,17 +65,14 @@ def getSystemUptime():
 
     return uptime_str
 
-@debug
 def getNodeUptime():
     PID = getPID()
     return shellCommand(f"ps -p {PID} -o etime= | sed 's/^[[:space:]]*//'")
 
-@debug
 def getCurrentNodeVersion():
     version = CLICommand("version").replace("-",".")
     return version.split()[2]
 
-@debug
 def getLatestNodeVersion():
     badge_url = "https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg"
     response = urllib.request.urlopen(badge_url)
@@ -97,22 +85,20 @@ def getLatestNodeVersion():
     else:
         return "N/A"
 
-@debug
 def getCPUStats():
     PID = getPID()
     return shellCommand(f"ps -p {PID} -o %cpu= | tr -d '[:blank:]'")
 
-@debug
 def getMemoryStats():
     PID = getPID()
-    return shellCommand(f"ps -p {PID} -o %mem= | tr -d '[:blank:]'")
+    rss_kb = shellCommand(f"ps -p {PID} -o rss= | tr -d '[:blank:]'")
+    rss_mb = round(int(rss_kb) / 1024, 2)
+    return rss_mb
 
-@debug
 def getListNetworks():
     networks = CLICommand("net list").replace(",","")
     return networks.split()[1:]
 
-@debug
 def getAutocollectStatus(network):
     autocollect_cmd = CLICommand(f"block autocollect status -net {network} -chain main")
     if not "is active" in autocollect_cmd:
@@ -120,7 +106,6 @@ def getAutocollectStatus(network):
     else:
         return "Active"
 
-@debug
 def readNetworkConfig(network):
     net_config = []
     config_file = f"/opt/cellframe-node/etc/network/{network}.cfg"
@@ -137,12 +122,20 @@ def readNetworkConfig(network):
     else:
         return None
 
-@debug
+def getAllBlocks(network):
+    all_blocks_cmd = CLICommand(f"block count -net {network}")
+    pattern_all_blocks = r":\s+(\d+)"
+    all_blocks_match = re.search(pattern_all_blocks, all_blocks_cmd)
+    if all_blocks_match:
+        return all_blocks_match.group(1)
+    else:
+        return None
+
 def getFirstSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
-        cmd_get_first_signed_blocks = CLICommand(f"block -net {network} -chain main list first_signed -cert {net_config[0]}")
-        pattern = r"Have (\d+) blocks"
+        cmd_get_first_signed_blocks = CLICommand(f"block list -net {network} chain -main first_signed -cert {net_config[0]} -limit 1")
+        pattern = r"have blocks: (\d+)"
         blocks_match = re.search(pattern, cmd_get_first_signed_blocks)
         if blocks_match:
             result = blocks_match.group(1)
@@ -150,12 +143,11 @@ def getFirstSignedBlocks(network):
     else:
         return None
 
-@debug
 def getAllSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
-        cmd_get_all_signed_blocks = CLICommand(f"block -net {network} -chain main list signed -cert {net_config[0]}")
-        pattern = r"Have (\d+) blocks"
+        cmd_get_all_signed_blocks = CLICommand(f"block list -net {network} chain -main signed -cert {net_config[0]} -limit 1")
+        pattern = r"have blocks: (\d+)"
         blocks_match = re.search(pattern, cmd_get_all_signed_blocks)
         if blocks_match:
             result = blocks_match.group(1)
@@ -163,33 +155,44 @@ def getAllSignedBlocks(network):
     else:
         return None
 
-@debug
 def getFeeWalletTokens(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_wallet_info = CLICommand(f"wallet info -addr {net_config[1]}")
         if cmd_get_wallet_info:
-            balance_pattern = r"coins: (\d+.\d+)\s+\S+\s+\d+\s+token: (\w+)"
+            balance_pattern = r"coins:\s+([\d.]+)[\s\S]+?ticker:\s+(\w+)"
             tokens = re.findall(balance_pattern, cmd_get_wallet_info)
             return tokens
     else:
         return None
     
-@debug
+def getRewards(network):
+    net_config = readNetworkConfig(network)
+    if net_config is not None:
+        cmd_get_autocollect_rewards = CLICommand(f"block -net {network} autocollect status")
+        if cmd_get_autocollect_rewards:
+            amount_pattern = r"Total prepared value: (\d+.\d+)"
+            amounts = re.findall(amount_pattern, cmd_get_autocollect_rewards)
+            total_amount = sum(float(amount) for amount in amounts)
+            return total_amount
+    else:
+        return None
+
+    
 def generateNetworkData():
     networks = getListNetworks()
     network_data = []
     for network in networks:
         net_status = CLICommand(f"net -net {network} get status")
         addr_pattern = r"([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
-        state_pattern = r"current: (\w+)"
+        state_pattern = r"states:\s+current: (\w+)"
         target_state_pattern = r"target: (\w+)"
         addr_match = re.search(addr_pattern, net_status)
         state_match = re.search(state_pattern, net_status)
         target_state_match = re.search(target_state_pattern, net_status)
         tokens = getFeeWalletTokens(network)
         
-        if addr_match and state_match and target_state_match:
+        if state_match and target_state_match:
             network_info = {
                 'name': network,
                 'state': state_match.group(1),
@@ -197,10 +200,11 @@ def generateNetworkData():
                 'address': addr_match.group(1),
                 'first_signed_blocks': getFirstSignedBlocks(network),
                 'all_signed_blocks': getAllSignedBlocks(network),
+                'all_blocks': getAllBlocks(network),
                 'autocollect_status': getAutocollectStatus(network),
+                'rewards': getRewards(network),
                 'fee_wallet_tokens': [{'token': token[1], 'balance': token[0]} for token in tokens] if tokens else None
             }
-
             network_data.append(network_info)
         else:
             return None

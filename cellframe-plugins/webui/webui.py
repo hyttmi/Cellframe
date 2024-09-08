@@ -1,19 +1,22 @@
-import DAP
-from DAP.Core import logIt
-
-import utils, base64, threading
-from utils import debug
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from threading import Thread
+from DAP.Core import logIt, AppContext
+from DAP.Network import HttpSimple, Server, HttpHeader, HttpCode
+import base64
+import utils
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
+PLUGIN_URI = "webui"
+HTTP_REPLY_SIZE_MAX = 10 * 1024 * 1024
+
 env = Environment(
-    loader=PackageLoader("webui"),
+    loader=PackageLoader(PLUGIN_URI),
     autoescape=select_autoescape()
 )
 
-@debug
 def generateHtml():
     info = {
+        "title": PLUGIN_NAME,
         "hostname": utils.getHostname(),
         "external_ip": utils.getExtIP(),
         "system_uptime": utils.getSystemUptime(),
@@ -26,66 +29,68 @@ def generateHtml():
         "net_info": utils.generateNetworkData()
     }
 
-    template_setting = utils.get_config_value("webui", "template", default="cards")
+    template_setting = utils.getConfigValue("webui", "template", default="cards")
     template_path = f"{template_setting}/template.html"
     try:
         template = env.get_template(template_path)
         output = template.render(info)
-    except Exception:
-        output = f"<h1>Error: Template {template_path} not found</h1>"
-
-    return output
-        
-@debug
-class MyRequestHandler(BaseHTTPRequestHandler):
-
-    USERNAME = utils.get_config_value("webui", "username", default=None)
-    PASSWORD = utils.get_config_value("webui", "password", default=None)
-
-    def do_GET(self):
-        if self.USERNAME is not None and self.PASSWORD is not None:
-            auth_header = self.headers.get('Authorization')
-            if auth_header is None or not self.check_basic_auth(auth_header):
-                self.send_response(401)
-                self.send_header('WWW-Authenticate', 'Basic realm="Access to the server"')
-                self.end_headers()
-                self.wfile.write(b'<h1>Unauthorized</h1>')
-                return
-
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-        html_data = generateHtml()
-
-        self.wfile.write(html_data.encode('utf-8'))
-    
-    def check_basic_auth(self, auth_header):
-        auth_type, auth_data = auth_header.split(None, 1)
-        if auth_type.lower() == 'basic':
-            decoded_bytes = base64.b64decode(auth_data.encode('utf-8'))
-            decoded_str = decoded_bytes.decode('utf-8')
-            username, password = decoded_str.split(':', 1)
-            return username == self.USERNAME and password == self.PASSWORD
-        return False
-
-@debug
-def start_server():
-    PORT = utils.get_config_value("webui", "port", default=9999, cast=int)
-    server = HTTPServer(('0.0.0.0', PORT), MyRequestHandler)
-    try:
-        server.allow_reuse_address = True
-        server.serve_forever()
     except Exception as e:
-        logIt.error(f"(Cellframe Masternode WebUI) server startup failed: {e}.")
-    finally:
-        logIt.notice(f"(Cellframe Masternode WebUI) started on port {str(PORT)}.")
+        output = f"<h1>Got an error: {e}</h1>"
+    return output
+
+def http_handler(request: HttpSimple, httpCode: HttpCode):
+    username = utils.getConfigValue("webui", "username")
+    password = utils.getConfigValue("webui", "password")
+
+    if not username or not password:
+        request.replyAdd(b"Missing configuration in cellframe-node.cfg. Username or password is not set, plugin will be unavailable!")
+        httpCode.set(200)
+        return
+
+    auth_header = next((header.value for header in request.requestHeader if header.name.lower() == 'authorization'), None)
+
+    if not auth_header or not auth_header.startswith('Basic '):
+        request.setResponseHeader(HttpHeader("WWW-Authenticate", 'Basic realm="Cellframe node WebUI"'))
+        request.replyAdd(b"401 Unauthorized")
+        httpCode.set(401)
+        return
+
+    try:
+        credentials = base64.b64decode(auth_header[6:]).decode('utf-8')
+        req_username, req_password = credentials.split(':', 1)
+    except Exception as e:
+        logIt.error(f"{PLUGIN_NAME} Error decoding credentials: {e}")
+        request.setResponseHeader(HttpHeader("WWW-Authenticate", 'Basic realm="Cellframe node WebUI"'))
+        request.replyAdd(b"401 Unauthorized")
+        httpCode.set(401)
+        return
+
+    if req_username != username or req_password != password:
+        request.setResponseHeader(HttpHeader("WWW-Authenticate", 'Basic realm="Cellframe node WebUI"'))
+        request.replyAdd(b"401 Unauthorized")
+        httpCode.set(401)
+        return
+
+    try:
+        html_content = generateHtml()
+        request.replyAdd(html_content.encode('utf-8'))
+        request.setResponseHeader(HttpHeader("Content-type", "text/html"))
+        httpCode.set(200)
+    except Exception as e:
+        logIt.error(f"{PLUGIN_NAME} Error generating HTML: {e}")
+        request.replyAdd(b"500 Internal Server Error")
+        httpCode.set(500)
+
+def http_proc_in_thread(server_instance):
+    HttpSimple.addProc(server_instance, f"/{PLUGIN_URI}", HTTP_REPLY_SIZE_MAX, http_handler)
 
 def init():
-    server_process = threading.Thread(target=start_server)
-    server_process.start()
+    server_instance = Server()
+    AppContext.getServer(server_instance)
+    proc_thread = Thread(target=http_proc_in_thread, args=(server_instance,))
+    proc_thread.start()
     return 0
 
 def deinit():
-    logIt.notice(f"(Cellframe Masternode WebUI) stopped.")
+    logIt.notice(f"{PLUGIN_NAME} stopped.")
     return 0
