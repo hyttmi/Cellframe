@@ -90,6 +90,7 @@ def handler(request: CFSimpleHTTPRequestHandler):
         "Content-Type": "text/html"
     }
     
+    utils.log_notice("Sending response...")
     return response
 
 def init():
