@@ -14,6 +14,6 @@ With this plugin, it's easy to check your node autocollect stats and some other 
 
 Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/opt/cellframe-node/etc/cellframe-node.cfg`. You just need to add new section `[webui]` to the end of the file and below that, add the settings which you want to change:
 
-- `username=john` - Sets http authentication as user john. *MANDATORY*
-- `password=p4a55w0rd` - Sets password to p4a55w0rd. *MANDATORY*
+- `username=john` - Sets http authentication as user john. **MANDATORY**
+- `password=p4a55w0rd` - Sets password to p4a55w0rd. **MANDATORY**
 - `template=something` - Change template to something. If not set, default template will be used (cards).
