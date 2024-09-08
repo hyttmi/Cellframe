@@ -1,22 +1,21 @@
+from pycfhelpers.node.http.simple import CFSimpleHTTPServer, CFSimpleHTTPRequestHandler, CFSimpleHTTPResponse
+from pycfhelpers.node.logging import CFLog
+
 from threading import Thread
-from DAP.Core import logIt, AppContext
-from DAP.Network import HttpSimple, Server, HttpHeader, HttpCode
 import base64
 import utils
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
-PLUGIN_URI = "webui"
-HTTP_REPLY_SIZE_MAX = 10 * 1024 * 1024
+log = CFLog()
 
 env = Environment(
-    loader=PackageLoader(PLUGIN_URI),
+    loader=PackageLoader(utils.PLUGIN_URI),
     autoescape=select_autoescape()
 )
 
 def generateHtml():
     info = {
-        "title": PLUGIN_NAME,
+        "title": utils.PLUGIN_NAME,
         "hostname": utils.getHostname(),
         "external_ip": utils.getExtIP(),
         "system_uptime": utils.getSystemUptime(),
@@ -32,65 +31,70 @@ def generateHtml():
     template_setting = utils.getConfigValue("webui", "template", default="cards")
     template_path = f"{template_setting}/template.html"
     try:
+        utils.log_notice(f"Generating HTML page...")
         template = env.get_template(template_path)
         output = template.render(info)
     except Exception as e:
+        utils.log_error(f"Error in generating HTML: {e}")
         output = f"<h1>Got an error: {e}</h1>"
     return output
-
-def http_handler(request: HttpSimple, httpCode: HttpCode):
-    username = utils.getConfigValue("webui", "username")
-    password = utils.getConfigValue("webui", "password")
-
-    if not username or not password:
-        request.replyAdd(b"Missing configuration in cellframe-node.cfg. Username or password is not set, plugin will be unavailable!")
-        httpCode.set(200)
-        return
-
-    auth_header = next((header.value for header in request.requestHeader if header.name.lower() == 'authorization'), None)
-
+    
+@CFSimpleHTTPServer.handler(uri=f"/{utils.PLUGIN_URI}", methods=["GET"])
+def handler(request: CFSimpleHTTPRequestHandler):
+    utils.log_notice("Handling request...")
+    
+    headers = request.headers
+    auth_header = headers.get('Authorization')
+    
+    expected_username = utils.getConfigValue("webui", "username")
+    expected_password = utils.getConfigValue("webui", "password")
+    
+    if not expected_username or not expected_password:
+        utils.log_error(f"Missing configuration in cellframe-node.cfg. Username or password is not set, plugin will be unavailable!")
+        response = CFSimpleHTTPResponse(body=b"Missing configuration in cellframe-node.cfg. Username or password is not set, plugin will be unavailable!", code=200)
+        return response
+    
     if not auth_header or not auth_header.startswith('Basic '):
-        request.setResponseHeader(HttpHeader("WWW-Authenticate", 'Basic realm="Cellframe node WebUI"'))
-        request.replyAdd(b"401 Unauthorized")
-        httpCode.set(401)
-        return
-
+        response = CFSimpleHTTPResponse(body=b"Unauthorized", code=401)
+        response.headers = {
+            "Content-Type": "text/plain",
+            "WWW-Authenticate": 'Basic realm="Cellframe node webui"'
+        }
+        return response
+    
     try:
-        credentials = base64.b64decode(auth_header[6:]).decode('utf-8')
-        req_username, req_password = credentials.split(':', 1)
-    except Exception as e:
-        logIt.error(f"{PLUGIN_NAME} Error decoding credentials: {e}")
-        request.setResponseHeader(HttpHeader("WWW-Authenticate", 'Basic realm="Cellframe node WebUI"'))
-        request.replyAdd(b"401 Unauthorized")
-        httpCode.set(401)
-        return
+        encoded_credentials = auth_header.split(' ', 1)[1]
+        decoded_credentials = base64.b64decode(encoded_credentials).decode('utf-8')
+        username, password = decoded_credentials.split(':', 1)
+    except (IndexError, ValueError):
+        response = CFSimpleHTTPResponse(body=b"Unauthorized", code=401)
+        response.headers = {
+            "Content-Type": "text/plain",
+            "WWW-Authenticate": 'Basic realm="Cellframe node webui"'
+        }
+        return response
+    
+    if username != expected_username or password != expected_password:
+        response = CFSimpleHTTPResponse(body=b"Unauthorized", code=401)
+        response.headers = {
+            "Content-Type": "text/plain",
+            "WWW-Authenticate": 'Basic realm="Cellframe node webui"'
+        }
+        return response
 
-    if req_username != username or req_password != password:
-        request.setResponseHeader(HttpHeader("WWW-Authenticate", 'Basic realm="Cellframe node WebUI"'))
-        request.replyAdd(b"401 Unauthorized")
-        httpCode.set(401)
-        return
+    response_body = generateHtml()
 
-    try:
-        html_content = generateHtml()
-        request.replyAdd(html_content.encode('utf-8'))
-        request.setResponseHeader(HttpHeader("Content-type", "text/html"))
-        httpCode.set(200)
-    except Exception as e:
-        logIt.error(f"{PLUGIN_NAME} Error generating HTML: {e}")
-        request.replyAdd(b"500 Internal Server Error")
-        httpCode.set(500)
-
-def http_proc_in_thread(server_instance):
-    HttpSimple.addProc(server_instance, f"/{PLUGIN_URI}", HTTP_REPLY_SIZE_MAX, http_handler)
+    response_body = response_body.encode("utf-8")
+    response = CFSimpleHTTPResponse(body=response_body, code=200)
+    response.headers = {
+        "Content-Type": "text/html"
+    }
+    
+    return response
 
 def init():
-    server_instance = Server()
-    AppContext.getServer(server_instance)
-    proc_thread = Thread(target=http_proc_in_thread, args=(server_instance,))
-    proc_thread.start()
     return 0
 
 def deinit():
-    logIt.notice(f"{PLUGIN_NAME} stopped.")
+    utils.log_notice("stopped")
     return 0

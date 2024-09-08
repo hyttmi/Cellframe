@@ -1,9 +1,18 @@
 import DAP
 from pycfhelpers.node.logging import CFLog
+from pycfhelpers.node.net import CFNet
 from CellFrame.Network import Net
 import subprocess, socket, urllib.request, re, os, time
 
+PLUGIN_URI = "webui"
+PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
 log = CFLog()
+
+def log_notice(msg):
+    log.notice(f"{PLUGIN_NAME} {msg}")
+    
+def log_error(msg):
+    log.error(f"{PLUGIN_NAME} {msg}")
 
 def getConfigValue(section, key, default=None, cast=None):
     try:
@@ -20,10 +29,10 @@ def CLICommand(command):
         result = subprocess.check_output(full_command, shell=True, text=True, timeout=5).strip()
         return result
     except subprocess.TimeoutExpired:
-        log.error(f"Command {full_command} timed out!")
+        log_error(f"Command {full_command} timed out!")
         return f"Command {full_command} timed out!"
     except subprocess.CalledProcessError as e:
-        log.error(f"Error: {e}")
+        log_error(f"Error: {e}")
         return f"Error: {e}"
 
 def shellCommand(command):
@@ -31,10 +40,10 @@ def shellCommand(command):
         result = subprocess.check_output(command, shell=True, text=True, timeout=5).strip()
         return result
     except subprocess.TimeoutExpired:
-        log.error(f"Command {command} timed out!")
+        log_error(f"Command {command} timed out!")
         return f"Command {command} timed out!"
     except subprocess.CalledProcessError as e:
-        log.error(f"Error: {e}")
+        log_error(f"Error: {e}")
         return f"Error: {e}"
 
 def getPID():
@@ -49,7 +58,7 @@ def getExtIP():
             ip_address = response.read().decode('utf-8').strip()
             return ip_address
     except Exception as e:
-        log.error(f"Error: {e}")
+        log_error(f"Error: {e}")
         return f"Error: {e}"
 
 def getSystemUptime():
