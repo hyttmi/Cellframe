@@ -1,8 +1,7 @@
 import DAP
 from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
-from CellFrame.Network import Net
-import subprocess, socket, urllib.request, re, os, time
+import subprocess, socket, urllib.request, re, time
 
 PLUGIN_URI = "webui"
 PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
@@ -24,16 +23,34 @@ def getConfigValue(section, key, default=None, cast=None):
         return default
     
 def CLICommand(command):
-    full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command}"
+    full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command.strip()}"
+    log_notice(f"Running command: {full_command}")
+
     try:
-        result = subprocess.check_output(full_command, shell=True, text=True, timeout=5).strip()
-        return result
+        process = subprocess.Popen(
+            full_command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        stdout, stderr = process.communicate(timeout=10)
+        
+        if process.returncode == 0:
+            return stdout.strip()
+        else:
+            log_error(f"Command '{full_command}' failed with error: {stderr.strip()}")
+            return f"Command '{full_command}' failed with error: {stderr.strip()}"
+    
     except subprocess.TimeoutExpired:
+        process.kill()
+        stdout, stderr = process.communicate()
         log_error(f"Command {full_command} timed out!")
         return f"Command {full_command} timed out!"
-    except subprocess.CalledProcessError as e:
-        log_error(f"Error: {e}")
-        return f"Error: {e}"
+    except Exception as e:
+        log_error(f"An error occurred: {e}")
+        return f"An error occurred: {e}"
 
 def shellCommand(command):
     try:
