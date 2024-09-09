@@ -1,12 +1,8 @@
 from pycfhelpers.node.http.simple import CFSimpleHTTPServer, CFSimpleHTTPRequestHandler, CFSimpleHTTPResponse
-from pycfhelpers.node.logging import CFLog
 
-from threading import Thread
-import base64
+import base64       
 import utils
 from jinja2 import Environment, PackageLoader, select_autoescape
-
-log = CFLog()
 
 env = Environment(
     loader=PackageLoader(utils.PLUGIN_URI),

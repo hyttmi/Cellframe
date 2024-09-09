@@ -3,16 +3,6 @@ from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
 import subprocess, socket, urllib.request, re, time
 
-PLUGIN_URI = "webui"
-PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
-log = CFLog()
-
-def log_notice(msg):
-    log.notice(f"{PLUGIN_NAME} {msg}")
-    
-def log_error(msg):
-    log.error(f"{PLUGIN_NAME} {msg}")
-
 def getConfigValue(section, key, default=None, cast=None):
     try:
         value = DAP.configGetItem(section, key)
@@ -21,6 +11,17 @@ def getConfigValue(section, key, default=None, cast=None):
         return value
     except ValueError:
         return default
+
+PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
+PLUGIN_URI = getConfigValue("webui", "uri", default="webui")
+
+log = CFLog()
+
+def log_notice(msg):
+    log.notice(f"{PLUGIN_NAME} {msg}")
+    
+def log_error(msg):
+    log.error(f"{PLUGIN_NAME} {msg}")
     
 def CLICommand(command):
     full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command.strip()}"
@@ -53,15 +54,34 @@ def CLICommand(command):
         return f"An error occurred: {e}"
 
 def shellCommand(command):
+    command = f"{command.strip()}"
+    log_notice(f"Running command: {command}")
+
     try:
-        result = subprocess.check_output(command, shell=True, text=True, timeout=5).strip()
-        return result
+        process = subprocess.Popen(
+            command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        stdout, stderr = process.communicate(timeout=10)
+        
+        if process.returncode == 0:
+            return stdout.strip()
+        else:
+            log_error(f"Command '{command}' failed with error: {stderr.strip()}")
+            return f"Command '{command}' failed with error: {stderr.strip()}"
+    
     except subprocess.TimeoutExpired:
+        process.kill()
+        stdout, stderr = process.communicate()
         log_error(f"Command {command} timed out!")
         return f"Command {command} timed out!"
-    except subprocess.CalledProcessError as e:
-        log_error(f"Error: {e}")
-        return f"Error: {e}"
+    except Exception as e:
+        log_error(f"An error occurred: {e}")
+        return f"An error occurred: {e}"
 
 def getPID():
     return shellCommand("pgrep -x cellframe-node")
