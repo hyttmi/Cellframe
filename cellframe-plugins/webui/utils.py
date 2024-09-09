@@ -22,8 +22,6 @@ def log_notice(msg):
     
 def log_error(msg):
     log.error(f"{PLUGIN_NAME} {msg}")
-    
-import subprocess
 
 def CLICommand(command):
     full_command = ["/opt/cellframe-node/bin/cellframe-node-cli"] + command.strip().split()
