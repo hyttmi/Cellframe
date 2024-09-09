@@ -17,3 +17,4 @@ Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/op
 - `username=john` - Sets http authentication as user john. **MANDATORY**
 - `password=p4a55w0rd` - Sets password to p4a55w0rd. **MANDATORY**  
 - `template=something` - Change template to something. If not set, default template will be used (cards).
+- `plugin_uri=something` - Change plugin URI. Defaults to `webui`
