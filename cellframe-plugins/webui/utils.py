@@ -148,8 +148,7 @@ def getMemoryStats():
     return rss_mb
 
 def getListNetworks():
-    networks = CLICommand("net list").replace(",","")
-    return networks.split()[1:]
+    return CFNet.active_nets() or None
 
 def getAutocollectStatus(network):
     autocollect_cmd = CLICommand(f"block autocollect status -net {network} -chain main")
@@ -233,32 +232,33 @@ def getRewards(network):
     
 def generateNetworkData():
     networks = getListNetworks()
-    network_data = []
-    for network in networks:
-        net_status = CLICommand(f"net -net {network} get status")
-        addr_pattern = r"([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
-        state_pattern = r"states:\s+current: (\w+)"
-        target_state_pattern = r"target: (\w+)"
-        addr_match = re.search(addr_pattern, net_status)
-        state_match = re.search(state_pattern, net_status)
-        target_state_match = re.search(target_state_pattern, net_status)
-        tokens = getFeeWalletTokens(network)
-        
-        if state_match and target_state_match:
-            network_info = {
-                'name': network,
-                'state': state_match.group(1),
-                'target_state': target_state_match.group(1),
-                'address': addr_match.group(1),
-                'first_signed_blocks': getFirstSignedBlocks(network),
-                'all_signed_blocks': getAllSignedBlocks(network),
-                'all_blocks': getAllBlocks(network),
-                'autocollect_status': getAutocollectStatus(network),
-                'rewards': getRewards(network),
-                'fee_wallet_tokens': [{'token': token[1], 'balance': token[0]} for token in tokens] if tokens else None
-            }
-            network_data.append(network_info)
-        else:
-            return None
-
-    return network_data
+    if networks is not None:
+        network_data = []
+        for network in networks:
+            net_status = CLICommand(f"net -net {network} get status")
+            addr_pattern = r"([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
+            state_pattern = r"states:\s+current: (\w+)"
+            target_state_pattern = r"target: (\w+)"
+            addr_match = re.search(addr_pattern, net_status)
+            state_match = re.search(state_pattern, net_status)
+            target_state_match = re.search(target_state_pattern, net_status)
+            tokens = getFeeWalletTokens(network)
+            
+            if state_match and target_state_match:
+                network_info = {
+                    'name': network,
+                    'state': state_match.group(1),
+                    'target_state': target_state_match.group(1),
+                    'address': addr_match.group(1),
+                    'first_signed_blocks': getFirstSignedBlocks(network),
+                    'all_signed_blocks': getAllSignedBlocks(network),
+                    'all_blocks': getAllBlocks(network),
+                    'autocollect_status': getAutocollectStatus(network),
+                    'rewards': getRewards(network),
+                    'fee_wallet_tokens': [{'token': token[1], 'balance': token[0]} for token in tokens] if tokens else None
+                }
+                network_data.append(network_info)
+            else:
+                return None
+    
+        return network_data
