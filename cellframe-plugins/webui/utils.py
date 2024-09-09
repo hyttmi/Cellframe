@@ -23,35 +23,43 @@ def log_notice(msg):
 def log_error(msg):
     log.error(f"{PLUGIN_NAME} {msg}")
     
+import subprocess
+
 def CLICommand(command):
-    full_command = f"/opt/cellframe-node/bin/cellframe-node-cli {command.strip()}"
-    log_notice(f"Running command: {full_command}")
+    full_command = ["/opt/cellframe-node/bin/cellframe-node-cli"] + command.strip().split()
+    log_notice(f"Running command: {' '.join(full_command)}")
 
     try:
         process = subprocess.Popen(
             full_command,
-            shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
         
-        stdout, stderr = process.communicate(timeout=10)
+        stdout_lines = []
+        for line in process.stdout:
+            stdout_lines.append(line.strip())
+        
+        stderr = process.stderr.read().strip()
+        
+        process.wait(timeout=10)
         
         if process.returncode == 0:
-            return stdout.strip()
+            return "\n".join(stdout_lines)
         else:
-            log_error(f"Command '{full_command}' failed with error: {stderr.strip()}")
-            return f"Command '{full_command}' failed with error: {stderr.strip()}"
+            log_error(f"Command '{' '.join(full_command)}' failed with error: {stderr}")
+            return f"Command '{' '.join(full_command)}' failed with error: {stderr}"
     
     except subprocess.TimeoutExpired:
         process.kill()
         stdout, stderr = process.communicate()
-        log_error(f"Command {full_command} timed out!")
-        return f"Command {full_command} timed out!"
+        log_error(f"Command {' '.join(full_command)} timed out!")
+        return f"Command {' '.join(full_command)} timed out!"
     except Exception as e:
         log_error(f"An error occurred: {e}")
         return f"An error occurred: {e}"
+
 
 def shellCommand(command):
     command = f"{command.strip()}"
