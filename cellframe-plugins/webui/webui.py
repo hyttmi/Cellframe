@@ -1,6 +1,8 @@
 from pycfhelpers.node.http.simple import CFSimpleHTTPServer, CFSimpleHTTPRequestHandler, CFSimpleHTTPResponse
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
-import base64       
+import base64
 import utils
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -34,9 +36,13 @@ def generateHtml():
         utils.log_error(f"Error in generating HTML: {e}")
         output = f"<h1>Got an error: {e}</h1>"
     return output
-    
-@CFSimpleHTTPServer.handler(uri=f"/{utils.PLUGIN_URI}", methods=["GET"])
-def handler(request: CFSimpleHTTPRequestHandler):
+
+def generateHtml_async():
+    with ThreadPoolExecutor() as executor:
+        future = executor.submit(generateHtml)
+        return future.result()
+
+def request_handler(request: CFSimpleHTTPRequestHandler):
     utils.log_notice("Handling request...")
     
     headers = request.headers
@@ -78,7 +84,7 @@ def handler(request: CFSimpleHTTPRequestHandler):
         }
         return response
 
-    response_body = generateHtml()
+    response_body = generateHtml_async()
 
     response_body = response_body.encode("utf-8")
     response = CFSimpleHTTPResponse(body=response_body, code=200)
@@ -90,6 +96,8 @@ def handler(request: CFSimpleHTTPRequestHandler):
     return response
 
 def init():
+    handler = CFSimpleHTTPRequestHandler(methods=["GET"], handler=request_handler)
+    CFSimpleHTTPServer().register_uri_handler(uri=f"/{utils.PLUGIN_URI}", handler=handler)
     return 0
 
 def deinit():

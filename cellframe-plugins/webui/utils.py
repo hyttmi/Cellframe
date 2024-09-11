@@ -262,3 +262,5 @@ def generateNetworkData():
                 return None
     
         return network_data
+    else:
+        return None
