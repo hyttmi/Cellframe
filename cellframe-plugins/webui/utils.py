@@ -105,17 +105,21 @@ def getExtIP():
         return f"Error: {e}"
 
 def getSystemUptime():
-    with open('/proc/uptime', 'r') as f:
-        uptime_seconds = float(f.readline().split()[0])
+    try:
+        with open('/proc/uptime', 'r') as f:
+            uptime_seconds = float(f.readline().split()[0])
 
-    uptime_struct = time.gmtime(uptime_seconds)
-    days = uptime_struct.tm_yday - 1
-    hours = uptime_struct.tm_hour
-    minutes = uptime_struct.tm_min
-    seconds = uptime_struct.tm_sec
-    uptime_str = f"{days}-{hours:02}:{minutes:02}:{seconds:02}" if days > 0 else f"{hours:02}:{minutes:02}:{seconds:02}"
+        uptime_struct = time.gmtime(uptime_seconds)
+        days = uptime_struct.tm_yday - 1
+        hours = uptime_struct.tm_hour
+        minutes = uptime_struct.tm_min
+        seconds = uptime_struct.tm_sec
+        uptime_str = f"{days}-{hours:02}:{minutes:02}:{seconds:02}" if days > 0 else f"{hours:02}:{minutes:02}:{seconds:02}"
 
-    return uptime_str
+        return uptime_str
+    except Exception as e:
+        log_error(f"Error {e}")
+        return f"Error {e}"
 
 def getNodeUptime():
     PID = getPID()
@@ -222,7 +226,7 @@ def getRewards(network):
     if net_config is not None:
         cmd_get_autocollect_rewards = CLICommand(f"block -net {network} autocollect status")
         if cmd_get_autocollect_rewards:
-            amount_pattern = r"Total prepared value: (\d+.\d+)"
+            amount_pattern = r"profit is (\d+.\d+)"
             amounts = re.findall(amount_pattern, cmd_get_autocollect_rewards)
             total_amount = sum(float(amount) for amount in amounts)
             return total_amount
