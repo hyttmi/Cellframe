@@ -1,6 +1,5 @@
 from pycfhelpers.node.http.simple import CFSimpleHTTPServer, CFSimpleHTTPRequestHandler, CFSimpleHTTPResponse
 from concurrent.futures import ThreadPoolExecutor
-import threading
 
 import base64
 import utils
@@ -98,8 +97,12 @@ def request_handler(request: CFSimpleHTTPRequestHandler):
     return response
 
 def init():
-    handler = CFSimpleHTTPRequestHandler(methods=["GET"], handler=request_handler)
-    CFSimpleHTTPServer().register_uri_handler(uri=f"/{utils.PLUGIN_URI}", handler=handler)
+    try:
+        handler = CFSimpleHTTPRequestHandler(methods=["GET"], handler=request_handler)
+        CFSimpleHTTPServer().register_uri_handler(uri=f"/{utils.PLUGIN_URI}", handler=handler)
+        utils.log_notice("started")
+    except Exception as e:
+        utils.log_error(f"Error: {e}")
     return 0
 
 def deinit():
