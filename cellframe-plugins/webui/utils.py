@@ -118,12 +118,28 @@ def getSystemUptime():
 
         return uptime_str
     except Exception as e:
-        log_error(f"Error {e}")
-        return f"Error {e}"
+        log_error(f"Error: {e}")
+        return f"Error: {e}"
+    
+def getNodeStats():
+    try:
+        PID = getPID()
 
-def getNodeUptime():
-    PID = getPID()
-    return shellCommand(f"ps -p {PID} -o etime= | sed 's/^[[:space:]]*//'")
+        node_stats = {}
+
+        cpu_stats = shellCommand(f"ps -p {PID} -o %cpu= | tr -d '[:blank:]'")
+        node_stats['cpu_usage'] = cpu_stats if cpu_stats else "N/A"
+
+        memory_kb = shellCommand(f"ps -p {PID} -o rss= | tr -d '[:blank:]'")
+        node_stats['memory_usage_mb'] = round(int(memory_kb) / 1024, 2) if memory_kb else "N/A"
+
+        node_uptime = shellCommand(f"ps -p {PID} -o etime= | sed 's/^[[:space:]]*//'")
+        node_stats['node_uptime'] = node_uptime if node_uptime else "N/A"
+
+        return node_stats
+    except Exception as e:
+        log_error(f"Error: {e}")
+        return f"Error {e}"
 
 def getCurrentNodeVersion():
     version = CLICommand("version").replace("-",".")
@@ -140,16 +156,6 @@ def getLatestNodeVersion():
         return latest_version
     else:
         return "N/A"
-
-def getCPUStats():
-    PID = getPID()
-    return shellCommand(f"ps -p {PID} -o %cpu= | tr -d '[:blank:]'")
-
-def getMemoryStats():
-    PID = getPID()
-    rss_kb = shellCommand(f"ps -p {PID} -o rss= | tr -d '[:blank:]'")
-    rss_mb = round(int(rss_kb) / 1024, 2)
-    return rss_mb
 
 def getListNetworks():
     return CFNet.active_nets() or None
@@ -233,7 +239,6 @@ def getRewards(network):
     else:
         return None
 
-    
 def generateNetworkData():
     networks = getListNetworks()
     if networks is not None:
