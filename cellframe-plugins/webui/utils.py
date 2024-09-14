@@ -1,10 +1,8 @@
 from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
-from CellFrame.Chain import GlobalDB
 from command_runner import command_runner
 import DAP
 import socket, urllib.request, re, time, psutil
-from datetime import datetime
 
 def getConfigValue(section, key, default=None, cast=None):
     try:
@@ -42,6 +40,7 @@ def CLICommand(command, timeout=5):
 def getPID():
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == "cellframe-node":
+            log_notice(proc.info)
             return proc.info['pid']
     return None
 
@@ -91,26 +90,20 @@ def getSysStats():
 
 
 def getCurrentNodeVersion():
-    try:
-        version = CLICommand("version", 2).replace("-",".")
-        return version.split()[2]
-    except Exception as e:
-        return f"Error: {e}"
+    version = CLICommand("version", 2).replace("-",".")
+    return version.split()[2]
 
 def getLatestNodeVersion():
-    try:
-        badge_url = "https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg"
-        response = urllib.request.urlopen(badge_url)
-        svg_content = response.read().decode('utf-8')
-        version_pattern = r'>(\d.\d.\d+)'
-        match = re.search(version_pattern, svg_content)
-        if match:
-            latest_version = match.group(1)
-            return latest_version
-        else:
-            return "N/A"
-    except Exception as e:
-        return f"Error: {e}"
+    badge_url = "https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg"
+    response = urllib.request.urlopen(badge_url)
+    svg_content = response.read().decode('utf-8')
+    version_pattern = r'>(\d.\d.\d+)'
+    match = re.search(version_pattern, svg_content)
+    if match:
+        latest_version = match.group(1)
+        return latest_version
+    else:
+        return "N/A"
 
 def getListNetworks():
     return CFNet.active_nets() or None
@@ -171,20 +164,6 @@ def getAllSignedBlocks(network):
     else:
         return None
 
-def getSignedBlocksToday(network):
-    net_config = readNetworkConfig(network)
-    if net_config is not None:
-        cmd_output = CLICommand(f"block list -net {network} signed -cert {net_config[0]}")
-        today_str = datetime.now().strftime("%a, %d %b %Y")
-        blocks_signed_today = 0
-
-        lines = cmd_output.splitlines()
-        for line in lines:
-            if line.startswith("ts_create:") and today_str in line:
-                blocks_signed_today += 1
-        print(f"Blocks signed today: {blocks_signed_today}")
-        return blocks_signed_today
-
 def getRewardWalletTokens(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
@@ -209,12 +188,10 @@ def getRewards(network):
         return None
 
 def generateNetworkData():
-    getSignedBlocksToday()
     networks = getListNetworks()
     if networks is not None:
         network_data = []
         for network in networks:
-            getSignedBlocksToday(network)
             net_status = CLICommand(f"net -net {network} get status")
             addr_pattern = r"([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
             state_pattern = r"states:\s+current: (\w+)"
