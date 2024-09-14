@@ -71,11 +71,13 @@
 
 <body>
     <div class="container-fluid mt-4">
+        {% if header_text %}
         <div class="row">
             <div class="col-12 text-center">
-                <h1 class="text-uppercase text-color-secondary display-4"><b>system & masternode info page</b></h1>
+                <h1 class="text-uppercase text-color-secondary display-4"><b>{{ header_text }}</b></h1>
             </div>
         </div>
+        {% endif %}
         <div class="row">
             <div class="col-12">
                 <h1 class="text-uppercase text-color-secondary">System Info</h1>

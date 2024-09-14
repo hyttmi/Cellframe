@@ -6,7 +6,7 @@ import utils
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 env = Environment(
-    loader=PackageLoader(utils.PLUGIN_URI),
+    loader=PackageLoader("webui"),
     autoescape=select_autoescape()
 )
 
@@ -24,6 +24,7 @@ def generateHtml():
         "networks": utils.getListNetworks(),
         "cpu_utilization": sys_stats["node_cpu_usage"],
         "memory_utilization": sys_stats["node_memory_usage_mb"],
+        "header_text": utils.getConfigValue("webui", "header_text", default=False),
         "net_info": utils.generateNetworkData()
     }
 

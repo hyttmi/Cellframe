@@ -18,3 +18,4 @@ Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/op
 - `password=p4a55w0rd` - Sets password to p4a55w0rd. **MANDATORY**  
 - `template=something` - Change template to something. If not set, default template will be used (cards).
 - `uri=something` - Change plugin URI. Defaults to `webui`
+- `header_text=sometext` - Show `sometext` as a website header **WITHOUT SPACES**
