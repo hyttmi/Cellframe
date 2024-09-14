@@ -170,15 +170,10 @@ def getSignedBlocksToday(network):
         cmd_output = CLICommand(f"block list -net {network} signed -cert {net_config[0]}")
         today_str = datetime.now().strftime("%a, %d %b %Y")
         blocks_signed_today = 0
-
         lines = cmd_output.splitlines()
-        log_notice(lines)
         for line in lines:
             if "ts_create:" in line and today_str in line:
-                log_notice(today_str)
-                log_notice(line)
                 blocks_signed_today += 1
-        log_notice(f"Blocks signed today: {blocks_signed_today}")
         return blocks_signed_today
 
 def getRewardWalletTokens(network):
@@ -209,7 +204,6 @@ def generateNetworkData():
     if networks is not None:
         network_data = []
         for network in networks:
-            getSignedBlocksToday(network)
             net_status = CLICommand(f"net -net {network} get status")
             addr_pattern = r"([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
             state_pattern = r"states:\s+current: (\w+)"
@@ -228,6 +222,7 @@ def generateNetworkData():
                     'first_signed_blocks': getFirstSignedBlocks(network),
                     'all_signed_blocks': getAllSignedBlocks(network),
                     'all_blocks': getAllBlocks(network),
+                    'signed_blocks_today': getSignedBlocksToday(network),
                     'autocollect_status': getAutocollectStatus(network),
                     'rewards': getRewards(network),
                     'fee_wallet_tokens': [{'token': token[1], 'balance': token[0]} for token in tokens] if tokens else None
