@@ -3,6 +3,7 @@ from pycfhelpers.node.net import CFNet
 from command_runner import command_runner
 import DAP
 import socket, urllib.request, re, time, psutil
+from datetime import datetime
 
 def getConfigValue(section, key, default=None, cast=None):
     try:
@@ -164,6 +165,20 @@ def getAllSignedBlocks(network):
     else:
         return None
 
+def getSignedBlocksToday(network):
+    net_config = readNetworkConfig(network)
+    if net_config is not None:
+        cmd_output = CLICommand(f"block list -net {network} signed -cert {net_config[0]}")
+        today_str = datetime.now().strftime("%a, %d %b %Y")
+        blocks_signed_today = 0
+
+        lines = cmd_output.splitlines()
+        for line in lines:
+            if line.startswith("ts_create:") and today_str in line:
+                blocks_signed_today += 1
+        print(f"Blocks signed today: {blocks_signed_today}")
+        return blocks_signed_today
+
 def getRewardWalletTokens(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
@@ -192,6 +207,7 @@ def generateNetworkData():
     if networks is not None:
         network_data = []
         for network in networks:
+            getSignedBlocksToday(network)
             net_status = CLICommand(f"net -net {network} get status")
             addr_pattern = r"([A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*::[A-Z0-9]*)"
             state_pattern = r"states:\s+current: (\w+)"
