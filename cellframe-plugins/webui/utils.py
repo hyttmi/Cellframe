@@ -1,7 +1,8 @@
-import DAP
 from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
-import subprocess, socket, urllib.request, re, time
+from command_runner import command_runner
+import DAP
+import socket, urllib.request, re, time, psutil
 
 def getConfigValue(section, key, default=None, cast=None):
     try:
@@ -22,75 +23,26 @@ def log_notice(msg):
     
 def log_error(msg):
     log.error(f"{PLUGIN_NAME} {msg}")
-
-def CLICommand(command):
-    full_command = ["/opt/cellframe-node/bin/cellframe-node-cli"] + command.strip().split()
-    log_notice(f"Running command: {' '.join(full_command)}")
-
-    try:
-        process = subprocess.Popen(
-            full_command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        
-        stdout_lines = []
-        for line in process.stdout:
-            stdout_lines.append(line.strip())
-        
-        stderr = process.stderr.read().strip()
-        
-        process.wait(timeout=10)
-        
-        if process.returncode == 0:
-            return "\n".join(stdout_lines)
-        else:
-            log_error(f"Command '{' '.join(full_command)}' failed with error: {stderr}")
-            return f"Command '{' '.join(full_command)}' failed with error: {stderr}"
     
-    except subprocess.TimeoutExpired:
-        process.kill()
-        stdout, stderr = process.communicate()
-        log_error(f"Command {' '.join(full_command)} timed out!")
-        return f"Command {' '.join(full_command)} timed out!"
-    except Exception as e:
-        log_error(f"An error occurred: {e}")
-        return f"An error occurred: {e}"
-
-
-def shellCommand(command):
-    command = f"{command.strip()}"
-    log_notice(f"Running command: {command}")
-
+def CLICommand(command, timeout=5):
     try:
-        process = subprocess.Popen(
-            command,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        
-        stdout, stderr = process.communicate(timeout=10)
-        
-        if process.returncode == 0:
-            return stdout.strip()
+        log_notice(f"Running command: {command}")
+        exit_code, output = command_runner(f"/opt/cellframe-node/bin/cellframe-node-cli {command}", timeout=timeout)
+        if exit_code == 0:
+            return output.strip()
         else:
-            log_error(f"Command '{command}' failed with error: {stderr.strip()}")
-            return f"Command '{command}' failed with error: {stderr.strip()}"
-    
-    except subprocess.TimeoutExpired:
-        process.kill()
-        stdout, stderr = process.communicate()
-        log_error(f"Command {command} timed out!")
-        return f"Command {command} timed out!"
+            log_error(f"Command failed with error: {output.strip()}")
+            return f"Command failed with error: {output.strip()}"
     except Exception as e:
-        log_error(f"An error occurred: {e}")
-        return f"An error occurred: {e}"
+        log_error(f"Error: {e}")
+        return f"Error: {e}"
 
 def getPID():
-    return shellCommand("pgrep -x cellframe-node")
+    for proc in psutil.process_iter(['pid', 'name']):
+        if proc.info['name'] == "cellframe-node":
+            log_notice(proc.info)
+            return proc.info['pid']
+    return None
 
 def getHostname():
     return socket.gethostname()
@@ -104,45 +56,41 @@ def getExtIP():
         log_error(f"Error: {e}")
         return f"Error: {e}"
 
-def getSystemUptime():
-    try:
-        with open('/proc/uptime', 'r') as f:
-            uptime_seconds = float(f.readline().split()[0])
+def format_uptime(seconds):
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{int(hours)}h {int(minutes)}m {int(seconds)}s"
 
-        uptime_struct = time.gmtime(uptime_seconds)
-        days = uptime_struct.tm_yday - 1
-        hours = uptime_struct.tm_hour
-        minutes = uptime_struct.tm_min
-        seconds = uptime_struct.tm_sec
-        uptime_str = f"{days}-{hours:02}:{minutes:02}:{seconds:02}" if days > 0 else f"{hours:02}:{minutes:02}:{seconds:02}"
-
-        return uptime_str
-    except Exception as e:
-        log_error(f"Error: {e}")
-        return f"Error: {e}"
-    
-def getNodeStats():
+def getSysStats():
     try:
         PID = getPID()
+        process = psutil.Process(PID)
 
-        node_stats = {}
+        sys_stats = {}
 
-        cpu_stats = shellCommand(f"ps -p {PID} -o %cpu= | tr -d '[:blank:]'")
-        node_stats['cpu_usage'] = cpu_stats if cpu_stats else "N/A"
+        cpu_usage = process.cpu_percent(interval=1)
+        sys_stats['node_cpu_usage'] = cpu_usage if cpu_usage is not None else "N/A"
 
-        memory_kb = shellCommand(f"ps -p {PID} -o rss= | tr -d '[:blank:]'")
-        node_stats['memory_usage_mb'] = round(int(memory_kb) / 1024, 2) if memory_kb else "N/A"
+        memory_info = process.memory_info()
+        memory_usage_mb = memory_info.rss / 1024 / 1024
+        sys_stats['node_memory_usage_mb'] = round(memory_usage_mb, 2) if memory_usage_mb is not None else "N/A"
+        
+        create_time = process.create_time()
+        uptime_seconds = time.time() - create_time
+        sys_stats['node_uptime'] = format_uptime(uptime_seconds) if uptime_seconds is not None else "N/A"
 
-        node_uptime = shellCommand(f"ps -p {PID} -o etime= | sed 's/^[[:space:]]*//'")
-        node_stats['node_uptime'] = node_uptime if node_uptime else "N/A"
+        boot_time = psutil.boot_time()
+        system_uptime_seconds = time.time() - boot_time
+        sys_stats['system_uptime'] = format_uptime(system_uptime_seconds) if system_uptime_seconds is not None else "N/A"
 
-        return node_stats
+        return sys_stats
     except Exception as e:
         log_error(f"Error: {e}")
         return f"Error {e}"
 
+
 def getCurrentNodeVersion():
-    version = CLICommand("version").replace("-",".")
+    version = CLICommand("version", 2).replace("-",".")
     return version.split()[2]
 
 def getLatestNodeVersion():
@@ -160,13 +108,6 @@ def getLatestNodeVersion():
 def getListNetworks():
     return CFNet.active_nets() or None
 
-def getAutocollectStatus(network):
-    autocollect_cmd = CLICommand(f"block autocollect status -net {network} -chain main")
-    if not "is active" in autocollect_cmd:
-        return "Inactive"
-    else:
-        return "Active"
-
 def readNetworkConfig(network):
     net_config = []
     config_file = f"/opt/cellframe-node/etc/network/{network}.cfg"
@@ -182,6 +123,13 @@ def readNetworkConfig(network):
         return net_config
     else:
         return None
+
+def getAutocollectStatus(network):
+    autocollect_cmd = CLICommand(f"block autocollect status -net {network} -chain main")
+    if not "is active" in autocollect_cmd:
+        return "Inactive"
+    else:
+        return "Active"
 
 def getAllBlocks(network):
     all_blocks_cmd = CLICommand(f"block count -net {network}")
@@ -216,7 +164,7 @@ def getAllSignedBlocks(network):
     else:
         return None
 
-def getFeeWalletTokens(network):
+def getRewardWalletTokens(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_wallet_info = CLICommand(f"wallet info -addr {net_config[1]}")
@@ -251,7 +199,7 @@ def generateNetworkData():
             addr_match = re.search(addr_pattern, net_status)
             state_match = re.search(state_pattern, net_status)
             target_state_match = re.search(target_state_pattern, net_status)
-            tokens = getFeeWalletTokens(network)
+            tokens = getRewardWalletTokens(network)
             
             if state_match and target_state_match:
                 network_info = {

@@ -11,19 +11,19 @@ env = Environment(
 )
 
 def generateHtml():
-    node_stats = utils.getNodeStats()
+    sys_stats = utils.getSysStats()
     
     info = {
         "title": utils.PLUGIN_NAME,
         "hostname": utils.getHostname(),
         "external_ip": utils.getExtIP(),
-        "system_uptime": utils.getSystemUptime(),
-        "node_uptime": node_stats["node_uptime"],
+        "system_uptime": sys_stats["system_uptime"],
+        "node_uptime": sys_stats["node_uptime"],
         "node_version": utils.getCurrentNodeVersion(),
         "latest_node_version": utils.getLatestNodeVersion(),
         "networks": utils.getListNetworks(),
-        "cpu_utilization": node_stats["cpu_usage"],
-        "memory_utilization": node_stats["memory_usage_mb"],
+        "cpu_utilization": sys_stats["node_cpu_usage"],
+        "memory_utilization": sys_stats["node_memory_usage_mb"],
         "net_info": utils.generateNetworkData()
     }
 
