@@ -41,7 +41,6 @@ def CLICommand(command, timeout=5):
 def getPID():
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == "cellframe-node":
-            log_notice(proc.info)
             return proc.info['pid']
     return None
 
@@ -176,7 +175,7 @@ def getSignedBlocksToday(network):
         for line in lines:
             if line.startswith("ts_create:") and today_str in line:
                 blocks_signed_today += 1
-        print(f"Blocks signed today: {blocks_signed_today}")
+        log_notice(f"Blocks signed today: {blocks_signed_today}")
         return blocks_signed_today
 
 def getRewardWalletTokens(network):
