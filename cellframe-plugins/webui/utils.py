@@ -174,6 +174,8 @@ def getSignedBlocksToday(network):
         lines = cmd_output.splitlines()
         for line in lines:
             if line.startswith("ts_create:") and today_str in line:
+                log_notice(today_str)
+                log_notice(line)
                 blocks_signed_today += 1
         log_notice(f"Blocks signed today: {blocks_signed_today}")
         return blocks_signed_today
