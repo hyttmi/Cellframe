@@ -2,7 +2,8 @@ from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
 from command_runner import command_runner
 import DAP
-import socket, urllib.request, re, time, psutil
+import socket, urllib.request, re, time, psutil, json, os
+from packaging.version import Version
 from datetime import datetime
 
 def getConfigValue(section, key, default=None, cast=None):
@@ -25,6 +26,25 @@ def log_notice(msg):
 def log_error(msg):
     log.error(f"{PLUGIN_NAME} {msg}")
     
+def checkForUpdate():
+    try:
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        with open(f"{dir_path}/manifest.json") as manifest:
+            data = json.load(manifest)
+            curr_version = Version(data["version"])
+            log_notice(f"Current plugin version: {curr_version}")
+        
+        with urllib.request.urlopen('https://raw.githubusercontent.com/hyttmi/Cellframe/main/cellframe-plugins/webui/manifest.json') as response:
+            res = response.read().decode('utf-8').strip()
+            manifest_json = json.loads(res)
+            latest_version = Version(manifest_json["version"])
+            log_notice(f"Latest plugin version: {latest_version}")
+        return curr_version < latest_version, curr_version, latest_version
+    except Exception as e:
+        log_error(f"Error: {e}")
+        return f"Error: {e}"
+    
+    
 def CLICommand(command, timeout=5):
     try:
         log_notice(f"Running command: {command}")
@@ -39,10 +59,14 @@ def CLICommand(command, timeout=5):
         return f"Error: {e}"
 
 def getPID():
-    for proc in psutil.process_iter(['pid', 'name']):
-        if proc.info['name'] == "cellframe-node":
-            return proc.info['pid']
-    return None
+    try:
+        for proc in psutil.process_iter(['pid', 'name']):
+            if proc.info['name'] == "cellframe-node":
+                return proc.info['pid']
+        return None
+    except Exception as e:
+        log_error(f"Error: {e}")
+        return f"Error: {e}"
 
 def getHostname():
     return socket.gethostname()
@@ -56,7 +80,7 @@ def getExtIP():
         log_error(f"Error: {e}")
         return f"Error: {e}"
 
-def format_uptime(seconds):
+def formatUptime(seconds):
     hours, remainder = divmod(seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
     return f"{int(hours)}h {int(minutes)}m {int(seconds)}s"
@@ -77,11 +101,11 @@ def getSysStats():
         
         create_time = process.create_time()
         uptime_seconds = time.time() - create_time
-        sys_stats['node_uptime'] = format_uptime(uptime_seconds) if uptime_seconds is not None else "N/A"
+        sys_stats['node_uptime'] = formatUptime(uptime_seconds) if uptime_seconds is not None else "N/A"
 
         boot_time = psutil.boot_time()
         system_uptime_seconds = time.time() - boot_time
-        sys_stats['system_uptime'] = format_uptime(system_uptime_seconds) if system_uptime_seconds is not None else "N/A"
+        sys_stats['system_uptime'] = formatUptime(system_uptime_seconds) if system_uptime_seconds is not None else "N/A"
 
         return sys_stats
     except Exception as e:

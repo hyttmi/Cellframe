@@ -63,14 +63,17 @@
             align-items: center;
             padding: 25px;
         }
-
-    .table {
-        --bs-table-bg
-    }
 </style>
 
 <body>
     <div class="container-fluid mt-4">
+        {% if update_available %}
+        <div class="row">
+            <div class="alert alert-danger" role="alert">
+                New version {{ latest_version }} available! You are running version {{ current_version }}.
+            </div>
+        </div>
+        {% endif %}
         {% if header_text %}
         <div class="row">
             <div class="col-12 text-center">

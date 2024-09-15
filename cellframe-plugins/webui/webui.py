@@ -12,8 +12,13 @@ env = Environment(
 
 def generateHtml():
     sys_stats = utils.getSysStats()
+    is_update_available, curr_version, latest_version = utils.checkForUpdate()
+
     
     info = {
+        'update_available': is_update_available,
+        'current_version': curr_version,
+        'latest_version': latest_version,
         "title": utils.PLUGIN_NAME,
         "hostname": utils.getHostname(),
         "external_ip": utils.getExtIP(),
@@ -98,13 +103,22 @@ def request_handler(request: CFSimpleHTTPRequestHandler):
     return response
 
 def init():
+    def task():
+        try:
+            handler = CFSimpleHTTPRequestHandler(methods=["GET"], handler=request_handler)
+            CFSimpleHTTPServer().register_uri_handler(uri=f"/{utils.PLUGIN_URI}", handler=handler)
+            utils.log_notice("started")
+        except Exception as e:
+            utils.log_error(f"Error: {e}")
+        return 0
     try:
-        handler = CFSimpleHTTPRequestHandler(methods=["GET"], handler=request_handler)
-        CFSimpleHTTPServer().register_uri_handler(uri=f"/{utils.PLUGIN_URI}", handler=handler)
-        utils.log_notice("started")
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(task)
+            return future.result()
     except Exception as e:
         utils.log_error(f"Error: {e}")
-    return 0
+        return 0
+
 
 def deinit():
     utils.log_notice("stopped")
