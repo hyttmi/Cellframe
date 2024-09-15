@@ -1,4 +1,5 @@
 # Cellframe (master)node WebUI
+![image](https://github.com/user-attachments/assets/818362e5-0fa6-4ee0-bb7b-16240c073829)
 
 With this plugin, it's easy to check your node autocollect stats and some other things too. 100% themeable!
 
