@@ -10,6 +10,12 @@ With this plugin, it's easy to check your node autocollect stats and some other 
 4. Go back to `/opt/cellframe-node/var/lib/plugins/webui` and install required packages with `/opt/cellframe-node/python/bin/pip3 install -r requirements.txt` **AS ROOT**
 5. Restart your node and access the WebUI with your browser.
 
+## Updating
+
+1. Overwrite the old files in `/opt/cellframe-node/var/lib/plugins/webui`
+2. Go to `/opt/cellframe-node/var/lib/plugins/webui` and install required packages with `/opt/cellframe-node/python/bin/pip3 install -r requirements.txt` **AS ROOT**
+3. Restart your node and access the WebUI with your browser.
+
 ## Configuration
 
 Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/opt/cellframe-node/etc/cellframe-node.cfg`. You just need to add new section `[webui]` to the end of the file and below that, add the settings which you want to change:
