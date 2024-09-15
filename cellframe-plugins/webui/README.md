@@ -3,6 +3,17 @@
 
 With this plugin, it's easy to check your node autocollect stats and some other things too. 100% themeable!
 
+## Configuration
+
+Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/opt/cellframe-node/etc/cellframe-node.cfg`. You just need to add new section `[webui]` to the end of the file and below that, add the settings which you want to change:
+
+- `username=john` - Sets http authentication as user john. **MANDATORY**
+- `password=p455w0rd` - Sets password to p455w0rd. **MANDATORY**  
+- `template=something` - Change template to something. If not set, default template will be used (cards).
+- `uri=something` - Change plugin URI. Defaults to `webui`
+- `header_text=sometext` - Show `sometext` as a website header **WITHOUT SPACES**
+
+
 ## Installation
 
 1. Enable Python plugins in `cellframe-node.cfg` so it looks on the bottom something like this:
@@ -25,13 +36,3 @@ py_path=/opt/cellframe-node/var/lib/plugins
 1. Overwrite the old files in `/opt/cellframe-node/var/lib/plugins/webui`
 2. Go to `/opt/cellframe-node/var/lib/plugins/webui` and install required packages with `/opt/cellframe-node/python/bin/pip3 install -r requirements.txt` **AS ROOT**
 3. Restart your node and access the WebUI with your browser (`http://<your_node_ip>:<your_node_port>/<uri>` where uri by default is webui).
-
-## Configuration
-
-Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/opt/cellframe-node/etc/cellframe-node.cfg`. You just need to add new section `[webui]` to the end of the file and below that, add the settings which you want to change:
-
-- `username=john` - Sets http authentication as user john. **MANDATORY**
-- `password=p455w0rd` - Sets password to p455w0rd. **MANDATORY**  
-- `template=something` - Change template to something. If not set, default template will be used (cards).
-- `uri=something` - Change plugin URI. Defaults to `webui`
-- `header_text=sometext` - Show `sometext` as a website header **WITHOUT SPACES**
