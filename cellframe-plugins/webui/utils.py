@@ -81,9 +81,14 @@ def getExtIP():
         return f"Error: {e}"
 
 def formatUptime(seconds):
-    hours, remainder = divmod(seconds, 3600)
+    days, remainder = divmod(seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
     minutes, seconds = divmod(remainder, 60)
-    return f"{int(hours)}h {int(minutes)}m {int(seconds)}s"
+    if days > 0:
+        return f"{int(days)}d {int(hours)}h {int(minutes)}m {int(seconds)}s"
+    else:
+        return f"{int(hours)}h {int(minutes)}m {int(seconds)}s"
+
 
 def getSysStats():
     try:
