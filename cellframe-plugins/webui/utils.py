@@ -230,10 +230,9 @@ def getAllBlocks(network):
 def getFirstSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
-        cmd_get_first_signed_blocks = nodeCLISocket("block", [f"block;list;-net;{network};chain;-main;first_signed:-cert;{net_config[0]};-limit;1"])
-        result = json.dumps(cmd_get_first_signed_blocks)
-        pattern = r'have blocks": (\d+)'
-        blocks_match = re.search(pattern, result)
+        cmd_get_first_signed_blocks = CLICommand(f"block list -net {network} chain -main first_signed -cert {net_config[0]} -limit 1")
+        pattern = r"have blocks: (\d+)"
+        blocks_match = re.search(pattern, cmd_get_first_signed_blocks)
         if blocks_match:
             result = blocks_match.group(1)
             return result
@@ -243,10 +242,9 @@ def getFirstSignedBlocks(network):
 def getAllSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
-        cmd_get_all_signed_blocks = nodeCLISocket("block", [f"block;list;-net;{network};chain;-main;signed:-cert;{net_config[0]};-limit;1"])
-        result = json.dumps(cmd_get_all_signed_blocks)
-        pattern = r'have blocks": (\d+)'
-        blocks_match = re.search(pattern, result)
+        cmd_get_all_signed_blocks = CLICommand(f"block list -net {network} chain -main signed -cert {net_config[0]} -limit 1")
+        pattern = r"have blocks: (\d+)"
+        blocks_match = re.search(pattern, cmd_get_all_signed_blocks)
         if blocks_match:
             result = blocks_match.group(1)
             return result
