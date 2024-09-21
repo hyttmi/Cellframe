@@ -51,6 +51,8 @@ def generateHtml_async():
 
 def request_handler(request: CFSimpleHTTPRequestHandler):
     utils.log_notice(f"Handling request from {request.client_address}...")
+    if request.body:
+        utils.log_notice(f"Received {request.body}")
     
     headers = request.headers
     auth_header = headers.get('Authorization')
@@ -105,7 +107,7 @@ def request_handler(request: CFSimpleHTTPRequestHandler):
 def init():
     def task():
         try:
-            handler = CFSimpleHTTPRequestHandler(methods=["GET"], handler=request_handler)
+            handler = CFSimpleHTTPRequestHandler(methods=["GET", "POST"], handler=request_handler)
             CFSimpleHTTPServer().register_uri_handler(uri=f"/{utils.PLUGIN_URI}", handler=handler)
             utils.log_notice("started")
         except Exception as e:
