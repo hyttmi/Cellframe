@@ -31,7 +31,7 @@ def generateHtml():
         "cpu_utilization": sys_stats["node_cpu_usage"],
         "memory_utilization": sys_stats["node_memory_usage_mb"],
         "header_text": utils.getConfigValue("webui", "header_text", default=False),
-        "master_key": utils.getConfigValue("webui", "master_key"),
+        "link_key": utils.getConfigValue("webui", "link_key"),
         "net_info": utils.generateNetworkData()
     }
 
@@ -57,20 +57,34 @@ def request_handler(request: CFSimpleHTTPRequestHandler):
         post_data = urllib.parse.parse_qs(request.body.decode('utf-8'))
         command = post_data["command"][0]
 
-        master_key, network, state = command.split("_")
-        if utils.getConfigValue("webui", "master_key") == master_key:
+        link_key, network, state = command.split("_")
+        if utils.getConfigValue("webui", "link_key") == link_key:
             utils.log_notice("Master key is correct, proceeding...")
             utils.setNetworkState(state, network)
-        else:
-            response = CFSimpleHTTPResponse(body=b"Master key mismatch, action is prohibited!", code=200)
+            response_body = b"""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta http-equiv="refresh" content="0;url=/webui">
+                <script type="text/javascript">
+                    window.location.href = '/webui';
+                </script>
+                <title>Redirecting...</title>
+            </head>
+            <body>
+                <p>If you are not redirected automatically, follow this <a href="/webui">link</a>.</p>
+            </body>
+            </html>
+            """
+            response = CFSimpleHTTPResponse(body=response_body, code=200)
+            response.headers = {
+            "Content-Type": "text/html"
+            }
             return response
-        response = CFSimpleHTTPResponse(body=b"Redirecting...", code=301)
-        response.headers = {
-        "Location": "/webui",  # Redirect to the main web UI or other GET page
-        "Content-Type": "text/plain",
-        "Content-Length": str(len(response.body))  # Set content length header
-        }
-        return response
+        else:
+            response = CFSimpleHTTPResponse(body=b"Link key mismatch, action is prohibited!", code=200)
+            return response
     
     headers = request.headers
     auth_header = headers.get('Authorization')
