@@ -230,7 +230,7 @@ def getFirstSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_first_signed_blocks = nodeCLISocket("block", [f"block;list;-net;{network};chain;-main;first_signed:-cert;{net_config[0]};-limit;1"])
-        result = json.dump(cmd_get_first_signed_blocks)
+        result = json.dumps(cmd_get_first_signed_blocks)
         pattern = r"have blocks: (\d+)"
         blocks_match = re.search(pattern, result)
         if blocks_match:
