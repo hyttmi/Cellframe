@@ -59,6 +59,7 @@ def request_handler(request: CFSimpleHTTPRequestHandler):
         if utils.getConfigValue("webui", "master_key", default="testtest123") == master_key:
             # Got the master key, proceed
             utils.setNetworkState(command, network)
+        return
     
     headers = request.headers
     auth_header = headers.get('Authorization')
