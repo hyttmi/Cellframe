@@ -171,8 +171,12 @@
         <div class="row">
             <div class="col-12">
                 <form action="/webui/" method="POST">
-                    <input type="hidden" name="command" value="{{ master_key }}_{{ network.name }}_go_offline">
+                    <input type="hidden" name="command" value="{{ master_key }}_{{ network.name }}_offline">
                     <button class="float-end btn" type="submit"><i class="fa-solid text-color-secondary fa-link-slash" aria-hidden="true"></i></button>
+                </form>
+                <form action="/webui/" method="POST">
+                    <input type="hidden" name="command" value="{{ master_key }}_{{ network.name }}_online">
+                    <button class="float-end btn" type="submit"><i class="fa-solid text-color-secondary fa-link" aria-hidden="true"></i></button>
                 </form>
                 <h1 class="text-uppercase text-color-secondary">{{ network.name }}</h1>
             </div>
