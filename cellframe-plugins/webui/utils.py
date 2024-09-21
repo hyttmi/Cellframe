@@ -63,6 +63,7 @@ def nodeCLISocket(method, params):
         client.connect(socket_path)
         
         request = f"POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {len(json_data)}\r\n\r\n{json_data}"
+        log_notice(f"Sending request: {request}")
         
         client.sendall(request.encode('utf-8'))
         
