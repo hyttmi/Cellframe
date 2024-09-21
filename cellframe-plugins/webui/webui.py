@@ -50,7 +50,7 @@ def generateHtml_async():
         return future.result()
 
 def request_handler(request: CFSimpleHTTPRequestHandler):
-    utils.log_notice(f"Handling request from {request.client}...")
+    utils.log_notice(f"Handling request from {request.client_address}...")
     
     headers = request.headers
     auth_header = headers.get('Authorization')
