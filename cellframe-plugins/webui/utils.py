@@ -1,5 +1,6 @@
 from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
+from pycfhelpers.node.types import CFNetState
 from command_runner import command_runner
 import DAP
 import socket, urllib.request, re, time, psutil, json, os
@@ -173,6 +174,12 @@ def getSysStats():
         log_error(f"Error: {e}")
         return f"Error {e}"
 
+def setNetworkOffline(network):
+    try:
+        net = CFNet(network)
+        net.change_state(CFNetState.NET_STATE_OFFLINE)
+    except Exception as e:
+        log_error(f"Error: {e}")
 
 def getCurrentNodeVersion():
     response = nodeCLISocket("version", ["version"])
@@ -227,7 +234,7 @@ def getAllBlocks(network):
     else:
         return None
 
-def getFirstSignedBlocks(network):
+def getFirstSignedBlocks(network): # Not working in JSON yet (limiting)
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_first_signed_blocks = CLICommand(f"block list -net {network} chain -main first_signed -cert {net_config[0]} -limit 1")
@@ -239,7 +246,7 @@ def getFirstSignedBlocks(network):
     else:
         return None
 
-def getAllSignedBlocks(network):
+def getAllSignedBlocks(network): # Not working in JSON yet (limiting)
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_all_signed_blocks = CLICommand(f"block list -net {network} chain -main signed -cert {net_config[0]} -limit 1")

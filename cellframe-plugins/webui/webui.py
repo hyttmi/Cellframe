@@ -30,6 +30,7 @@ def generateHtml():
         "cpu_utilization": sys_stats["node_cpu_usage"],
         "memory_utilization": sys_stats["node_memory_usage_mb"],
         "header_text": utils.getConfigValue("webui", "header_text", default=False),
+        "master_key": utils.getConfigValue("webui", "master_key", default=False),
         "net_info": utils.generateNetworkData()
     }
 
