@@ -54,7 +54,7 @@ def request_handler(request: CFSimpleHTTPRequestHandler):
     utils.log_notice(f"Handling request from {request.client_address}...")
     if request.body:
         req = request.body.decode('utf-8')
-        utils.log_notice(f"Received {req§}")
+        utils.log_notice(f"Received {req}")
         master_key, network, command = req.split("_")
     
     headers = request.headers
