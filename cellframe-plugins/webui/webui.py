@@ -52,7 +52,7 @@ def generateHtml_async():
 def request_handler(request: CFSimpleHTTPRequestHandler):
     utils.log_notice(f"Handling request from {request.client_address}...")
     if request.body:
-        utils.log_notice(f"Received {request.body}")
+        utils.log_notice(f"Received {request.body.decode('utf-8')}")
     
     headers = request.headers
     auth_header = headers.get('Authorization')
