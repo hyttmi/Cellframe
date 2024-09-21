@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import base64
 import utils
 from jinja2 import Environment, PackageLoader, select_autoescape
+import urllib
 
 env = Environment(
     loader=PackageLoader("webui"),
@@ -30,7 +31,7 @@ def generateHtml():
         "cpu_utilization": sys_stats["node_cpu_usage"],
         "memory_utilization": sys_stats["node_memory_usage_mb"],
         "header_text": utils.getConfigValue("webui", "header_text", default=False),
-        "master_key": utils.getConfigValue("webui", "master_key", default="testtest123"),
+        "master_key": utils.getConfigValue("webui", "master_key"),
         "net_info": utils.generateNetworkData()
     }
 
@@ -53,9 +54,23 @@ def generateHtml_async():
 def request_handler(request: CFSimpleHTTPRequestHandler):
     utils.log_notice(f"Handling request from {request.client_address}...")
     if request.body:
-        req = request.body.decode('utf-8')
-        utils.log_notice(f"Received {req}")
-        master_key, network, command = req.split("_")
+        post_data = urllib.parse.parse_qs(request.body.decode('utf-8'))
+        command = post_data["command"][0]
+
+        master_key, network, state = command.split("_")
+        if utils.getConfigValue("webui", "master_key") == master_key:
+            utils.log_notice("Master key is correct, proceeding...")
+            utils.setNetworkState(state, network)
+        else:
+            response = CFSimpleHTTPResponse(body=b"Master key mismatch, action is prohibited!", code=200)
+            return response
+        response = CFSimpleHTTPResponse(body=b"Redirecting...", code=301)
+        response.headers = {
+        "Location": "/webui",  # Redirect to the main web UI or other GET page
+        "Content-Type": "text/plain",
+        "Content-Length": str(len(response.body))  # Set content length header
+        }
+        return response
     
     headers = request.headers
     auth_header = headers.get('Authorization')

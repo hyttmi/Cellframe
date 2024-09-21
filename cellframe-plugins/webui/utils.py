@@ -174,10 +174,13 @@ def getSysStats():
         log_error(f"Error: {e}")
         return f"Error {e}"
 
-def setNetworkOffline(network):
+def setNetworkState(state, network):
     try:
         net = CFNet(network)
-        net.change_state(CFNetState.NET_STATE_OFFLINE)
+        if state == "offline":
+            net.change_state(CFNetState.NET_STATE_OFFLINE)
+        elif state == "online":
+            net.change_state(CFNetState.NET_STATE_ONLINE)
     except Exception as e:
         log_error(f"Error: {e}")
 
