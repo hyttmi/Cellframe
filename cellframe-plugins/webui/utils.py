@@ -211,7 +211,7 @@ def readNetworkConfig(network):
 
 def getAutocollectStatus(network):
     autocollect_cmd = nodeCLISocket("block", [f"block;autocollect;status;-net;{network};-chain;main"])
-    if not "is active" in autocollect_cmd:
+    if not "is active" in json.dumps(autocollect_cmd):
         return "Inactive"
     else:
         return "Active"
@@ -229,9 +229,10 @@ def getAllBlocks(network):
 def getFirstSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
-        cmd_get_first_signed_blocks = CLICommand(f"block list -net {network} chain -main first_signed -cert {net_config[0]} -limit 1")
+        cmd_get_first_signed_blocks = nodeCLISocket("block", [f"block;list;-net;{network};chain;-main;first_signed:-cert;{net_config[0]};-limit;1"])
+        result = json.dump(cmd_get_first_signed_blocks)
         pattern = r"have blocks: (\d+)"
-        blocks_match = re.search(pattern, cmd_get_first_signed_blocks)
+        blocks_match = re.search(pattern, result)
         if blocks_match:
             result = blocks_match.group(1)
             return result
