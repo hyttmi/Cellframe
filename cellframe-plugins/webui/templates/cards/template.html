@@ -170,6 +170,10 @@
         {% for network in net_info %}
         <div class="row">
             <div class="col-12">
+                <form action="/webui/" method="POST">
+                    <input type="hidden" name="command" value="{{ network.name }}_go_offline">
+                    <button class="float-end" type="submit"><i class="fa-solid fa-link-slash" aria-hidden="true"></i></button>
+                </form>
                 <h1 class="text-uppercase text-color-secondary">{{ network.name }}</h1>
             </div>
 
