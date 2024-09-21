@@ -53,8 +53,9 @@ def generateHtml_async():
 def request_handler(request: CFSimpleHTTPRequestHandler):
     utils.log_notice(f"Handling request from {request.client_address}...")
     if request.method == "POST":
-        utils.log_notice(f"Received {request.body.decode('utf-8')}")
-        master_key, network, command = request.body.split("_")
+        request = request.body.decode('utf-8')
+        utils.log_notice(f"Received {request}")
+        master_key, network, command = request.split("_")
         print(f"{master_key}, {network}, {command}")
         if utils.getConfigValue("webui", "master_key", default="testtest123") == master_key:
             # Got the master key, proceed
