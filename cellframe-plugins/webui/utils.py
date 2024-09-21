@@ -232,7 +232,7 @@ def getFirstSignedBlocks(network):
     if net_config is not None:
         cmd_get_first_signed_blocks = nodeCLISocket("block", [f"block;list;-net;{network};chain;-main;first_signed:-cert;{net_config[0]};-limit;1"])
     
-        blocks_info = cmd_get_first_signed_blocks[-1]
+        blocks_info = cmd_get_first_signed_blocks
         blocks_count = blocks_info.get("Backbone.main with filter - none, have blocks", None)
         return blocks_count
 
