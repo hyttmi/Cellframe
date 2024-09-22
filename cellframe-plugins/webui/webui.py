@@ -31,7 +31,7 @@ def generateHtml():
         "cpu_utilization": sys_stats["node_cpu_usage"],
         "memory_utilization": sys_stats["node_memory_usage_mb"],
         "header_text": utils.getConfigValue("webui", "header_text", default=False),
-        "link_key": utils.getConfigValue("webui", "link_key"),
+        "link_key": utils.getConfigValue("webui", "link_key", default=False),
         "net_info": utils.generateNetworkData()
     }
 
@@ -55,11 +55,17 @@ def request_handler(request: CFSimpleHTTPRequestHandler):
     utils.log_notice(f"Handling request from {request.client_address}...")
     if request.body:
         post_data = urllib.parse.parse_qs(request.body.decode('utf-8'))
-        command = post_data["command"][0]
-
-        link_key, network, state = command.split("_")
+        post_network = post_data["network"][0]
+        parts = post_network.split("_")
+        if len(parts) == 3:
+            link_key, network, state = parts
+        else:
+            utils.log_error(f"Invalid format, got {post_network}")
+            response = CFSimpleHTTPResponse(body=b"Invalid format!", code=200)
+            return response
+        
         if utils.getConfigValue("webui", "link_key") == link_key:
-            utils.log_notice("Master key is correct, proceeding...")
+            utils.log_notice("Link key is correct, proceeding...")
             utils.setNetworkState(state, network)
             response_body = b"""
             <!DOCTYPE html>
@@ -84,6 +90,7 @@ def request_handler(request: CFSimpleHTTPRequestHandler):
             return response
         else:
             response = CFSimpleHTTPResponse(body=b"Link key mismatch, action is prohibited!", code=200)
+            utils.log_error("Link key mismatch, action is prohibited!")
             return response
     
     headers = request.headers
