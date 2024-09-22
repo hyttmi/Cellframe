@@ -12,7 +12,7 @@ Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/op
 - `template=something` - Change template to something. If not set, default template will be used (cards).
 - `uri=something` - Change plugin URI. Defaults to `webui`
 - `header_text=sometext` - Show `sometext` as a website header **WITHOUT SPACES**
-- `link_key=oein03g0n49n0vse8n0s` - Where `oein03g0n49n0vse8n0s` is used as precaution for filling links with some random data. 
+- `link_key=oein03g0n49n0vse8n0s` - Where `oein03g0n49n0vse8n0s` is used as precaution for filling links with some random data **ONLY ALPHANUMERIC, NO SPACES**. 
 
 
 ## Installation
