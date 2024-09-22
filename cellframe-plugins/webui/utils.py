@@ -21,10 +21,10 @@ PLUGIN_URI = getConfigValue("webui", "uri", default="webui")
 
 log = CFLog()
 
-def log_notice(msg):
+def logNotice(msg):
     log.notice(f"{PLUGIN_NAME} {msg}")
     
-def log_error(msg):
+def logError(msg):
     log.error(f"{PLUGIN_NAME} {msg}")
     
 def checkForUpdate():
@@ -33,16 +33,16 @@ def checkForUpdate():
         with open(f"{dir_path}/manifest.json") as manifest:
             data = json.load(manifest)
             curr_version = Version(data["version"])
-            log_notice(f"Current plugin version: {curr_version}")
+            logNotice(f"Current plugin version: {curr_version}")
         
         with urllib.request.urlopen('https://raw.githubusercontent.com/hyttmi/Cellframe/main/cellframe-plugins/webui/manifest.json') as response:
             res = response.read().decode('utf-8').strip()
             manifest_json = json.loads(res)
             latest_version = Version(manifest_json["version"])
-            log_notice(f"Latest plugin version: {latest_version}")
+            logNotice(f"Latest plugin version: {latest_version}")
         return curr_version < latest_version, curr_version, latest_version
     except Exception as e:
-        log_error(f"Error: {e}")
+        logError(f"Error: {e}")
         return f"Error: {e}"
 
 def nodeCLISocket(method, params):
@@ -64,7 +64,7 @@ def nodeCLISocket(method, params):
         client.connect(socket_path)
         
         request = f"POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {len(json_data)}\r\n\r\n{json_data}"
-        log_notice(f"Sending request: {request}")
+        logNotice(f"Sending request: {request}")
         
         client.sendall(request.encode('utf-8'))
         
@@ -93,26 +93,26 @@ def nodeCLISocket(method, params):
             json_response = json.loads(body)
             return json_response
         except json.JSONDecodeError:
-            log_error("Failed to decode JSON!")
+            logError("Failed to decode JSON!")
             return body
     
     except TimeoutError as e:
-        log_error(f"Error: {method} with params {params} {e}")
+        logError(f"Error: {method} with params {params} {e}")
 
     finally:
         client.close()
     
 def CLICommand(command, timeout=5):
     try:
-        log_notice(f"Running command: {command}")
+        logNotice(f"Running command: {command}")
         exit_code, output = command_runner(f"/opt/cellframe-node/bin/cellframe-node-cli {command}", timeout=timeout)
         if exit_code == 0:
             return output.strip()
         else:
-            log_error(f"Command failed with error: {output.strip()}")
+            logError(f"Command failed with error: {output.strip()}")
             return f"Command failed with error: {output.strip()}"
     except Exception as e:
-        log_error(f"Error: {e}")
+        logError(f"Error: {e}")
         return f"Error: {e}"
 
 def getPID():
@@ -122,7 +122,7 @@ def getPID():
                 return proc.info['pid']
         return None
     except Exception as e:
-        log_error(f"Error: {e}")
+        logError(f"Error: {e}")
         return f"Error: {e}"
 
 def getHostname():
@@ -134,7 +134,7 @@ def getExtIP():
             ip_address = response.read().decode('utf-8').strip()
             return ip_address
     except Exception as e:
-        log_error(f"Error: {e}")
+        logError(f"Error: {e}")
         return f"Error: {e}"
 
 def formatUptime(seconds):
@@ -171,7 +171,7 @@ def getSysStats():
 
         return sys_stats
     except Exception as e:
-        log_error(f"Error: {e}")
+        logError(f"Error: {e}")
         return f"Error {e}"
 
 def setNetworkState(state, network):
@@ -182,7 +182,7 @@ def setNetworkState(state, network):
         elif state == "online":
             net.change_state(CFNetState.NET_STATE_ONLINE)
     except Exception as e:
-        log_error(f"Error: {e}")
+        logError(f"Error: {e}")
 
 def getCurrentNodeVersion():
     response = nodeCLISocket("version", ["version"])
