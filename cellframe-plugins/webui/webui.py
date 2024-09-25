@@ -1,7 +1,7 @@
 from pycfhelpers.node.http.simple import CFSimpleHTTPServer, CFSimpleHTTPRequestHandler, CFSimpleHTTPResponse
 from concurrent.futures import ThreadPoolExecutor
 
-import base64, urllib, ssl
+import base64, urllib
 from utils import *
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -14,7 +14,6 @@ def generateHtml():
     sys_stats = getSysStats()
     is_update_available, curr_version, latest_version = checkForUpdate()
 
-    
     info = {
         'update_available': is_update_available,
         'current_version': curr_version,
@@ -44,11 +43,6 @@ def generateHtml():
         logError(f"Error in generating HTML: {e}")
         output = f"<h1>Got an error: {e}</h1>"
     return output
-
-def generateHtmlAsync():
-    with ThreadPoolExecutor() as executor:
-        future = executor.submit(generateHtml)
-        return future.result()
     
 def requestHandler(request: CFSimpleHTTPRequestHandler):
     if request.method == "GET":
@@ -136,7 +130,7 @@ def getRequestHandler(request: CFSimpleHTTPRequestHandler):
             "WWW-Authenticate": 'Basic realm="Cellframe node webui"'
         }
         return response
-    response_body = generateHtmlAsync()
+    response_body = generateHtml()
     response_body = response_body.encode("utf-8")
     response = CFSimpleHTTPResponse(body=response_body, code=200)
     response.headers = {
@@ -145,7 +139,7 @@ def getRequestHandler(request: CFSimpleHTTPRequestHandler):
     logNotice("Sending response...")
     return response
     
-def task():
+def HTTPServer():
     try:
         handler = CFSimpleHTTPRequestHandler(methods=["GET", "POST"], handler=requestHandler)
         CFSimpleHTTPServer().register_uri_handler(uri=f"/{PLUGIN_URI}", handler=handler)
@@ -157,7 +151,7 @@ def task():
 def init():
     try:
         with ThreadPoolExecutor() as executor:
-            future = executor.submit(task)
+            future = executor.submit(HTTPServer)
             return future.result()
     except Exception as e:
         logError(f"Error: {e}")
