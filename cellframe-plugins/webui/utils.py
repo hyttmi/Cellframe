@@ -12,8 +12,8 @@ def getConfigValue(section, key, default=None):
     try:
         value = node_config[section].get(key, default)
         return value
-    except ValueError:
-        return default
+    except Exception as e:
+        logError(f"Error: {e}")
 
 PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
 PLUGIN_URI = getConfigValue("webui", "uri", default="webui")
