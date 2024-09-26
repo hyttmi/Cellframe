@@ -1,17 +1,16 @@
 from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
 from pycfhelpers.node.types import CFNetState
+from pycfhelpers.node import config as node_config
 from command_runner import command_runner
-import DAP
-import socket, urllib.request, re, time, psutil, json, os
 from packaging.version import Version
+
+import socket, urllib.request, re, time, psutil, json, os
 from datetime import datetime
 
-def getConfigValue(section, key, default=None, cast=None):
+def getConfigValue(section, key, default=None):
     try:
-        value = DAP.configGetItem(section, key)
-        if cast is not None:
-            value = cast(value)
+        value = node_config[section].get(key, default)
         return value
     except ValueError:
         return default
