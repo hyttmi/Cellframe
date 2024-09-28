@@ -7,6 +7,7 @@ from packaging.version import Version
 
 import socket, urllib.request, re, time, psutil, json, os
 from datetime import datetime
+import handlers
 
 def getConfigValue(section, key, default=None):
     try:
@@ -55,7 +56,6 @@ def nodeCLISocket(method, params):
     }
     
     json_data = json.dumps(data)
-    
     client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     client.settimeout(timeout)
 
@@ -87,14 +87,12 @@ def nodeCLISocket(method, params):
         while content_length is not None and len(body) < content_length:
             chunk = client.recv(4096).decode('utf-8')
             body += chunk
-        
         try:
             json_response = json.loads(body)
             return json_response
         except json.JSONDecodeError:
             logError("Failed to decode JSON!")
             return body
-    
     except TimeoutError as e:
         logError(f"Error: {method} with params {params} {e}")
 
@@ -330,3 +328,37 @@ def generateNetworkData():
         return network_data
     else:
         return None
+
+def generateHTML():
+    sys_stats = getSysStats()
+    is_update_available, curr_version, latest_version = checkForUpdate()
+
+    info = {
+        'update_available': is_update_available,
+        'current_version': curr_version,
+        'latest_version': latest_version,
+        "title": PLUGIN_NAME,
+        "hostname": getHostname(),
+        "external_ip": getExtIP(),
+        "system_uptime": sys_stats["system_uptime"],
+        "node_uptime": sys_stats["node_uptime"],
+        "node_version": getCurrentNodeVersion(),
+        "latest_node_version": getLatestNodeVersion(),
+        "networks": getListNetworks(),
+        "cpu_utilization": sys_stats["node_cpu_usage"],
+        "memory_utilization": sys_stats["node_memory_usage_mb"],
+        "header_text": getConfigValue("webui", "header_text", default=False),
+        "link_key": getConfigValue("webui", "link_key", default=False),
+        "net_info": generateNetworkData()
+    }
+
+    template_setting = getConfigValue("webui", "template", default="cards")
+    template_path = f"{template_setting}/template.html"
+    try:
+        logNotice(f"Generating HTML page...")
+        template = handlers.env.get_template(template_path)
+        output = template.render(info)
+    except Exception as e:
+        logError(f"Error in generating HTML: {e}")
+        output = f"<h1>Got an error: {e}</h1>"
+    return output
