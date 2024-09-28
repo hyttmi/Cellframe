@@ -69,22 +69,22 @@ def postRequestHandler(request: CFSimpleHTTPRequestHandler):
         if getConfigValue("webui", "link_key") == link_key:
             logNotice("Link key is correct, proceeding...")
             setNetworkState(state, network)
-            response_body = b"""
+            response_body = f"""
             <!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
-                <meta http-equiv="refresh" content="0;url=/webui">
+                <meta http-equiv="refresh" content="0;url='/{PLUGIN_URI}'>
                 <script type="text/javascript">
-                    window.location.href = '/webui';
+                    window.location.href = '/{PLUGIN_URI}';
                 </script>
                 <title>Redirecting...</title>
             </head>
             <body>
-                <p>If you are not redirected automatically, follow this <a href="/webui">link</a>.</p>
+                <p>If you are not redirected automatically, follow this <a href='/{PLUGIN_URI}'</a>.</p>
             </body>
             </html>
-            """
+            """.encode("utf-8")
             response = CFSimpleHTTPResponse(body=response_body, code=200)
             response.headers = {
             "Content-Type": "text/html"
