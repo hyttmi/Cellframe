@@ -4,7 +4,6 @@ from handlers import *
 from utils import *
 from generators import generateEmail
 from mailer import sendMail
-from datetime import datetime
     
 def HTTPServer():
     try:

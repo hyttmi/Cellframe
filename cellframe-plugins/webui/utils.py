@@ -7,7 +7,6 @@ from packaging.version import Version
 
 import socket, urllib.request, re, time, psutil, json, os, time
 from datetime import datetime
-import handlers
 import schedule
 
 def getConfigValue(section, key, default=None):
