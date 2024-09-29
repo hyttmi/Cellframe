@@ -5,9 +5,10 @@ from pycfhelpers.node import config as node_config
 from command_runner import command_runner
 from packaging.version import Version
 
-import socket, urllib.request, re, time, psutil, json, os
+import socket, urllib.request, re, time, psutil, json, os, time
 from datetime import datetime
 import handlers
+import schedule
 
 def getConfigValue(section, key, default=None):
     try:
@@ -329,36 +330,19 @@ def generateNetworkData():
     else:
         return None
 
-def generateHTML():
-    sys_stats = getSysStats()
-    is_update_available, curr_version, latest_version = checkForUpdate()
-
-    info = {
-        'update_available': is_update_available,
-        'current_version': curr_version,
-        'latest_version': latest_version,
-        "title": PLUGIN_NAME,
-        "hostname": getHostname(),
-        "external_ip": getExtIP(),
-        "system_uptime": sys_stats["system_uptime"],
-        "node_uptime": sys_stats["node_uptime"],
-        "node_version": getCurrentNodeVersion(),
-        "latest_node_version": getLatestNodeVersion(),
-        "networks": getListNetworks(),
-        "cpu_utilization": sys_stats["node_cpu_usage"],
-        "memory_utilization": sys_stats["node_memory_usage_mb"],
-        "header_text": getConfigValue("webui", "header_text", default=False),
-        "link_key": getConfigValue("webui", "link_key", default=False),
-        "net_info": generateNetworkData()
-    }
-
-    template_setting = getConfigValue("webui", "template", default="cards")
-    template_path = f"{template_setting}/template.html"
+def funcScheduler(func, scheduled_time):
     try:
-        logNotice(f"Generating HTML page...")
-        template = handlers.env.get_template(template_path)
-        output = template.render(info)
+        schedule.every().day.at(scheduled_time).do(func)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
     except Exception as e:
-        logError(f"Error in generating HTML: {e}")
-        output = f"<h1>Got an error: {e}</h1>"
-    return output
+        logError(f"Error with scheduler: {e}")
+        
+def validateTime(str):
+    try:
+        datetime.strptime(str, "%H:%M")
+        return True
+    except ValueError as e:
+        logError(f"Wrong format of time: {e}")
+        return False

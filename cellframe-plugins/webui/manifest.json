@@ -1,6 +1,6 @@
 { 
     "name": "webui",
-    "version": "2.24",
+    "version": "2.30",
     "author": "Mika Hyttinen (@CELLgainz)",
     "dependencies": [],
     "description": "WebUI for Cellframe masternode",
