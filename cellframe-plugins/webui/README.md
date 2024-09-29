@@ -5,6 +5,8 @@ With this plugin, it's easy to check your node autocollect stats and some other 
 
 ## Configuration
 
+**NOTICE: Email feature supports only GMail for now. And for using it, you MUST HAVE 2-factor authentication enabled and you HAVE TO create an app password from this link:  https://myaccount.google.com/apppasswords**
+
 Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/opt/cellframe-node/etc/cellframe-node.cfg`. You just need to add new section `[webui]` to the end of the file and below that, add the settings which you want to change:
 
 - `username=john` - Sets http authentication as user john. **MANDATORY**
@@ -13,6 +15,11 @@ Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/op
 - `uri=something` - Change plugin URI. Defaults to `webui`
 - `header_text=sometext` - Show `sometext` as a website header **WITHOUT SPACES**
 - `link_key=oein03g0n49n0vse8n0s` - Where `oein03g0n49n0vse8n0s` is used as precaution for filling links with some random data **ONLY ALPHANUMERIC, NO SPACES**. 
+- `email_stats=true|false` - Allow sending scheduled email statistics
+- `email_time=17:39` - Set time when you want to send the statistics **24h format**
+- `gmail_app_password=asdf asdf asdf asdf` - GMail app password
+gmail_user=mika.hyttinen@gmail.com
+email_recipients=mika.hyttinen@gmail.com 
 
 
 ## Installation
