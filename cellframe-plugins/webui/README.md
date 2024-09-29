@@ -16,7 +16,7 @@ Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/op
 - `header_text=sometext` - Show `sometext` as a website header **WITHOUT SPACES**
 - `link_key=oein03g0n49n0vse8n0s` - Where `oein03g0n49n0vse8n0s` is used as precaution for filling links with some random data **ONLY ALPHANUMERIC, NO SPACES**. 
 - `email_stats=true|false` - Allow sending scheduled email statistics
-- `email_time=17:39` - Set time when you want to send the statistics **24h format**
+- `email_time=17:39` - Set time when you want to send the statistics **24h format (HH:MM)**
 - `gmail_app_password=asdf asdf asdf asdf` - GMail app password
 - `gmail_user=somebody@gmail.com` - Your GMail username
 - `email_recipients=somebody@gmail.com|[somebody@gmail.com, another@aol.com]` - Recipient(s) for the email
