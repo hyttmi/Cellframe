@@ -1,5 +1,5 @@
 from pycfhelpers.node.http.simple import CFSimpleHTTPServer, CFSimpleHTTPRequestHandler
-import threading
+from concurrent.futures import ThreadPoolExecutor
 from handlers import *
 from utils import *
 from generators import generateEmail
@@ -17,12 +17,11 @@ def HTTPServer():
 def init():
     email_stats_enabled = getConfigValue("webui", "email_stats")
     email_stats_time = getConfigValue("webui", "email_time")
-    http_thread = threading.Thread(target=HTTPServer)
-    http_thread.start()
-    if email_stats_enabled and validateTime(email_stats_time):
-        logNotice(f"Email sending is activated at time {email_stats_time}")
-        scheduler_thread = threading.Thread(target=funcScheduler, args=(lambda: sendMail(generateEmail()), email_stats_time))
-        scheduler_thread.start()
+    with ThreadPoolExecutor() as executor:
+        executor.submit(HTTPServer)
+        if email_stats_enabled and validateTime(email_stats_time):
+            logNotice(f"Email sending is activated at time {email_stats_time}")
+            executor.submit(funcScheduler, lambda: sendMail(generateEmail()), email_stats_time)
     return 0
 
 def deinit():
