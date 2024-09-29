@@ -18,8 +18,8 @@ Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/op
 - `email_stats=true|false` - Allow sending scheduled email statistics
 - `email_time=17:39` - Set time when you want to send the statistics **24h format**
 - `gmail_app_password=asdf asdf asdf asdf` - GMail app password
-gmail_user=mika.hyttinen@gmail.com
-email_recipients=mika.hyttinen@gmail.com 
+- `gmail_user=somebody@gmail.com` - Your GMail username
+- `email_recipients=somebody@gmail.com|[somebody@gmail.com, another@aol.com]`
 
 
 ## Installation
