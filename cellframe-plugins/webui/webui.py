@@ -7,7 +7,7 @@ from mailer import sendMail
     
 def HTTPServer():
     try:
-        handler = CFSimpleHTTPRequestHandler(methods=["GET", "POST"], handler=requestHandler)
+        handler = CFSimpleHTTPRequestHandler(methods=["GET"], handler=requestHandler)
         CFSimpleHTTPServer().register_uri_handler(uri=f"/{PLUGIN_URI}", handler=handler)
         logNotice("started")
     except Exception as e:

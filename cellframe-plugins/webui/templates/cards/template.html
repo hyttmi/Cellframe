@@ -170,19 +170,6 @@
         {% if network_data is not none %}
         {% for network in net_info %}
         <div class="row">
-            <div class="col-12">
-                {% if link_key %}
-                <form action="/webui" method="POST">
-                    <input type="hidden" name="network" value="{{ link_key }}_{{ network.name }}_offline">
-                    <button title="Set {{ network.name }} offline" class="float-end btn" type="submit"><i class="fa-solid text-color-secondary fa-link-slash" aria-hidden="true"></i></button>
-                </form>
-                <form action="/webui" method="POST">
-                    <input type="hidden" name="network" value="{{ link_key }}_{{ network.name }}_online">
-                    <button title="Set {{ network.name }} online" class="float-end btn" type="submit"><i class="fa-solid text-color-secondary fa-link" aria-hidden="true"></i></button>
-                </form>
-                {% endif %}
-                <h1 class="text-uppercase text-color-secondary">{{ network.name }}</h1>
-            </div>
             <div class="col-md-3">
                 <div class="card">
                     <h5 class="card-header text-uppercase">state</h5>

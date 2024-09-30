@@ -11,53 +11,10 @@ env = Environment(
 def requestHandler(request: CFSimpleHTTPRequestHandler):
     if request.method == "GET":
         return getRequestHandler(request)
-    elif request.method == "POST":
-        return postRequestHandler(request)
     else:
         logError(f"Unsupported method: {request.method}")
         response = CFSimpleHTTPResponse(body=b"Unsupported method", code=200)
         return response
-
-def postRequestHandler(request: CFSimpleHTTPRequestHandler):
-    logNotice(f"Handling request from {request.client_address}...")
-    if request.body:
-        post_data = urllib.parse.parse_qs(request.body.decode('utf-8'))
-        post_network = post_data["network"][0]
-        parts = post_network.split("_")
-        if len(parts) == 3:
-            link_key, network, state = parts
-        else:
-            logError(f"Invalid format, got {post_network}")
-            response = CFSimpleHTTPResponse(body=b"Invalid format!", code=200)
-            return response
-        if getConfigValue("webui", "link_key") == link_key:
-            logNotice("Link key is correct, proceeding...")
-            setNetworkState(state, network)
-            response_body = f"""
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta http-equiv="refresh" content="0;url='/{PLUGIN_URI}'>
-                <script type="text/javascript">
-                    window.location.href = '/{PLUGIN_URI}';
-                </script>
-                <title>Redirecting...</title>
-            </head>
-            <body>
-                <p>If you are not redirected automatically, follow this <a href='/{PLUGIN_URI}'>link</a>.</p>
-            </body>
-            </html>
-            """.encode("utf-8")
-            response = CFSimpleHTTPResponse(body=response_body, code=200)
-            response.headers = {
-            "Content-Type": "text/html"
-            }
-            return response
-        else:
-            response = CFSimpleHTTPResponse(body=b"Link key mismatch, action is prohibited!", code=200)
-            logError("Link key mismatch, action is prohibited!")
-            return response
 
 def getRequestHandler(request: CFSimpleHTTPRequestHandler):
     logNotice(f"Handling request from {request.client_address}...")
