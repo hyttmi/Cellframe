@@ -2,7 +2,8 @@ from utils import *
 from generators import generateHTML
 import base64, urllib
 from pycfhelpers.node.http.simple import CFSimpleHTTPRequestHandler, CFSimpleHTTPResponse
-from jinja2 import Environment, PackageLoader, select_autoescape    
+from jinja2 import Environment, PackageLoader, select_autoescape
+from decorators import debug
 
 env = Environment(
     loader=PackageLoader("webui"),
@@ -18,6 +19,7 @@ def requestHandler(request: CFSimpleHTTPRequestHandler):
         response = CFSimpleHTTPResponse(body=b"Unsupported method", code=200)
         return response
     
+@debug
 def postRequestHandler(request: CFSimpleHTTPRequestHandler):
     logNotice(f"Handling request from {request.client_address}...")
     if request.body:

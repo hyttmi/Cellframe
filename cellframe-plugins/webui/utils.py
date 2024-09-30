@@ -9,16 +9,6 @@ import socket, urllib.request, re, time, psutil, json, os, time
 from datetime import datetime
 import schedule
 
-def getConfigValue(section, key, default=None):
-    try:
-        value = node_config[section].get(key, default)
-        return value
-    except Exception as e:
-        logError(f"Error: {e}")
-
-PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
-PLUGIN_URI = getConfigValue("webui", "uri", default="webui")
-
 log = CFLog()
 
 def logNotice(msg):
@@ -26,6 +16,21 @@ def logNotice(msg):
     
 def logError(msg):
     log.error(f"{PLUGIN_NAME} {msg}")
+
+def getConfigValue(section, key, default=None):
+    try:
+        section_config = node_config.get(section)
+        if section_config is None:
+            logError(f"Section '{section}' does not exist!")
+            return default
+        value = section_config.get(key, default)
+        return value
+    except Exception as e:
+        logError(f"Error fetching config value: {e}")
+        return default
+
+PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
+PLUGIN_URI = getConfigValue("webui", "uri", default="webui")
     
 def checkForUpdate():
     try:
