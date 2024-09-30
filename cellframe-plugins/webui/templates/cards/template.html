@@ -64,6 +64,10 @@
             align-items: center;
             padding: 25px;
         }
+
+    .tokens td {
+        padding: 5px;
+    }
 </style>
 
 <body>
@@ -276,9 +280,14 @@
                 <div class="card">
                     <h5 class="card-header text-uppercase">reward wallet information</h5>
                     <div class="card-body">
-                        {% for token in network.fee_wallet_tokens %}
-                        <h6 class="card-subtitle mb-2 text-body-secondary">{{ token.token }}&nbsp;&nbsp;&nbsp;&nbsp;{{ token.balance}}</h6>
-                        {% endfor %}
+                        <table class="tokens">
+                            {% for token in network.fee_wallet_tokens %}
+                            <tr>
+                                <td><h6 class="text-body-secondary card-subtitle">{{ token.token }}</h6></td>
+                                <td><h6 class="text-body-secondary card-subtitle">{{ token.balance }}</h6></td>
+                            </tr>
+                            {% endfor %}
+                        </table>
                     </div>
                     <i class="fa-solid fa-wallet icon-container"></i>
                 </div>
