@@ -45,7 +45,7 @@ def postRequestHandler(request: CFSimpleHTTPRequestHandler):
                 <title>Redirecting...</title>
             </head>
             <body>
-                <p>If you are not redirected automatically, follow this <a href='/{PLUGIN_URI}'</a>.</p>
+                <p>If you are not redirected automatically, follow this <a href='/{PLUGIN_URI}'>link</a>.</p>
             </body>
             </html>
             """.encode("utf-8")
