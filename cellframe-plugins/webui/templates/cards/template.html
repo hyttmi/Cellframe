@@ -319,7 +319,7 @@
             var sortedBlocks = combined.map(item => item.blocks);
             var ctx = document.getElementById('blocksChart').getContext('2d');
             var blocksChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: sortedDays,
                     datasets: [{
