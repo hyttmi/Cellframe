@@ -220,7 +220,7 @@ def readNetworkConfig(network):
 def getAutocollectStatus(network):
     autocollect_cmd = nodeCLISocket("block", [f"block;autocollect;status;-net;{network};-chain;main"])
     if not "is active" in json.dumps(autocollect_cmd):
-        return "Inactive"
+        return None
     else:
         return "Active"
 
@@ -269,6 +269,8 @@ def getSignedBlocksToday(network):
             if "ts_create:" in line and today_str in line:
                 blocks_signed_today += 1
         return blocks_signed_today
+    else:
+        return None
 
 def getSignedBlocksLast7Days(network):
     net_config = readNetworkConfig(network)

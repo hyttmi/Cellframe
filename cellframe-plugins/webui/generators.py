@@ -20,7 +20,6 @@ def generateHTML():
         "cpu_utilization": sys_stats["node_cpu_usage"],
         "memory_utilization": sys_stats["node_memory_usage_mb"],
         "header_text": getConfigValue("webui", "header_text", default=False),
-        "link_key": getConfigValue("webui", "link_key", default=False),
         "net_info": generateNetworkData()
     }
 
