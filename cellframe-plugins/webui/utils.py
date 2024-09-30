@@ -276,20 +276,24 @@ def getSignedBlocksLast7Days(network):
         cmd_output = CLICommand(f"block list -net {network} signed -cert {net_config[0]}")
         today = datetime.now()
         seven_days_ago = today - timedelta(days=7)
+        
         blocks_signed_per_day = { 
             (today - timedelta(days=i)).strftime("%a, %d %b %Y"): 0 
             for i in range(7)
         }
+        
         lines = cmd_output.splitlines()
         for line in lines:
             if "ts_create:" in line:
                 timestamp_str = line.split("ts_create:")[1].strip()
+                timestamp_str = timestamp_str.rsplit(' ', 1)[0]
                 block_time = datetime.strptime(timestamp_str, "%a, %d %b %Y %H:%M:%S")
+                
                 if seven_days_ago <= block_time <= today:
                     block_day = block_time.strftime("%a, %d %b %Y")
                     if block_day in blocks_signed_per_day:
                         blocks_signed_per_day[block_day] += 1
-        
+
         return blocks_signed_per_day
     else:
         return None
