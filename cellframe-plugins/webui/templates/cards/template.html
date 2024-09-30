@@ -291,19 +291,24 @@
             var blocks = Object.values(blocksData);
 
             function formatDate(dateString) {
-                var dateParts = dateString.split(' ');
-                return dateParts[1] + ' ' + dateParts[2];
+                var date = new Date(dateString);
+            
+                return date.toLocaleDateString(undefined, {
+                    month: 'numeric',
+                    day: 'numeric'
+                });
             }
-
+        
             var combined = days.map((day, index) => ({
                 date: new Date(day),
                 blocks: blocks[index]
             }));
-
+        
             combined.sort((a, b) => a.date - b.date);
-
-            var sortedDays = combined.map(item => formatDate(item.date.toDateString()));
+        
+            var sortedDays = combined.map(item => formatDate(item.date.toString()));
             var sortedBlocks = combined.map(item => item.blocks);
+
             var ctx = document.getElementById('blocksChart').getContext('2d');
             var blocksChart = new Chart(ctx, {
                 type: 'line',
