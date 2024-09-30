@@ -1,7 +1,7 @@
+import DAP
 from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
 from pycfhelpers.node.types import CFNetState
-from pycfhelpers.node import config as node_config
 from command_runner import command_runner
 from packaging.version import Version
 
@@ -19,14 +19,9 @@ def logError(msg):
 
 def getConfigValue(section, key, default=None):
     try:
-        section_config = node_config.get(section)
-        if section_config is None:
-            logError(f"Section '{section}' does not exist!")
-            return default
-        value = section_config.get(key, default)
+        value = DAP.configGetItem(section, key)
         return value
-    except Exception as e:
-        logError(f"Error fetching config value: {e}")
+    except ValueError:
         return default
 
 PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
