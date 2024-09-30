@@ -277,15 +277,10 @@
                 <div class="card">
                     <h5 class="card-header text-uppercase">Signed blocks last 7 days</h5>
                     <div class="card-body">
-                        {% for day, blocks in network.signed_blocks_last_7_days.items() %}
-                        <h6 class="card-subtitle mb-2 text-body-secondary">{{ day }}: {{ blocks }} signed blocks</h6>
-                        {% endfor %}
+                       <canvas id="blocksChart"></canvas>
                     </div>
-                    <i class="fa-solid fa-coins icon-container"></i>
                 </div>
             </div>
-            {% else %}
-            <div class="alert alert-warning">No signed blocks data available for the last 7 days.</div>
             {% endif %}
 
             {% if network.fee_wallet_tokens is not none %}
@@ -302,6 +297,60 @@
             </div>
             {% endif %}
         </div>
+        <script>
+            var blocksData = {{ network.signed_blocks_last_7_days | tojson }};
+            var days = Object.keys(blocksData);
+            var blocks = Object.values(blocksData);
+
+            function formatDate(dateString) {
+                var dateParts = dateString.split(' ');
+                return dateParts[1] + ' ' + dateParts[2];
+            }
+
+            var combined = days.map((day, index) => ({
+                date: new Date(day),
+                blocks: blocks[index]
+            }));
+
+            combined.sort((a, b) => a.date - b.date);
+
+            var sortedDays = combined.map(item => formatDate(item.date.toDateString()));
+            var sortedBlocks = combined.map(item => item.blocks);
+            var ctx = document.getElementById('blocksChart').getContext('2d');
+            var blocksChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedDays,
+                    datasets: [{
+                        data: sortedBlocks,
+                        backgroundColor: '#B3A3FF',
+                        borderColor: '#B3A3FF',
+                        borderWidth: 1,
+                        barThickness: 20
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#B3A3FF'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#B3A3FF'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false,
+                        }
+                    }
+                }
+            });
+        </script>
         {% endfor %}
         {% endif %}
     </div>
