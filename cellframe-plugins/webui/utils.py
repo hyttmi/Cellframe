@@ -6,7 +6,7 @@ from command_runner import command_runner
 from packaging.version import Version
 
 import socket, urllib.request, re, time, psutil, json, os, time
-from datetime import datetime
+from datetime import datetime, timedelta
 import schedule
 
 log = CFLog()
@@ -270,6 +270,30 @@ def getSignedBlocksToday(network):
                 blocks_signed_today += 1
         return blocks_signed_today
 
+def getSignedBlocksLast7Days(network):
+    net_config = readNetworkConfig(network)
+    if net_config is not None:
+        cmd_output = CLICommand(f"block list -net {network} signed -cert {net_config[0]}")
+        today = datetime.now()
+        seven_days_ago = today - timedelta(days=7)
+        blocks_signed_per_day = { 
+            (today - timedelta(days=i)).strftime("%a, %d %b %Y"): 0 
+            for i in range(7)
+        }
+        lines = cmd_output.splitlines()
+        for line in lines:
+            if "ts_create:" in line:
+                timestamp_str = line.split("ts_create:")[1].strip()
+                block_time = datetime.strptime(timestamp_str, "%a, %d %b %Y %H:%M:%S")
+                if seven_days_ago <= block_time <= today:
+                    block_day = block_time.strftime("%a, %d %b %Y")
+                    if block_day in blocks_signed_per_day:
+                        blocks_signed_per_day[block_day] += 1
+        
+        return blocks_signed_per_day
+    else:
+        return None
+
 def getRewardWalletTokens(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
@@ -317,6 +341,7 @@ def generateNetworkData():
                     'all_signed_blocks': getAllSignedBlocks(network),
                     'all_blocks': getAllBlocks(network),
                     'signed_blocks_today': getSignedBlocksToday(network),
+                    'signed_blocks_last_7_days': getSignedBlocksLast7Days(network),
                     'autocollect_status': getAutocollectStatus(network),
                     'rewards': getRewards(network),
                     'fee_wallet_tokens': [{'token': token[1], 'balance': token[0]} for token in tokens] if tokens else None

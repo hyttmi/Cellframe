@@ -272,6 +272,22 @@
                 </div>
             </div>
 
+            {% if network.signed_blocks_last_7_days is not none %}
+            <div class="col-md-3">
+                <div class="card">
+                    <h5 class="card-header text-uppercase">Signed blocks last 7 days</h5>
+                    <div class="card-body">
+                        {% for day, blocks in network.signed_blocks_last_7_days.items() %}
+                        <h6 class="card-subtitle mb-2 text-body-secondary">{{ day }}: {{ blocks }} signed blocks</h6>
+                        {% endfor %}
+                    </div>
+                    <i class="fa-solid fa-coins icon-container"></i>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">No signed blocks data available for the last 7 days.</div>
+            {% endif %}
+
             {% if network.fee_wallet_tokens is not none %}
             <div class="col-md-3">
                 <div class="card">
