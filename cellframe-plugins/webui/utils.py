@@ -362,9 +362,10 @@ def generateNetworkData():
 
 def funcScheduler(func, scheduled_time):
     try:
-        schedule.every().day.at(scheduled_time).do(func)
+        scheduler = schedule.Scheduler()
+        scheduler.every().day.at(scheduled_time).do(func)
         while True:
-            schedule.run_pending()
+            scheduler.run_pending()
             time.sleep(1)
     except Exception as e:
         logError(f"Error with scheduler: {e}")

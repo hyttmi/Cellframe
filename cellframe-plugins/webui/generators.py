@@ -58,3 +58,28 @@ def generateEmail():
         logError(f"Error in generating email: {e}")
         return None
     return output
+
+def generateTelegram():
+    sys_stats = getSysStats()
+
+    info = {
+        "title": PLUGIN_NAME,
+        "system_uptime": sys_stats["system_uptime"],
+        "node_uptime": sys_stats["node_uptime"],
+        "node_version": getCurrentNodeVersion(),
+        "latest_node_version": getLatestNodeVersion(),
+        "cpu_utilization": sys_stats["node_cpu_usage"],
+        "memory_utilization": sys_stats["node_memory_usage_mb"],
+        "net_info": generateNetworkData()
+    }
+
+    template_setting = getConfigValue("webui", "template", default="cards")
+    template_path = f"{template_setting}/telegram.html"
+    try:
+        logNotice(f"Generating Telegram message...")
+        template = handlers.env.get_template(template_path)
+        output = template.render(info)
+    except Exception as e:
+        logError(f"Error in generating Telegram message: {e}")
+        return None
+    return output
