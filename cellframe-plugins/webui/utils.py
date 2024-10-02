@@ -63,7 +63,7 @@ def nodeCLISocket(method, params):
         client.connect(socket_path)
         
         request = f"POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {len(json_data)}\r\n\r\n{json_data}"
-        logNotice(f"Sending request: {request}")
+        #logNotice(f"Sending request: {request}")
         
         client.sendall(request.encode('utf-8'))
         
@@ -101,13 +101,14 @@ def nodeCLISocket(method, params):
     
 def CLICommand(command, timeout=5):
     try:
-        logNotice(f"Running command: {command}")
+        #logNotice(f"Running command: {command}")
         exit_code, output = command_runner(f"/opt/cellframe-node/bin/cellframe-node-cli {command}", timeout=timeout)
         if exit_code == 0:
             return output.strip()
         else:
-            logError(f"Command failed with error: {output.strip()}")
-            return f"Command failed with error: {output.strip()}"
+            ret = f"Command failed with error: {output.strip()}"
+            logError(ret)
+            return ret
     except Exception as e:
         logError(f"Error: {e}")
         return f"Error: {e}"
