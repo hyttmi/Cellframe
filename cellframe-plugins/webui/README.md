@@ -81,7 +81,7 @@ Here are the variables that are passed to the Jinja templates:
   - `signed_blocks_today`: The number of blocks signed today
   - `signed_blocks_last_7_days`: A dictionary of blocks signed in the last 7 days
   - `autocollect_status`: The status of block autocollection
-  - `rewards`: The total rewards collected
+  - `rewards`: The total rewards currenly uncollected
   - `fee_wallet_tokens`: A list of token balances in the network's fee wallet
 
 
