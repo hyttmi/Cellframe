@@ -1,6 +1,6 @@
 from utils import *
 from generators import generateHTML
-import base64, urllib
+import base64
 from pycfhelpers.node.http.simple import CFSimpleHTTPRequestHandler, CFSimpleHTTPResponse
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -51,7 +51,7 @@ def getRequestHandler(request: CFSimpleHTTPRequestHandler):
             "WWW-Authenticate": 'Basic realm="Cellframe node webui"'
         }
         return response
-    response_body = generateHTML()
+    response_body = generateHTML(template_name="template.html")
     response_body = response_body.encode("utf-8")
     response = CFSimpleHTTPResponse(body=response_body, code=200)
     response.headers = {

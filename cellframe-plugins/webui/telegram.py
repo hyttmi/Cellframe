@@ -18,7 +18,7 @@ def sendTelegram(text):
             req = urllib.request.Request(url, data=data)
             with urllib.request.urlopen(req) as response:
                 response_data = response.read().decode('utf-8')
-                logNotice("Telegram response:", response_data)
+                logNotice(f"Telegram response: {response_data}")
         else:
             logError("Missing configuration for Telegram messages, make sure that you have telegram_api_key and telegram_chat_id set!")
             return

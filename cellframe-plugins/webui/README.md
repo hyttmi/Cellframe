@@ -46,3 +46,45 @@ py_path=/opt/cellframe-node/var/lib/plugins
 1. Overwrite the old files in `/opt/cellframe-node/var/lib/plugins/webui`
 2. Go to `/opt/cellframe-node/var/lib/plugins/webui` and install required packages with `/opt/cellframe-node/python/bin/pip3 install -r requirements.txt` **AS ROOT**
 3. Restart your node and access the WebUI with your browser (`http://<your_node_ip>:<your_node_port>/<uri>` where `<uri>` by default is webui).
+
+## Templating
+
+All `.html` files in `templates/cards` are the default templates for Telegram, WebUI and email.
+
+This plugin renders system and node information to a web interface using Jinja templates. It collects data such as node status, network statistics, and system uptime, and formats it into HTML.
+
+### Available Variables
+
+Here are the variables that are passed to the Jinja templates:
+
+- `plugin_name`: The name of the plugin.
+- `update_available`: Checks if there's update available for plugin
+- `current_version`: Shows current version of this plugin
+- `latest_version`: Returns the latest version of this plugin
+- `title`: Return plugin name
+- `hostname`: Returns your systems hostname
+- `external_ip`: Returns external IP address
+- `system_uptime`: Returns your system uptime
+- `node_uptime`: Returns Cellframe node uptime
+- `node_version`: Returns the current version of Cellframe node
+- `latest_node_version`: Returns the latest version of Cellframe node
+- `cpu_utilization`: Returns the current CPU utilization of Cellframe node
+- `memory_utilization`: Returns the current memory utilization of Cellframe node
+- `network_data`: A list of dictionaries containing network information.
+  - `name`: The name of the network
+  - `state`: The current state of the network (online/offline)
+  - `target_state`: The target state of the network
+  - `address`: The network address
+  - `first_signed_blocks`: The number of first signed blocks
+  - `all_signed_blocks`: The total number of signed blocks
+  - `all_blocks`: The total number of blocks
+  - `signed_blocks_today`: The number of blocks signed today
+  - `signed_blocks_last_7_days`: A dictionary of blocks signed in the last 7 days
+  - `autocollect_status`: The status of block autocollection
+  - `rewards`: The total rewards collected
+  - `fee_wallet_tokens`: A list of token balances in the network's fee wallet
+
+
+
+
+
