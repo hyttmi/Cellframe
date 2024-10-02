@@ -66,7 +66,7 @@ Here are the variables that are passed to the Jinja templates:
 - `external_ip`: Returns external IP address
 - `system_uptime`: Returns your system uptime
 - `node_uptime`: Returns Cellframe node uptime
-- `node_version`: Returns the current version of Cellframe node
+- `node_version`: Returns the currently installed version of Cellframe node
 - `latest_node_version`: Returns the latest version of Cellframe node
 - `cpu_utilization`: Returns the current CPU utilization of Cellframe node
 - `memory_utilization`: Returns the current memory utilization of Cellframe node
