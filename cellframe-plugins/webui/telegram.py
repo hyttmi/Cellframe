@@ -6,7 +6,6 @@ def sendTelegram(text):
     CHAT_ID = getConfigValue("webui", "telegram_chat_id")
     try:
         if API_TOKEN is not None and CHAT_ID is not None:
-            CHAT_ID= CHAT_ID[1:-1] # Remove "" for now, python-cellframe does not support uint64 yet.
             url = f"https://api.telegram.org/bot{API_TOKEN}/sendMessage"
             payload = {
                 'chat_id': CHAT_ID,
