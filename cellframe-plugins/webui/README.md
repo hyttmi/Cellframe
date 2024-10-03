@@ -20,8 +20,8 @@ Configuration of the plugin is done by editing `cellframe-node.cfg` file in `/op
 - `gmail_user=somebody@gmail.com` - Your GMail username
 - `email_recipients=somebody@gmail.com|[somebody@gmail.com, another@aol.com]` - Recipient(s) for the email
 - `telegram_stats=true|false` - Enable timed Telegram messages
-- `telegram_api_key=something` - Your Telegram Bot API key
-- `telegram_chat_id="something"` - Your Telegram chat id **IMPORTANT: USE DOUBLE QUOTES FOR NOW**
+- `telegram_api_key=something` - Your Telegram Bot API token
+- `telegram_chat_id=something` - Your Telegram chat id
 - `telegram_stats_time=23:59` - Time to send the message **24h format (HH:MM)**
 
 ## Installation
