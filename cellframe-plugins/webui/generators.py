@@ -1,7 +1,7 @@
 from utils import *
 import handlers
 
-def generateHTML(template_name="template.html"):
+def generateHTML(template_name):
     sys_stats = getSysStats()
     is_update_available, curr_version, latest_version = checkForUpdate()
 
