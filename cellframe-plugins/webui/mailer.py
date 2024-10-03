@@ -38,6 +38,6 @@ def sendMail(msg):
         server.login(gmail_user, gmail_app_password)
         server.sendmail(gmail_user, email_recipients, email_msg.as_string())
         server.close()
-        logNotice("email sent!")
+        logNotice("Email sent!")
     except Exception as e:
         logError(f"Error: {e}")
