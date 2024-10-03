@@ -25,7 +25,7 @@ def generateHTML(template_name="template.html"):
     template_setting = getConfigValue("webui", "template", default="cards")
     template_path = f"{template_setting}/{template_name}"
     try:
-        logNotice(f"Generating HTML page...")
+        logNotice(f"Generating HTML content...")
         template = handlers.env.get_template(template_path)
         output = template.render(info)
     except Exception as e:
