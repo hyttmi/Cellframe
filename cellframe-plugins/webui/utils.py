@@ -1,3 +1,4 @@
+import inspect
 import DAP
 from pycfhelpers.node.logging import CFLog
 from pycfhelpers.node.net import CFNet
@@ -12,10 +13,12 @@ import schedule
 log = CFLog()
 
 def logNotice(msg):
-    log.notice(f"{PLUGIN_NAME} {msg}")
-    
+    func_name = inspect.stack()[1].function
+    log.notice(f"{PLUGIN_NAME} [{func_name}] {msg}")
+
 def logError(msg):
-    log.error(f"{PLUGIN_NAME} {msg}")
+    func_name = inspect.stack()[1].function
+    log.error(f"{PLUGIN_NAME} [{func_name}] {msg}")
 
 def getConfigValue(section, key, default=None):
     try:
@@ -24,7 +27,7 @@ def getConfigValue(section, key, default=None):
     except ValueError:
         return default
 
-PLUGIN_NAME = "[Cellframe system & node info by Mika H (@CELLgainz)]"
+PLUGIN_NAME = "Cellframe system & node info by Mika H (@CELLgainz)"
 PLUGIN_URI = getConfigValue("webui", "uri", default="webui")
     
 def checkForUpdate():
@@ -63,7 +66,6 @@ def nodeCLISocket(method, params):
         client.connect(socket_path)
         
         request = f"POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {len(json_data)}\r\n\r\n{json_data}"
-        #logNotice(f"Sending request: {request}")
         
         client.sendall(request.encode('utf-8'))
         
@@ -101,7 +103,6 @@ def nodeCLISocket(method, params):
     
 def CLICommand(command, timeout=5):
     try:
-        #logNotice(f"Running command: {command}")
         exit_code, output = command_runner(f"/opt/cellframe-node/bin/cellframe-node-cli {command}", timeout=timeout)
         if exit_code == 0:
             return output.strip()
