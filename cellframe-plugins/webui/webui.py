@@ -22,11 +22,11 @@ def init():
         
     with ThreadPoolExecutor() as executor:
         executor.submit(HTTPServer)
-        if email_stats_enabled and validateTime(email_stats_time):
+        if email_stats_enabled is not None and validateTime(email_stats_time):
             logNotice(f"Email sending is activated at {email_stats_time}")
             sendMail(f"Email sending is activated at {email_stats_time}")
             executor.submit(funcScheduler, lambda: sendMail(generateHTML(template_name="mail.html")), email_stats_time)
-        if telegram_stats_enabled and validateTime(telegram_stats_time):
+        if telegram_stats_enabled is not None and validateTime(telegram_stats_time):
             sendTelegram(f"Telegram sending is activated at {telegram_stats_time}")
             logNotice(f"Telegram sending is activated at {telegram_stats_time}")
             executor.submit(funcScheduler, lambda: sendTelegram(generateHTML(template_name="telegram.html")), telegram_stats_time)
