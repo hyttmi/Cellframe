@@ -18,5 +18,11 @@ Signed blocks today: {{ network.signed_blocks_today }}
 Autocollect status:  {{ network.autocollect_status }}
 Current rewards:     {{ network.rewards }}
 
+Reward wallet:
+{% for token in network.fee_wallet_tokens %}
+{{ token.token }}
+{{ token.balance }}
+{% endfor %}
+
 {% endfor %}
 </pre>
