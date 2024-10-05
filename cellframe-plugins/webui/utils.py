@@ -6,7 +6,7 @@ from pycfhelpers.node.types import CFNetState
 from command_runner import command_runner
 from packaging.version import Version
 
-import socket, urllib.request, re, time, psutil, json, os, time, schedule
+import socket, requests, re, time, psutil, json, os, time, schedule
 from datetime import datetime, timedelta
 
 log = CFLog()
@@ -36,12 +36,11 @@ def checkForUpdate():
             data = json.load(manifest)
             curr_version = Version(data["version"])
             logNotice(f"Current plugin version: {curr_version}")
-        
-        with urllib.request.urlopen('https://raw.githubusercontent.com/hyttmi/Cellframe/main/cellframe-plugins/webui/manifest.json') as response:
-            res = response.read().decode('utf-8').strip()
-            manifest_json = json.loads(res)
-            latest_version = Version(manifest_json["version"])
-            logNotice(f"Latest plugin version: {latest_version}")
+                
+        url = "https://raw.githubusercontent.com/hyttmi/Cellframe/main/cellframe-plugins/webui/manifest.json"
+        res = requests.get(url).json()
+        latest_version = Version(res["version"])
+        logNotice(f"Latest plugin version: {latest_version}")
         return curr_version < latest_version, curr_version, latest_version
     except Exception as e:
         logError(f"Error: {e}")
@@ -75,9 +74,8 @@ def getHostname():
 
 def getExtIP():
     try:
-        with urllib.request.urlopen('https://ifconfig.me/ip') as response:
-            ip_address = response.read().decode('utf-8').strip()
-            return ip_address
+        res = requests.get('https://ifconfig.me/ip')
+        return res
     except Exception as e:
         logError(f"Error: {e}")
         return f"Error: {e}"
@@ -123,10 +121,9 @@ def getCurrentNodeVersion():
 
 def getLatestNodeVersion():
     badge_url = "https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg"
-    response = urllib.request.urlopen(badge_url)
-    svg_content = response.read().decode('utf-8')
+    res = requests.get(badge_url).text
     version_pattern = r'>(\d.\d.\d+)'
-    match = re.search(version_pattern, svg_content)
+    match = re.search(version_pattern, res)
     if match:
         latest_version = match.group(1)
         return latest_version
