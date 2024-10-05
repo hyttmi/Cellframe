@@ -7,9 +7,8 @@ from command_runner import command_runner
 from packaging.version import Version
 from concurrent.futures import ThreadPoolExecutor
 
-import socket, urllib.request, re, time, psutil, json, os, time
+import socket, urllib.request, re, time, psutil, json, os, time, schedule
 from datetime import datetime, timedelta
-import schedule
 
 log = CFLog()
 
@@ -173,7 +172,7 @@ def getAllBlocks(network):
     else:
         return None
 
-def getFirstSignedBlocks(network):
+def getFirstSignedBlocks(network): # Not working in JSON yet (limiting)
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_first_signed_blocks = CLICommand(f"block list -net {network} chain -main first_signed -cert {net_config[0]} -limit 1")
@@ -185,7 +184,7 @@ def getFirstSignedBlocks(network):
     else:
         return None
 
-def getAllSignedBlocks(network):
+def getAllSignedBlocks(network): # Not working in JSON yet (limiting)
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_all_signed_blocks = CLICommand(f"block list -net {network} chain -main signed -cert {net_config[0]} -limit 1")
@@ -274,7 +273,7 @@ def generateNetworkData():
             addr_match = re.search(addr_pattern, net_status)
             state_match = re.search(state_pattern, net_status)
             target_state_match = re.search(target_state_pattern, net_status)
-            tokens = runOnThreadpool(getRewardWalletTokens, network)
+            tokens = getRewardWalletTokens(network)
             
             if state_match and target_state_match:
                 network_info = {
@@ -282,13 +281,13 @@ def generateNetworkData():
                     'state': state_match.group(1),
                     'target_state': target_state_match.group(1),
                     'address': addr_match.group(1),
-                    'first_signed_blocks': runOnThreadpool(getFirstSignedBlocks, network),
-                    'all_signed_blocks': runOnThreadpool(getAllSignedBlocks, network),
-                    'all_blocks': runOnThreadpool(getAllBlocks, network),
-                    'signed_blocks_today': runOnThreadpool(getSignedBlocksToday, network),
-                    'signed_blocks_last_7_days': runOnThreadpool(getSignedBlocksLast7Days, network),
-                    'autocollect_status': runOnThreadpool(getAutocollectStatus, network),
-                    'rewards': runOnThreadpool(getRewards, network),
+                    'first_signed_blocks': getFirstSignedBlocks(network),
+                    'all_signed_blocks': getAllSignedBlocks(network),
+                    'all_blocks': getAllBlocks(network),
+                    'signed_blocks_today': getSignedBlocksToday(network),
+                    'signed_blocks_last_7_days': getSignedBlocksLast7Days(network),
+                    'autocollect_status': getAutocollectStatus(network),
+                    'rewards': getRewards(network),
                     'fee_wallet_tokens': [{'token': token[1], 'balance': token[0]} for token in tokens] if tokens else None
                 }
                 network_data.append(network_info)
@@ -316,8 +315,3 @@ def validateTime(str):
     except ValueError as e:
         logError(f"Error: {e}")
         return False
-
-def runOnThreadpool(func, *args):
-    executor = ThreadPoolExecutor(max_workers=10)
-    future = executor.submit(func, *args)
-    return future.result()
