@@ -2,20 +2,20 @@ from utils import *
 import handlers
 
 def generateHTML(template_name):
-    sys_stats = getSysStats()
-    is_update_available, curr_version, latest_version = checkForUpdate()
+    sys_stats = runOnThreadpool(getSysStats)
+    is_update_available, curr_version, latest_version = runOnThreadpool(checkForUpdate)
 
     info = {
         'update_available': is_update_available,
         'current_version': curr_version,
         'latest_version': latest_version,
         "title": PLUGIN_NAME,
-        "hostname": getHostname(),
-        "external_ip": getExtIP(),
+        "hostname": runOnThreadpool(getHostname),
+        "external_ip": runOnThreadpool(getExtIP),
         "system_uptime": sys_stats["system_uptime"],
         "node_uptime": sys_stats["node_uptime"],
-        "node_version": getCurrentNodeVersion(),
-        "latest_node_version": getLatestNodeVersion(),
+        "node_version": runOnThreadpool(getCurrentNodeVersion),
+        "latest_node_version": runOnThreadpool(getLatestNodeVersion),
         "cpu_utilization": sys_stats["node_cpu_usage"],
         "memory_utilization": sys_stats["node_memory_usage_mb"],
         "header_text": getConfigValue("webui", "header_text", default=False),
