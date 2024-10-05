@@ -5,6 +5,7 @@ from pycfhelpers.node.net import CFNet
 from pycfhelpers.node.types import CFNetState
 from command_runner import command_runner
 from packaging.version import Version
+from concurrent.futures import ThreadPoolExecutor
 
 import socket, urllib.request, re, time, psutil, json, os, time
 from datetime import datetime, timedelta
@@ -47,59 +48,6 @@ def checkForUpdate():
     except Exception as e:
         logError(f"Error: {e}")
         return f"Error: {e}"
-
-def nodeCLISocket(method, params):
-    socket_path = "/opt/cellframe-node/var/run/node_cli"
-    timeout = 5
-
-    data = {
-        "method": method,
-        "params": params,
-        "id": 1
-    }
-    
-    json_data = json.dumps(data)
-    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    client.settimeout(timeout)
-
-    try:
-        client.connect(socket_path)
-        
-        request = f"POST /connect HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {len(json_data)}\r\n\r\n{json_data}"
-        
-        client.sendall(request.encode('utf-8'))
-        
-        response = ""
-        while True:
-            chunk = client.recv(4096).decode('utf-8')
-            response += chunk
-            
-            if "\r\n\r\n" in response:
-                break
-        
-        headers, body = response.split("\r\n\r\n", 1)
-        
-        # Get the content length, we don't really need more data than that
-        content_length = None
-        for line in headers.split("\r\n"):
-            if line.startswith("Content-Length:"):
-                content_length = int(line.split(":")[1].strip())
-                break
-        
-        while content_length is not None and len(body) < content_length:
-            chunk = client.recv(4096).decode('utf-8')
-            body += chunk
-        try:
-            json_response = json.loads(body)
-            return json_response
-        except json.JSONDecodeError:
-            logError("Failed to decode JSON!")
-            return body
-    except TimeoutError as e:
-        logError(f"Error: {method} with params {params} {e}")
-
-    finally:
-        client.close()
     
 def CLICommand(command, timeout=5):
     try:
@@ -150,9 +98,7 @@ def getSysStats():
     try:
         PID = getPID()
         process = psutil.Process(PID)
-
         sys_stats = {}
-
         cpu_usage = process.cpu_percent(interval=1)
         sys_stats['node_cpu_usage'] = cpu_usage if cpu_usage is not None else "N/A"
 
@@ -173,20 +119,9 @@ def getSysStats():
         logError(f"Error: {e}")
         return f"Error {e}"
 
-def setNetworkState(state, network):
-    try:
-        net = CFNet(network)
-        if state == "offline":
-            net.change_state(CFNetState.NET_STATE_OFFLINE)
-        elif state == "online":
-            net.change_state(CFNetState.NET_STATE_ONLINE)
-    except Exception as e:
-        logError(f"Error: {e}")
-
 def getCurrentNodeVersion():
-    response = nodeCLISocket("version", ["version"])
-    return response["result"].split()[2].replace("-", ".")
-
+    version = CLICommand("version")
+    return version.split()[2].replace("-",".")
 
 def getLatestNodeVersion():
     badge_url = "https://pub.cellframe.net/linux/cellframe-node/master/node-version-badge.svg"
@@ -201,7 +136,10 @@ def getLatestNodeVersion():
         return "N/A"
 
 def getListNetworks():
-    return CFNet.active_nets() or None
+    try:
+        return CFNet.active_nets()
+    except:
+        return None
 
 def readNetworkConfig(network):
     net_config = []
@@ -220,17 +158,16 @@ def readNetworkConfig(network):
         return None
 
 def getAutocollectStatus(network):
-    autocollect_cmd = nodeCLISocket("block", [f"block;autocollect;status;-net;{network};-chain;main"])
-    if not "is active" in json.dumps(autocollect_cmd):
-        return None
+    autocollect_cmd = CLICommand(f"block autocollect status -net {network} -chain main")
+    if not "is active" in autocollect_cmd:
+        return "Inactive"
     else:
         return "Active"
 
 def getAllBlocks(network):
-    all_blocks_cmd = nodeCLISocket("block", [f"block;count;-net;{network}"])
-    all_blocks = json.dumps(all_blocks_cmd["result"])
-    pattern_all_blocks = r"(\d+)"
-    all_blocks_match = re.search(pattern_all_blocks, all_blocks)
+    all_blocks_cmd = CLICommand(f"block count -net {network}")
+    pattern_all_blocks = r":\s+(\d+)"
+    all_blocks_match = re.search(pattern_all_blocks, all_blocks_cmd)
     if all_blocks_match:
         return all_blocks_match.group(1)
     else:
@@ -370,12 +307,12 @@ def funcScheduler(func, scheduled_time):
             scheduler.run_pending()
             time.sleep(1)
     except Exception as e:
-        logError(f"Error with scheduler: {e}")
+        logError(f"Error: {e}")
         
 def validateTime(str):
     try:
         datetime.strptime(str, "%H:%M")
         return True
     except ValueError as e:
-        logError(f"Wrong format of time: {e}")
+        logError(f"Error: {e}")
         return False
