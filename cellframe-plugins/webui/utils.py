@@ -75,7 +75,7 @@ def getHostname():
 def getExtIP():
     try:
         res = requests.get('https://ifconfig.me/ip')
-        return res
+        return res.text
     except Exception as e:
         logError(f"Error: {e}")
         return f"Error: {e}"
