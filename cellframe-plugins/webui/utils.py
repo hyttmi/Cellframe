@@ -5,7 +5,6 @@ from pycfhelpers.node.net import CFNet
 from pycfhelpers.node.types import CFNetState
 from command_runner import command_runner
 from packaging.version import Version
-from concurrent.futures import ThreadPoolExecutor
 
 import socket, urllib.request, re, time, psutil, json, os, time, schedule
 from datetime import datetime, timedelta
@@ -172,7 +171,7 @@ def getAllBlocks(network):
     else:
         return None
 
-def getFirstSignedBlocks(network): # Not working in JSON yet (limiting)
+def getFirstSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_first_signed_blocks = CLICommand(f"block list -net {network} chain -main first_signed -cert {net_config[0]} -limit 1")
@@ -184,7 +183,7 @@ def getFirstSignedBlocks(network): # Not working in JSON yet (limiting)
     else:
         return None
 
-def getAllSignedBlocks(network): # Not working in JSON yet (limiting)
+def getAllSignedBlocks(network):
     net_config = readNetworkConfig(network)
     if net_config is not None:
         cmd_get_all_signed_blocks = CLICommand(f"block list -net {network} chain -main signed -cert {net_config[0]} -limit 1")
@@ -297,7 +296,7 @@ def generateNetworkData():
         return network_data
     else:
         return None
-
+    
 def funcScheduler(func, scheduled_time):
     try:
         scheduler = schedule.Scheduler()
